@@ -6,7 +6,6 @@ scapy_http
 pandas
 matplotlib
 mlxtend
-pypcap
 dpkt
 sqlparse
 python-dateutil
@@ -14,3 +13,6 @@ sh
 fuzzywuzzy[speedup]
 sqlparse
 mysqlclient
+python-dotenv
+pypcap
+requests

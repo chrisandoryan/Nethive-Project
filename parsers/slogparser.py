@@ -43,8 +43,6 @@ import time
 import csv
 import os
 
-SLOW_QUERY_LOG_PATH = '/var/log/mysql/slow-query.log'
-
 class SlowQueryParser(object):
 
     outOfContextQueries = ("# administrator command:", "USE ")
@@ -125,20 +123,13 @@ class SlowQueryParser(object):
             yield data
 
     def calc_stats(self):
-        # slow_queries = []
         for e in SlowQueryLog(self.stream):
-            # print(e)
             if not e.query_time:
                 continue
             try:
                 query_pattern = self.pattern(self.clean(e.query))
             except:
                 pass
-            # if query_pattern not in slow_queries:
-            #     slow_queries[query_pattern] = []
-            # slow_queries[query_pattern].append(e)
-            # slow_queries.append(e)
-            # print(slow_queries)
             entry = {
                 'org': {
                     'datetime': e.datetime,
@@ -152,24 +143,12 @@ class SlowQueryParser(object):
                 'rows_sent': e.rows_sent,
                 'rows_examined': e.rows_examined,
             }
-            # for entry_list in slow_queries:
-            #     entry = {
-            #         'org': entry_list[0],
-            #         'query_time': e.query_time,
-            #         'query_pattern': query_pattern,
-            #         'query': self.clean(entry_list[0].query),
-            #         'rows_sent': e.rows_sent,
-            #         'rows_examined': e.rows_examined,
-            #     }
-            # print(entry)
-            # ret[query_pattern] = entry
             yield entry
 
     def start_parser(self):
         stats = self.calc_stats()
         res = []
         for s in stats:
-            # print('[*] query: %s, time: %.2fs, rows: %d' % (self.prettify_sql(s['query']), s['query_time'], s['rows_sent']))
             if not s['query'].startswith(self.outOfContextQueries):
                 with open('data_temp/LOG_mysql.csv', 'a') as f:
                     obj = {
@@ -181,21 +160,14 @@ class SlowQueryParser(object):
                     }   
                     writer = csv.writer(f)
                     writer.writerow(list(obj.values())) 
-                    # os.system("clear")
-                    print(obj)
-                    # print(time.mktime(s['org']['datetime'].timetuple()))
-                    # yield obj
-            # for query_pattern, entry in list(s.items()):
-            #     res.append(entry)
-            # for q in res:
-            #     print('[*] count: %s, avg_time: %.2fs, query: %s' % (q['count'], q['avg_query_time'],
-            #                 self.prettify_sql(q['query'])))
 
 def main():
+    SLOW_QUERY_LOG_PATH = os.getenv("SLOW_QUERY_LOG_PATH")
+
     logfile = open(SLOW_QUERY_LOG_PATH, 'r')
     loglines = tail(logfile)
 
-    print("Starting...")
+    print("[*] Starting SlogParser Engine...")
     query_parser = SlowQueryParser(loglines)
     query_parser.start_parser()
 

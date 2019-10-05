@@ -1,2 +1,8 @@
 # --- Auditd
 https://linux-audit.com/configuring-and-auditing-linux-systems-with-audit-daemon/
+https://www.theurbanpenguin.com/lpic-3-linux-linux-security-auditd-conf/
+https://www.tecmint.com/linux-system-auditing-with-auditd-tool-on-centos-rhel/
+https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/security_guide/sec-audit_record_types
+
+# --- Auditd Parser
+https://godoc.org/github.com/elastic/go-libaudit/auparse
