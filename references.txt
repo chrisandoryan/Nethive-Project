@@ -1,0 +1,2 @@
+# --- Auditd
+https://linux-audit.com/configuring-and-auditing-linux-systems-with-audit-daemon/

@@ -1,0 +1,16 @@
+scapy>=2.4.0
+networkx
+scikit-learn
+numpy
+scapy_http
+pandas
+matplotlib
+mlxtend
+pypcap
+dpkt
+sqlparse
+python-dateutil
+sh
+fuzzywuzzy[speedup]
+sqlparse
+mysqlclient
