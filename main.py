@@ -5,4 +5,4 @@ from activators import activate
 
 if __name__ == "__main__":
     # activate.all()
-    sniffers.http.run("GET")
+    sniffers.http.run("*")

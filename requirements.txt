@@ -1,4 +1,4 @@
-scapy>=2.4.0
+scapy>=2.4.3
 networkx
 scikit-learn
 numpy
@@ -10,7 +10,7 @@ dpkt
 sqlparse
 python-dateutil
 sh
-fuzzywuzzy[speedup]
+# fuzzywuzzy[speedup]
 sqlparse
 mysqlclient
 python-dotenv

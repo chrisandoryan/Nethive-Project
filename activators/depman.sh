@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo apt-get install git curl apt-transport-https ca-certificates curl software-properties-common snapd
+sudo apt-get install git curl apt-transport-https ca-certificates curl software-properties-common snapd libmysqlclient-dev
 
 # --- Docker
 sudo snap install docker
