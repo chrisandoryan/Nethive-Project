@@ -5,5 +5,5 @@ from activators import activate
 
 if __name__ == "__main__":
     activate.all()
-    parsers.auditparser.main()
+    # parsers.auditparser.main()
     # sniffers.http.run()

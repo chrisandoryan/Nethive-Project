@@ -1,0 +1,29 @@
+filebeat:
+  prospectors:
+    -
+      paths:
+        - '/var/log/audit/*.log'
+      input_type: log
+      fields:
+        type: TYPE_AUDIT
+      fields_under_root: true
+    -
+      paths:
+        - '/var/log/mysql/slow-query.log'
+      input_type: log
+      fields:
+        type: TYPE_SLOG
+      fields_under_root: true
+  registry_file: /var/lib/filebeat/registry
+output:
+  logstash:
+    hosts:
+      - 'localhost:5044'
+    worker: 1
+    bulk_max_size: 2048
+    compression_level: 3
+    index: filebeat
+shipper: null
+logging:
+  files:
+    rotateeverybytes: 10485760
