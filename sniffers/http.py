@@ -3,9 +3,10 @@ from scapy.layers.http import *
 import time
 import os
 import settings
+import json
 
 from processors import sql_tokenizer
-from parsers import slogparser
+from parsers import slog_parser
 
 HTTP_LOG_PATH = os.getenv("HTTP_LOG_PATH")
 mode = None
@@ -15,11 +16,13 @@ def sniff_packet(interface):
 
 def write_httplog(packet, buffer):
     global HTTP_LOG_PATH
-    # print(packet[HTTPRequest].show())
+    print(packet[HTTPRequest].show())
 
-    cookie = packet[HTTPRequest].Cookie
-    user_agent = getattr(packet[HTTPRequest], 'User_Agent')
-    content_type = getattr(packet[HTTPRequest], 'Content_Type')
+    timestamp = int(time.time())
+
+    cookie = get_cookie(packet)
+    user_agent = get_ua(packet)
+    content_type = get_content_type(packet)
     referer = packet[HTTPRequest].Referer
     request_method = packet[HTTPRequest].Method
     host = packet[HTTPRequest].Host
@@ -30,18 +33,16 @@ def write_httplog(packet, buffer):
         print("[!] %s" % e)
         ip = ""
 
-    timestamp = int(time.time())
-
     for s in sql_tokenizer.tokenize(buffer):
-        s['cookie'] = cookie.decode("utf-8")
+        s['cookie'] = cookie
         s['source_address'] = ip
         s['request_method'] = request_method.decode("utf-8")
-        s['user_agent'] = user_agent.decode("utf-8")
+        s['user_agent'] = user_agent
         s['centrality'] = ' '.join(map(str, list(s['centrality'].values())))
         s['host'] = host.decode("utf-8")
         s['timestamp'] = timestamp
         with open(HTTP_LOG_PATH, 'a') as f:
-            print(s)
+            f.writelines(json.dumps(s))
         return    
 
 def process_packets(packet):
@@ -65,15 +66,27 @@ def get_method(packet):
     return packet[HTTPRequest].Method
 
 def get_cookie(packet):
-    return packet[HTTPRequest].Cookie
+    try:
+        return packet[HTTPRequest].Cookie.decode("utf-8")
+    except Exception as e:
+        print("[!] %s" % e)
+        return ""
 
 def get_ua(packet):
-    return getattr(packet[HTTPRequest], 'User_Agent')
+    try:
+        return getattr(packet[HTTPRequest], 'User_Agent').decode("utf-8")
+    except Exception as e:
+        print("[!] %s" % e)
+        return ""
 
 def get_content_type(packet):
-    return getattr(packet[HTTPRequest], 'Content_Type')
+    try:
+        return getattr(packet[HTTPRequest], 'Content_Type').decode("utf-8")
+    except Exception as e:
+        print("[!] %s" % e)
+        pass
 
-def get_url(packet):
+def get_longurl(packet):
     return packet[HTTPRequest].Host + packet[HTTPRequest].Path
 
 def get_payload(packet):
