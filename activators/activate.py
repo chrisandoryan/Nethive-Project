@@ -39,10 +39,11 @@ def logstash():
     subprocess.Popen(["docker-compose", "up"], cwd=DOCKER_ELK_REPO_PATH)
 
 def killswitch():
+    DOCKER_ELK_REPO_PATH = os.getenv("DOCKER_ELK_REPO_PATH")
     subprocess.Popen(["docker-compose", "down", "-v"], cwd=DOCKER_ELK_REPO_PATH)
 
 def all():
-    depman()
+    # depman()
     slog()
     audit()
     filebeat()

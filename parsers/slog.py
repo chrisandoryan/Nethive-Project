@@ -9,7 +9,7 @@ import datetime
 import dateutil.parser
 import os
 
-from exceptions import LogParserError
+from parsers.exceptions import LogParserError
 
 _DATE_PAT = r"\d{6}\s+\d{1,2}:\d{2}:\d{2}"
 _LOCAL_DATE_PAT = r"([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))T\d{1,2}:\d{2}:\d{2}\.\d{2}"

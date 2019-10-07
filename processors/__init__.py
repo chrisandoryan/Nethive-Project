@@ -1,2 +1,2 @@
-from . import correlate
-from . import sqltokenize
+from . import correlator
+from . import sql_tokenizer

@@ -1,9 +1,8 @@
 import parsers
 # import processors
-# import sniffers
+import sniffers
 from activators import activate
 
 if __name__ == "__main__":
-    activate.all()
-    # parsers.auditparser.main()
-    # sniffers.http.run()
+    # activate.all()
+    sniffers.http.run("GET")
