@@ -12,3 +12,7 @@ https://medium.com/@saurabhpresent/getting-started-on-elasticsearch-logstash-kib
 https://logz.io/learn/complete-guide-elk-stack/#elasticsearch
 https://logz.io/blog/shipping-logs-filebeat/
 https://logz.io/blog/elk-siem/
+
+# --- Bash History
+https://www.shellhacks.com/tune-command-line-history-bash/
+https://askubuntu.com/questions/953334/how-does-the-history-command-work

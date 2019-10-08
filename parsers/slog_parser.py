@@ -36,12 +36,16 @@ import re
 import sqlparse
 import argparse
 from datetime import datetime, timedelta
-from parsers.slog import SlowQueryLog
+from parsers.Slog import SlowQueryLog
 from sqlparse.tokens import Token
 from utils import tail
 import time
 import csv
 import os
+import settings
+
+MYSQL_SLOW_QUERY_LOG_PATH = os.getenv("MYSQL_SLOW_QUERY_LOG_PATH")
+PARSED_SLOW_QUERY_LOG_PATH = os.getenv("PARSED_SLOW_QUERY_LOG_PATH")
 
 class SlowQueryParser(object):
 
@@ -150,7 +154,7 @@ class SlowQueryParser(object):
         res = []
         for s in stats:
             if not s['query'].startswith(self.outOfContextQueries):
-                with open('data_temp/LOG_mysql.csv', 'a') as f:
+                with open(PARSED_SLOW_QUERY_LOG_PATH, 'a') as f:
                     obj = {
                         'query': s['query'],
                         'query_time': s['query_time'],
@@ -158,13 +162,11 @@ class SlowQueryParser(object):
                         'rows_examined': s['rows_examined'],
                         'timestamp': int(time.mktime(s['org']['datetime'].timetuple()))
                     }   
-                    writer = csv.writer(f)
-                    writer.writerow(list(obj.values())) 
+                    f.writelines(obj) 
 
-def main():
-    SLOW_QUERY_LOG_PATH = os.getenv("SLOW_QUERY_LOG_PATH")
-
-    logfile = open(SLOW_QUERY_LOG_PATH, 'r')
+def run():
+    global MYSQL_SLOW_QUERY_LOG_PATH, PARSED_SLOW_QUERY_LOG_PATH
+    logfile = open(MYSQL_SLOW_QUERY_LOG_PATH, 'r')
     loglines = tail(logfile)
 
     print("[*] Starting SlogParser Engine...")
@@ -173,4 +175,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    run()

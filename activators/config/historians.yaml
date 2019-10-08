@@ -1,0 +1,13 @@
+users:
+  -
+    username: ao
+    days_limit: 40
+    exclude_commands: 
+      - ls
+      - whoami
+      - pwd
+    force_append: true
+    with_datetime: true
+    hist_size: 500
+    hist_controls:
+      - ignore_dups: true
