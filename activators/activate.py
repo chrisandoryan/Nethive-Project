@@ -4,6 +4,7 @@ import shutil
 import subprocess
 import settings
 import yaml
+import fileinput
 
 def depman():
     DOCKER_ELK_REPO_PATH = os.getenv("DOCKER_ELK_REPO_PATH")
@@ -56,7 +57,7 @@ def killswitch():
     """ 
     Invoke reset for ELK system, turning off SIEM.
     Changes:
-        - All engine will be offline
+        - All engines will be offline
     """
     DOCKER_ELK_REPO_PATH = os.getenv("DOCKER_ELK_REPO_PATH")
     subprocess.Popen(["docker-compose", "down", "-v"], cwd=DOCKER_ELK_REPO_PATH)
@@ -70,8 +71,28 @@ def bash():
     """
     f = open('./activators/config/historians.yaml', 'r')
     config = yaml.load(f.read())
-    print(config)
+    f.close()
+    for u in config['users']:
+        BASHRC_PATH = "/home/%s/.bashrc" % u['username']
+        # os.rename(BASHRC_PATH, BASHRC_PATH + ".original")
+        f = open(BASHRC_PATH, 'a')
+        if 'force_append' in u and u['force_append']:
+            if "PROMPT_COMMAND" in os.environ:
+                f.writelines("PROMPT_COMMAND='$PROMPT_COMMAND; history -a'")                
+            else:
+                f.writelines("PROMPT_COMMAND='history -a'")
+        if 'hist_size' in u:
+            f.writelines("export HISTSIZE=%d" % u['hist_size'])
+        if 'with_datetime' in u and u['with_datetime']:
+            f.writelines("export HISTTIMEFORMAT=\"%h %d %H:%M:%S \"")
+        if 'exclude_commands' in u and u['exclude_commands']:
+            f.writelines("export HISTIGNORE=\"%s\"" % ':'.join(u['exclude_commands']))
+        
+        subprocess.call(['source', BASHRC_PATH])
 
+        f.close()
+
+    return
 
 def all():
     depman()
