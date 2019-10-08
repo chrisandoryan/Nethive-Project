@@ -50,7 +50,7 @@ def logstash():
     LOGSTASH_CONFIG_PATH = DOCKER_ELK_REPO_PATH + '/logstash/pipeline/logstash.conf'
     os.rename(LOGSTASH_CONFIG_PATH, LOGSTASH_CONFIG_PATH + ".original")
     shutil.copy("./activators/config/logstash.conf", LOGSTASH_CONFIG_PATH)
-    subprocess.Popen(["docker-compose", "up"], cwd=DOCKER_ELK_REPO_PATH)
+    # subprocess.Popen(["docker-compose", "up"], cwd=DOCKER_ELK_REPO_PATH)
     return
 
 def killswitch():
@@ -81,7 +81,7 @@ def bash():
             HITSIZE=1000,
             HISTIGNORE='"ls:ps:history"',
             HISTCONTROL='"ignorespace:erasedups"',
-            HISTTIMEFORMAT='"%y-%h-%d %H:%M:%S"'
+            HISTTIMEFORMAT='"%y-%h-%d %H:%M:%S "'
         )
         with open(BASHRC_PATH, 'a') as bashrc:
             bashrc.writelines(config)
@@ -105,11 +105,11 @@ def bash():
     return
 
 def all():
-    depman()
+    # depman()
     slog()
     audit()
     filebeat()
-    bash()
+    # bash()
     logstash()
     return
 

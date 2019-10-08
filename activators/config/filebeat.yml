@@ -21,6 +21,13 @@ filebeat:
       fields:
         type: TYPE_PARSED_SLOG
       fields_under_root: true
+    -
+      paths:
+        - '/home/*/.bash_history'
+      input_type: log
+      fields:
+        type: TYPE_BASH
+      fields_under_root: true
   registry_file: /var/lib/filebeat/registry
 output:
   logstash:

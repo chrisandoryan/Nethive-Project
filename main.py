@@ -6,7 +6,7 @@ from activators import activate
 
 if __name__ == "__main__":
     # --- Dependency and installation management
-    activate.bash()
+    activate.all()
 
     # --- Thread initialization for every modules
     # http = threading.Thread(target=sniffers.http.run, args=("*",))
