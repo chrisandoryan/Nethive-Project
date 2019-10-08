@@ -12,6 +12,9 @@ https://medium.com/@saurabhpresent/getting-started-on-elasticsearch-logstash-kib
 https://logz.io/learn/complete-guide-elk-stack/#elasticsearch
 https://logz.io/blog/shipping-logs-filebeat/
 https://logz.io/blog/elk-siem/
+https://www.elastic.co/guide/en/logstash/current/config-examples.html
+https://www.elastic.co/guide/en/logstash/current/event-dependent-configuration.html
+https://sematext.com/blog/auditd-logs-auditbeat-elasticsearch-logsene/
 
 # --- Bash History
 https://www.shellhacks.com/tune-command-line-history-bash/
