@@ -5,6 +5,7 @@ import subprocess
 import settings
 import yaml
 from string import Template
+import re
 
 def depman():
     DOCKER_ELK_REPO_PATH = os.getenv("DOCKER_ELK_REPO_PATH")
@@ -48,8 +49,13 @@ def logstash():
     """
     DOCKER_ELK_REPO_PATH = os.getenv("DOCKER_ELK_REPO_PATH")
     LOGSTASH_CONFIG_PATH = DOCKER_ELK_REPO_PATH + '/logstash/pipeline/logstash.conf'
+    LOGSTASH_DOCKERFILE_PATH = DOCKER_ELK_REPO_PATH + '/logstash/Dockerfile'
+
     os.rename(LOGSTASH_CONFIG_PATH, LOGSTASH_CONFIG_PATH + ".original")
     shutil.copy("./activators/config/logstash.conf", LOGSTASH_CONFIG_PATH)
+
+    os.rename(LOGSTASH_DOCKERFILE_PATH, LOGSTASH_DOCKERFILE_PATH + ".original")
+    shutil.copy("./activators/config/Dockerfile.logstash", LOGSTASH_DOCKERFILE_PATH)
     # subprocess.Popen(["docker-compose", "up"], cwd=DOCKER_ELK_REPO_PATH)
     return
 
@@ -84,7 +90,9 @@ def bash():
             HISTCONTROL='"ignorespace:erasedups"',
             HISTTIMEFORMAT='"%y-%h-%d %H:%M:%S "'
         )
-        with open(BASHRC_PATH, 'a') as bashrc:
+        pattern = re.compile(r'# --- Plug by SIEM, Do Not MODIFY.*# --- End of Plug', re.DOTALL)
+        with open(BASHRC_PATH, 'a+') as bashrc:
+            re.sub(pattern, '', bashrc.read())
             bashrc.writelines(config)
 
         # "$(whoami)@$([ \"$SSH_CONNECTION\" == \"\" ] && echo \"local\" || echo $SSH_CONNECTION | awk '{print $1}')"
@@ -107,13 +115,24 @@ def bash():
 
     return
 
+def dirs():
+    if not os.path.exists(os.getenv("AUDIT_LOG_PATH")):
+        os.makedirs(os.path.dirname(os.getenv("AUDIT_LOG_PATH")))
+    if not os.path.exists(os.getenv("MYSQL_SLOW_QUERY_LOG_PATH")):    
+        os.makedirs(os.path.dirname(os.getenv("MYSQL_SLOW_QUERY_LOG_PATH")))
+    if not os.path.exists(os.getenv("HTTP_LOG_PATH")):
+        os.makedirs(os.path.dirname(os.getenv("HTTP_LOG_PATH")))
+    if not os.path.exists(os.getenv("CENTRALIZED_BASH_HISTORY_PATH")):
+        os.makedirs(os.path.dirname(os.getenv("CENTRALIZED_BASH_HISTORY_PATH")))
+
 def all():
     # depman()
-    # slog()
-    # audit()
-    # filebeat()
+    dirs()
+    slog()
+    audit()
+    filebeat()
     bash()
-    # logstash()
+    logstash()
     return
 
 if __name__ == "__main__":
