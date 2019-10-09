@@ -15,6 +15,8 @@ https://logz.io/blog/elk-siem/
 https://www.elastic.co/guide/en/logstash/current/config-examples.html
 https://www.elastic.co/guide/en/logstash/current/event-dependent-configuration.html
 https://sematext.com/blog/auditd-logs-auditbeat-elasticsearch-logsene/
+https://github.com/zionio/graylog_grok_mysqlslowquery
+https://superuser.com/questions/562247/to-know-which-ip-executed-a-certain-command-in-linux-using-ssh
 
 # --- Bash History
 https://www.shellhacks.com/tune-command-line-history-bash/

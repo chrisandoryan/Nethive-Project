@@ -57,6 +57,7 @@ def killswitch():
     """ 
     Invoke reset for ELK system, turning off SIEM.
     Changes:
+        - All configurations will be reverted back to original
         - All engines will be offline
     """
     DOCKER_ELK_REPO_PATH = os.getenv("DOCKER_ELK_REPO_PATH")
@@ -78,7 +79,7 @@ def bash():
         template = open('./activators/config/.bashrc', 'r')
         t = Template(template.read())
         config = t.safe_substitute(
-            HITSIZE=1000,
+            HISTSIZE=1000,
             HISTIGNORE='"ls:ps:history"',
             HISTCONTROL='"ignorespace:erasedups"',
             HISTTIMEFORMAT='"%y-%h-%d %H:%M:%S "'
@@ -86,6 +87,8 @@ def bash():
         with open(BASHRC_PATH, 'a') as bashrc:
             bashrc.writelines(config)
 
+        # "$(whoami)@$([ \"$SSH_CONNECTION\" == \"\" ] && echo \"local\" || echo $SSH_CONNECTION | awk '{print $1}')"
+        
         # if 'force_append' in u and u['force_append']:
         #     if "PROMPT_COMMAND" in os.environ:
         #         f.writelines("PROMPT_COMMAND='$PROMPT_COMMAND; history -a'")                
@@ -106,11 +109,11 @@ def bash():
 
 def all():
     # depman()
-    slog()
-    audit()
-    filebeat()
-    # bash()
-    logstash()
+    # slog()
+    # audit()
+    # filebeat()
+    bash()
+    # logstash()
     return
 
 if __name__ == "__main__":

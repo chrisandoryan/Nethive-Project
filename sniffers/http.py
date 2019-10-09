@@ -97,9 +97,9 @@ def get_payload(packet):
         return bytearray()
 
 """ mode: GET, POST, * """
-def run(sniffMode):
+def run(sniffMode, iface):
     global mode
     mode = sniffMode
     print("[*] Starting HTTPSensor Engine...")
-    sniff_packet('ens33')
+    sniff_packet(iface)
 
