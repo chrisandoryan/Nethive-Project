@@ -11,7 +11,7 @@ if __name__ == "__main__":
     # --- Thread initialization for every modules
     http = threading.Thread(target=sniffers.http.run, args=("*", "lo"))
     slog_parser = threading.Thread(target=parsers.slog_parser.run, args=())
-    bash_parser = threading.Thread(target=parsers.bash_parser.run, args=("sh", ))
+    bash_parser = threading.Thread(target=parsers.bash_parser.run, args=())
 
     # --- Begin running modules and sensors
     http.start()

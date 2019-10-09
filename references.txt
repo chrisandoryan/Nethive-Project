@@ -17,6 +17,7 @@ https://www.elastic.co/guide/en/logstash/current/event-dependent-configuration.h
 https://sematext.com/blog/auditd-logs-auditbeat-elasticsearch-logsene/
 https://github.com/zionio/graylog_grok_mysqlslowquery
 https://superuser.com/questions/562247/to-know-which-ip-executed-a-certain-command-in-linux-using-ssh
+https://stackoverflow.com/questions/47107131/how-to-store-date-time-and-the-users-ip-in-bash-history
 
 # --- Bash History
 https://www.shellhacks.com/tune-command-line-history-bash/

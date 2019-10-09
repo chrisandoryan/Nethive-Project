@@ -35,6 +35,13 @@ filebeat:
       fields:
         type: TYPE_HTTP
       fields_under_root: true
+    -
+      paths:
+        - '/var/log/bash/history.log'
+      input_type: log
+      fields:
+        type: TYPE_BASH_CENTRALIZED
+      fields_under_root: true
   registry_file: /var/lib/filebeat/registry
 output:
   logstash:

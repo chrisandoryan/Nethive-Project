@@ -1,11 +1,12 @@
 import settings
+import os
 from utils import tail
 
-def run(username):
-    BASHRC_PATH = "/home/%s/.bash_history" % username
+CENTRALIZED_BASH_HISTORY_PATH = os.getenv("CENTRALIZED_BASH_HISTORY_PATH")
+
+def run():
     print("[*] Starting BashParser Engine...")
-    
-    logfile = open(BASHRC_PATH, 'r')
+    logfile = open(CENTRALIZED_BASH_HISTORY_PATH, 'r')
     loglines = tail(logfile)
     for l in loglines:
         print(l.strip())
