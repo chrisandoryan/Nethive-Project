@@ -9,16 +9,6 @@ filebeat:
       fields_under_root: true
     -
       paths:
-        - '/var/log/mysql/slow-query.log'
-      input_type: log
-      fields:
-        log_type: TYPE_RAW_SLOG
-      fields_under_root: true
-      multiline.pattern: '^# User@Host:'
-      multiline.negate: true
-      multiline.match: after
-    -
-      paths:
         - '/var/log/mysql/slog.log'
       input_type: log
       fields:

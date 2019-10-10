@@ -56,7 +56,8 @@ def logstash():
 
     os.rename(LOGSTASH_DOCKERFILE_PATH, LOGSTASH_DOCKERFILE_PATH + ".original")
     shutil.copy("./activators/config/Dockerfile.logstash", LOGSTASH_DOCKERFILE_PATH)
-    # subprocess.Popen(["docker-compose", "up"], cwd=DOCKER_ELK_REPO_PATH)
+
+    elk_panel = subprocess.Popen(['/bin/bash', './activators/elkstack.sh'])
     return
 
 def killswitch():
@@ -67,7 +68,6 @@ def killswitch():
         - All engines will be offline
     """
     DOCKER_ELK_REPO_PATH = os.getenv("DOCKER_ELK_REPO_PATH")
-    subprocess.Popen(["docker-compose", "down", "-v"], cwd=DOCKER_ELK_REPO_PATH)
     return
 
 def bash():
@@ -92,8 +92,9 @@ def bash():
         )
         pattern = re.compile(r'# --- Plug by SIEM, Do Not MODIFY.*# --- End of Plug', re.DOTALL)
         with open(BASHRC_PATH, 'a+') as bashrc:
-            re.sub(pattern, '', bashrc.read())
-            bashrc.writelines(config)
+            b = re.sub(pattern, '', bashrc.read())
+            b = b + config
+            bashrc.writelines(b)
 
         # "$(whoami)@$([ \"$SSH_CONNECTION\" == \"\" ] && echo \"local\" || echo $SSH_CONNECTION | awk '{print $1}')"
         

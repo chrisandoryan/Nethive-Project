@@ -14,8 +14,8 @@ if __name__ == "__main__":
     bash_parser = threading.Thread(target=parsers.bash_parser.run, args=())
 
     # --- Begin running modules and sensors
-    http.start()
-    slog_parser.start()
+    # http.start()
+    # slog_parser.start()
     bash_parser.start()
 
 
