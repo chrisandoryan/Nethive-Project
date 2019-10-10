@@ -4,12 +4,12 @@ from utils import tail
 
 CENTRALIZED_BASH_HISTORY_PATH = os.getenv("CENTRALIZED_BASH_HISTORY_PATH")
 
-def run():
+def run(queue):
     print("[*] Starting BashParser Engine...")
     logfile = open(CENTRALIZED_BASH_HISTORY_PATH, 'a+')
     loglines = tail(logfile)
     for l in loglines:
-        print(l.strip())
+        queue.put(l.strip())
         
     return
 

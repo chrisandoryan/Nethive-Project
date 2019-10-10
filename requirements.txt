@@ -15,3 +15,4 @@ python-dotenv
 pypcap
 requests
 pyyaml
+curses

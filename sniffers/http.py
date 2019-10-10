@@ -11,10 +11,10 @@ from parsers import slog_parser
 HTTP_LOG_PATH = os.getenv("HTTP_LOG_PATH")
 mode = None
 
-def sniff_packet(interface):
-    sniff(iface=interface, store=False, prn=process_packets, session=TCPSession)
+def sniff_packet(interface, queue):
+    sniff(iface=interface, store=False, prn=process_packets(queue), session=TCPSession)
 
-def write_httplog(packet, buffer):
+def write_httplog(packet, buffer, queue):
     global HTTP_LOG_PATH
     # print(packet[HTTPRequest].show())
 
@@ -41,24 +41,26 @@ def write_httplog(packet, buffer):
         s['centrality'] = ' '.join(map(str, list(s['centrality'].values())))
         s['host'] = host.decode("utf-8")
         s['timestamp'] = timestamp
+        queue.put(s)
         with open(HTTP_LOG_PATH, 'a') as f:
-            print(s)
-            f.writelines(json.dumps(s))
+            f.writelines(json.dumps(s) + "\n")
         return    
 
-def process_packets(packet):
-    global mode
-    if packet.haslayer(HTTPRequest):
-        url = packet[HTTPRequest].Path
-        payload = get_payload(packet)
-        if mode is "GET":
-            write_httplog(packet, url)
-        elif mode is "POST":
-            write_httplog(packet, payload)
-        elif mode is "*":
-            write_httplog(packet, url)
-            write_httplog(packet, payload)            
-    return
+# https://gist.github.com/thepacketgeek/6876699
+def process_packets(queue):
+    def processor(packet):
+        global mode
+        if packet.haslayer(HTTPRequest):
+            url = packet[HTTPRequest].Path
+            payload = get_payload(packet)
+            if mode is "GET":
+                write_httplog(packet, url, queue)
+            elif mode is "POST":
+                write_httplog(packet, payload, queue)
+            elif mode is "*":
+                write_httplog(packet, url, queue)
+                write_httplog(packet, payload, queue)            
+    return processor
 
 def get_referer(packet):
     return packet[HTTPRequest].Referer
@@ -97,9 +99,9 @@ def get_payload(packet):
         return bytearray()
 
 """ mode: GET, POST, * """
-def run(sniffMode, iface):
+def run(sniffMode, iface, queue):
     global mode
     mode = sniffMode
     print("[*] Starting HTTPSensor Engine...")
-    sniff_packet(iface)
+    sniff_packet(iface, queue)
 
