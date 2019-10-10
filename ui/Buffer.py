@@ -29,3 +29,4 @@ class Buffer(object):
         self.window.clear()
         for nr, line in enumerate(self.buffer[-self.lines:]):
             self.window.addstr(nr, 0, line)
+        self.window.refresh()

@@ -11,10 +11,10 @@ from parsers import slog_parser
 HTTP_LOG_PATH = os.getenv("HTTP_LOG_PATH")
 mode = None
 
-def sniff_packet(interface, queue):
-    sniff(iface=interface, store=False, prn=process_packets(queue), session=TCPSession)
+def sniff_packet(interface, logQueue, outQueue):
+    sniff(iface=interface, store=False, prn=process_packets(logQueue, outQueue), session=TCPSession)
 
-def write_httplog(packet, buffer, queue):
+def write_httplog(packet, buffer, logQueue, outQueue):
     global HTTP_LOG_PATH
     # print(packet[HTTPRequest].show())
 
@@ -30,7 +30,7 @@ def write_httplog(packet, buffer, queue):
     try:
         ip = packet[IP].src
     except Exception as e:
-        print("[!] %s" % e)
+        outQueue.put("[!] %s" % e)
         ip = ""
 
     for s in sql_tokenizer.tokenize(buffer):
@@ -41,25 +41,25 @@ def write_httplog(packet, buffer, queue):
         s['centrality'] = ' '.join(map(str, list(s['centrality'].values())))
         s['host'] = host.decode("utf-8")
         s['timestamp'] = timestamp
-        queue.put(s)
+        logQueue.put(s)
         with open(HTTP_LOG_PATH, 'a') as f:
             f.writelines(json.dumps(s) + "\n")
         return    
 
 # https://gist.github.com/thepacketgeek/6876699
-def process_packets(queue):
+def process_packets(logQueue, outQueue):
     def processor(packet):
         global mode
         if packet.haslayer(HTTPRequest):
             url = packet[HTTPRequest].Path
             payload = get_payload(packet)
             if mode is "GET":
-                write_httplog(packet, url, queue)
+                write_httplog(packet, url, logQueue, outQueue)
             elif mode is "POST":
-                write_httplog(packet, payload, queue)
+                write_httplog(packet, payload, logQueue, outQueue)
             elif mode is "*":
-                write_httplog(packet, url, queue)
-                write_httplog(packet, payload, queue)            
+                write_httplog(packet, url, logQueue, outQueue)
+                write_httplog(packet, payload, logQueue, outQueue)            
     return processor
 
 def get_referer(packet):
@@ -72,21 +72,21 @@ def get_cookie(packet):
     try:
         return packet[HTTPRequest].Cookie.decode("utf-8")
     except Exception as e:
-        print("[!] %s" % e)
+        # print("[!] %s" % e)
         return ""
 
 def get_ua(packet):
     try:
         return getattr(packet[HTTPRequest], 'User_Agent').decode("utf-8")
     except Exception as e:
-        print("[!] %s" % e)
+        # print("[!] %s" % e)
         return ""
 
 def get_content_type(packet):
     try:
         return getattr(packet[HTTPRequest], 'Content_Type').decode("utf-8")
     except Exception as e:
-        print("[!] %s" % e)
+        # print("[!] %s" % e)
         pass
 
 def get_longurl(packet):
@@ -99,9 +99,9 @@ def get_payload(packet):
         return bytearray()
 
 """ mode: GET, POST, * """
-def run(sniffMode, iface, queue):
+def run(sniffMode, iface, logQueue, outQueue):
     global mode
     mode = sniffMode
-    print("[*] Starting HTTPSensor Engine...")
-    sniff_packet(iface, queue)
+    outQueue.put("[*] Starting HTTPSensor Engine...")
+    sniff_packet(iface, logQueue, outQueue)
 

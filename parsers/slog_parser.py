@@ -149,11 +149,12 @@ class SlowQueryParser(object):
             }
             yield entry
 
-    def start_parser(self, queue):
+    def start_parser(self, logQueue):
         stats = self.calc_stats()
         res = []
         for s in stats:
             if not s['query'].startswith(self.outOfContextQueries):
+                logQueue.put(obj)
                 with open(PARSED_SLOW_QUERY_LOG_PATH, 'a') as f:
                     obj = {
                         'query': s['query'],
@@ -162,14 +163,13 @@ class SlowQueryParser(object):
                         'rows_examined': s['rows_examined'],
                         'timestamp': int(time.mktime(s['org']['datetime'].timetuple()))
                     }   
-                    queue.put(obj)
                     f.writelines(json.dumps(obj) + "\n") 
 
-def run(queue):
+def run(logQueue, outQueue):
     global MYSQL_SLOW_QUERY_LOG_PATH, PARSED_SLOW_QUERY_LOG_PATH
     logfile = open(MYSQL_SLOW_QUERY_LOG_PATH, 'r')
     loglines = tail(logfile)
 
-    print("[*] Starting SlogParser Engine...")
+    outQueue.put("[*] Starting SlogParser Engine...")
     query_parser = SlowQueryParser(loglines)
-    query_parser.start_parser(queue)
+    query_parser.start_parser(logQueue)
