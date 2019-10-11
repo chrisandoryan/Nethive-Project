@@ -6,28 +6,34 @@ from ui import ledger
 import curses
 import queue
 import signal
+from utils import OutputHandler
 
-logQueue = queue.Queue()
-outQueue = queue.Queue()
 panel = None
+outHand = OutputHandler().getInstance()
 
 def keyboardInterruptHandler(signal, frame):
     global panel
-    print("KeyboardInterrupt (ID: {}) has been caught. Cleaning up...".format(signal))
     panel.close()
     exit(0)
 
 def logQueMan():
-    global panel, logQueue
+    """
+    Manage and display log output from every sensors
+    """
+    global panel, outHand
+    outHand.sendLog("[*] Waiting for output from sensory...")
     while True:
-        panel.out2log(logQueue.get())
+        panel.out2logger(outHand.loggerQueue.get())
         panel.refresh()
     return
 
 def outQueMan():
-    global panel, outQueue
+    """
+    Manage and display stdout/stderr output from engines
+    """
+    global panel, outHand
     while True:
-        panel.out2elk(outQueue.get())
+        panel.out2outerr(outHand.outerrQueue.get())
         panel.refresh()
     return
 
@@ -37,32 +43,29 @@ def panMan(stdscr):
     panel = ledger.MainPanel(stdscr)
 
     p_thread = threading.Thread(target=panel.run, args=()).start()
+
+    # --- Output Synchronization Management
     lq_thread = threading.Thread(target=logQueMan, args=()).start()
     oq_thread = threading.Thread(target=outQueMan, args=()).start()
 
 if __name__ == "__main__":
 
     # --- Dependency and installation management
-    # activate.all()
+    activate.all()
 
     # --- Thread initialization for every modules
-    http = threading.Thread(target=sniffers.http.run, args=["*", "ens33", logQueue, outQueue])
-    slog_parser = threading.Thread(target=parsers.slog_parser.run, args=[logQueue, outQueue])
-    bash_parser = threading.Thread(target=parsers.bash_parser.run, args=[logQueue, outQueue])
+    http = threading.Thread(target=sniffers.http.run, args=["*", "lo"])
+    slog_parser = threading.Thread(target=parsers.slog_parser.run, args=())
+    bash_parser = threading.Thread(target=parsers.bash_parser.run, args=())
 
-    # --- Begin running modules and sensors
+    # --- Begin running modules and its sensors
     http.start()
     slog_parser.start()
     bash_parser.start()
 
     signal.signal(signal.SIGINT, keyboardInterruptHandler)
 
-    # --- Output Synchronization Management
-
-    # queMan(queue)
-
     # --- UI Management
-
     curses.wrapper(panMan)
 
     

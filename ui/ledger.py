@@ -10,10 +10,10 @@ class MainPanel:
     columns = 200
     quarterWidth = int(columns / 4)
 
-    elkwindow = None
-    elkbuffer = None
-    logwindow = None
-    logbuffer = None # Buffer(logwindow, lines)
+    outerr_window = None
+    outerr_buffer = None
+    logger_window = None
+    logger_buffer = None # Buffer(logger_window, lines)
 
     def __init__(self, stdscr):
         curses.echo()
@@ -22,21 +22,24 @@ class MainPanel:
         self.lines = nrows
         self.columns = ncols
 
-        self.logwindow = curses.newwin(self.lines, self.quarterWidth * 3)
-        self.elkwindow = curses.newwin(self.lines, self.quarterWidth, 0, self.quarterWidth * 3 + 2)
+        self.logger_window = curses.newwin(self.lines, self.quarterWidth * 3)
+        self.logger_window.box()
 
-        self.elkbuffer = Buffer(self.elkwindow, self.lines)
-        self.logbuffer = Buffer(self.logwindow, self.lines)
+        self.outerr_window = curses.newwin(self.lines, self.quarterWidth, 0, self.quarterWidth * 3 + 2)
+        self.outerr_window.box()
 
-    def out2elk(self, buffer):
-        self.elkbuffer.writeln(buffer)
+        self.outerr_buffer = Buffer(self.outerr_window, self.lines)
+        self.logger_buffer = Buffer(self.logger_window, self.lines)
 
-    def out2log(self, buffer):
-        self.logbuffer.writeln(buffer)
+    def out2outerr(self, buffer):
+        self.outerr_buffer.writeln(buffer)
+
+    def out2logger(self, buffer):
+        self.logger_buffer.writeln(buffer)
 
     def refresh(self):
-        self.logbuffer.refresh()
-        self.elkbuffer.refresh()
+        self.logger_buffer.refresh()
+        self.outerr_buffer.refresh()
         self.stdscr.refresh()
 
     def run(self):

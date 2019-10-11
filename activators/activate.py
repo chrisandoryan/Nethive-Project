@@ -6,9 +6,29 @@ import settings
 import yaml
 from string import Template
 import re
+from utils import OutputHandler
+
+DOCKER_ELK_REPO_PATH = os.getenv("DOCKER_ELK_REPO_PATH")
+AUDIT_RULES_PATH = os.getenv("AUDIT_RULES_PATH")
+FILEBEAT_CONFIG_PATH = os.getenv("FILEBEAT_CONFIG_PATH")
+AUDIT_LOG_PATH = os.getenv("AUDIT_LOG_PATH")
+MSQL_SLOW_QUERY_LOG_PATH = os.getenv("MYSQL_SLOW_QUERY_LOG_PATH")
+HTTP_LOG_PATH = os.getenv("HTTP_LOG_PATH")
+CENTRALIZED_BASH_HISTORY_PATH = os.getenv("CENTRALIZED_BASH_HISTORY_PATH")
+
+# --- Handle output synchronization
+outHand = OutputHandler().getInstance()
+
+# --- Helper methods
+
+def replConfigFile(original, modified):
+    if not os.path.exists(original + ".original"):
+        os.rename(original, original + ".original")
+    shutil.copy(modified, original)
+
+# --- End of Helper methods
 
 def depman():
-    DOCKER_ELK_REPO_PATH = os.getenv("DOCKER_ELK_REPO_PATH")
     subprocess.call(['/bin/bash', './activators/depman.sh', DOCKER_ELK_REPO_PATH])
     return
 
@@ -21,9 +41,9 @@ def slog():
     return
 
 def audit():
-    AUDIT_RULES_PATH = os.getenv("AUDIT_RULES_PATH")
-    os.rename(AUDIT_RULES_PATH, AUDIT_RULES_PATH + ".original")
-    shutil.copy("./activators/config/audit.rules", AUDIT_RULES_PATH)
+    replConfigFile(AUDIT_RULES_PATH, "./activators/config/audit.rules")
+    # os.rename(AUDIT_RULES_PATH, AUDIT_RULES_PATH + ".original")
+    # shutil.copy("./activators/config/audit.rules", AUDIT_RULES_PATH)
     subprocess.call(['service', 'auditd', 'restart'])
     return
 
@@ -34,9 +54,9 @@ def filebeat():
         - filebeat.yml
         - filebeat service restart
     """
-    FILEBEAT_CONFIG_PATH = os.getenv("FILEBEAT_CONFIG_PATH")
-    os.rename(FILEBEAT_CONFIG_PATH, FILEBEAT_CONFIG_PATH + ".original")
-    shutil.copy("./activators/config/filebeat.yml", FILEBEAT_CONFIG_PATH)
+    replConfigFile(FILEBEAT_CONFIG_PATH, "./activators/config/filebeat.yml")
+    # os.rename(FILEBEAT_CONFIG_PATH, FILEBEAT_CONFIG_PATH + ".original")
+    # shutil.copy("./activators/config/filebeat.yml", FILEBEAT_CONFIG_PATH)
     subprocess.call(['service', 'filebeat', 'restart'])
     return
 
@@ -47,17 +67,17 @@ def logstash():
         - logstash.conf
         - docker-elk reload and restart
     """
-    DOCKER_ELK_REPO_PATH = os.getenv("DOCKER_ELK_REPO_PATH")
     LOGSTASH_CONFIG_PATH = DOCKER_ELK_REPO_PATH + '/logstash/pipeline/logstash.conf'
     LOGSTASH_DOCKERFILE_PATH = DOCKER_ELK_REPO_PATH + '/logstash/Dockerfile'
 
-    os.rename(LOGSTASH_CONFIG_PATH, LOGSTASH_CONFIG_PATH + ".original")
-    shutil.copy("./activators/config/logstash.conf", LOGSTASH_CONFIG_PATH)
+    replConfigFile(LOGSTASH_CONFIG_PATH, "./activators/config/logstash.conf")
+    # os.rename(LOGSTASH_CONFIG_PATH, LOGSTASH_CONFIG_PATH + ".original")
+    # shutil.copy("./activators/config/logstash.conf", LOGSTASH_CONFIG_PATH)
 
-    os.rename(LOGSTASH_DOCKERFILE_PATH, LOGSTASH_DOCKERFILE_PATH + ".original")
-    shutil.copy("./activators/config/Dockerfile.logstash", LOGSTASH_DOCKERFILE_PATH)
+    replConfigFile(LOGSTASH_DOCKERFILE_PATH, "./activators/config/Dockerfile.logstash")
+    # os.rename(LOGSTASH_DOCKERFILE_PATH, LOGSTASH_DOCKERFILE_PATH + ".original")
+    # shutil.copy("./activators/config/Dockerfile.logstash", LOGSTASH_DOCKERFILE_PATH)
 
-    elk_panel = subprocess.Popen(['/bin/bash', './activators/elkstack.sh'])
     return
 
 def killswitch():
@@ -67,7 +87,6 @@ def killswitch():
         - All configurations will be reverted back to original
         - All engines will be offline
     """
-    DOCKER_ELK_REPO_PATH = os.getenv("DOCKER_ELK_REPO_PATH")
     return
 
 def bash():
@@ -117,23 +136,37 @@ def bash():
     return
 
 def dirs():
-    if not os.path.exists(os.getenv("AUDIT_LOG_PATH")):
-        os.makedirs(os.path.dirname(os.getenv("AUDIT_LOG_PATH")))
-    if not os.path.exists(os.getenv("MYSQL_SLOW_QUERY_LOG_PATH")):    
-        os.makedirs(os.path.dirname(os.getenv("MYSQL_SLOW_QUERY_LOG_PATH")))
-    if not os.path.exists(os.getenv("HTTP_LOG_PATH")):
-        os.makedirs(os.path.dirname(os.getenv("HTTP_LOG_PATH")))
-    if not os.path.exists(os.getenv("CENTRALIZED_BASH_HISTORY_PATH")):
-        os.makedirs(os.path.dirname(os.getenv("CENTRALIZED_BASH_HISTORY_PATH")))
+    if not os.path.exists(AUDIT_LOG_PATH):
+        os.makedirs(os.path.dirname(AUDIT_LOG_PATH))
+    if not os.path.exists(MSQL_SLOW_QUERY_LOG_PATH):    
+        os.makedirs(os.path.dirname(MSQL_SLOW_QUERY_LOG_PATH))
+    if not os.path.exists(HTTP_LOG_PATH):
+        os.makedirs(os.path.dirname(HTTP_LOG_PATH))
+    if not os.path.exists(CENTRALIZED_BASH_HISTORY_PATH):
+        os.makedirs(os.path.dirname(CENTRALIZED_BASH_HISTORY_PATH))
+
+def elk():
+    DOCKER_ELK_COMPOSE_PATH = DOCKER_ELK_REPO_PATH + 'docker-compose.yml'
+
+    replConfigFile(DOCKER_ELK_COMPOSE_PATH, "./activators/config/docker-compose.yml")
+    # os.rename(DOCKER_ELK_COMPOSE_PATH, DOCKER_ELK_COMPOSE_PATH + ".original")
+    # shutil.copy("./activators/config/docker-compose.yml", DOCKER_ELK_COMPOSE_PATH)
+
+    elkstack = subprocess.Popen(['/bin/bash', './activators/elkstack.sh'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while True:
+        out = elkstack.stdout.readline()
+        outHand.info(out.decode("utf-8"))
+        if not out: break
 
 def all():
-    # depman()
+    depman()
     dirs()
     slog()
     audit()
     filebeat()
     bash()
     logstash()
+    elk()
     return
 
 if __name__ == "__main__":

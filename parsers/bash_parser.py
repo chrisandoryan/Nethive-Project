@@ -1,16 +1,19 @@
 import settings
 import os
 from utils import tail
+from utils import OutputHandler
 
 CENTRALIZED_BASH_HISTORY_PATH = os.getenv("CENTRALIZED_BASH_HISTORY_PATH")
 
-def run(logQueue, outQueue):
-    outQueue.put("[*] Starting BashParser Engine...")
+# --- Handle output synchronization
+outHand = OutputHandler.getInstance()
+
+def run():
+    outHand.info("[*] Starting BashParser Engine...")
     logfile = open(CENTRALIZED_BASH_HISTORY_PATH, 'a+')
     loglines = tail(logfile)
     for l in loglines:
-        logQueue.put(l.strip())
-        
+        outHand.sendLog(l.strip())
     return
 
 if __name__ == "__main__":

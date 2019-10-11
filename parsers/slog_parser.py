@@ -31,6 +31,7 @@ How to use mysql-slow-query-parser to parser slow query::
                   a: sort by c*t desc; default c
 """
 
+import json
 import sys
 import re
 import sqlparse
@@ -39,6 +40,7 @@ from datetime import datetime, timedelta
 from parsers.Slog import SlowQueryLog
 from sqlparse.tokens import Token
 from utils import tail
+from utils import OutputHandler
 import time
 import csv
 import os
@@ -46,6 +48,9 @@ import settings
 
 MYSQL_SLOW_QUERY_LOG_PATH = os.getenv("MYSQL_SLOW_QUERY_LOG_PATH")
 PARSED_SLOW_QUERY_LOG_PATH = os.getenv("PARSED_SLOW_QUERY_LOG_PATH")
+
+# --- Handle output synchronization
+outHand = OutputHandler().getInstance()
 
 class SlowQueryParser(object):
 
@@ -149,13 +154,12 @@ class SlowQueryParser(object):
             }
             yield entry
 
-    def start_parser(self, logQueue):
+    def start_parser(self, outHand):
         stats = self.calc_stats()
         res = []
         for s in stats:
             if not s['query'].startswith(self.outOfContextQueries):
-                logQueue.put(obj)
-                with open(PARSED_SLOW_QUERY_LOG_PATH, 'a') as f:
+                with open(PARSED_SLOW_QUERY_LOG_PATH, 'a+') as f:
                     obj = {
                         'query': s['query'],
                         'query_time': s['query_time'],
@@ -163,13 +167,14 @@ class SlowQueryParser(object):
                         'rows_examined': s['rows_examined'],
                         'timestamp': int(time.mktime(s['org']['datetime'].timetuple()))
                     }   
+                    outHand.sendLog(json.dumps(obj))
                     f.writelines(json.dumps(obj) + "\n") 
 
-def run(logQueue, outQueue):
+def run():
     global MYSQL_SLOW_QUERY_LOG_PATH, PARSED_SLOW_QUERY_LOG_PATH
     logfile = open(MYSQL_SLOW_QUERY_LOG_PATH, 'r')
     loglines = tail(logfile)
 
-    outQueue.put("[*] Starting SlogParser Engine...")
+    outHand.info("[*] Starting SlogParser Engine...")
     query_parser = SlowQueryParser(loglines)
-    query_parser.start_parser(logQueue)
+    query_parser.start_parser(outHand)
