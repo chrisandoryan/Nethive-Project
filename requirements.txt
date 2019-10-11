@@ -12,7 +12,5 @@ sh
 sqlparse
 mysqlclient
 python-dotenv
-pypcap
 requests
 pyyaml
-curses

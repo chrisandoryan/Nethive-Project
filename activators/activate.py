@@ -176,8 +176,8 @@ def elk():
     bufferOutput(elkstack)
 
 def configs():
-    # outHand.info("[*] Initiating dependency manager...")
-    # depman()
+    outHand.info("[*] Initiating dependency manager...")
+    depman()
     outHand.info("[*] Creating directories...")
     dirs()
     outHand.info("[*] Configuring SQL Slow Query Log...")
