@@ -10,7 +10,9 @@ from utils import OutputHandler
 
 DOCKER_ELK_REPO_PATH = os.getenv("DOCKER_ELK_REPO_PATH")
 AUDIT_RULES_PATH = os.getenv("AUDIT_RULES_PATH")
+AUDITBEAT_RULES_PATH = os.getenv("AUDITBEAT_RULES_PATH")
 FILEBEAT_CONFIG_PATH = os.getenv("FILEBEAT_CONFIG_PATH")
+AUDITBEAT_CONFIG_PATH = os.getenv("AUDITBEAT_CONFIG_PATH")
 AUDIT_LOG_PATH = os.getenv("AUDIT_LOG_PATH")
 MSQL_SLOW_QUERY_LOG_PATH = os.getenv("MYSQL_SLOW_QUERY_LOG_PATH")
 HTTP_LOG_PATH = os.getenv("HTTP_LOG_PATH")
@@ -66,6 +68,19 @@ def filebeat():
     subprocess.call(['service', 'filebeat', 'restart'])
     return
 
+def auditbeat():
+    """ 
+    Setup configuration for Auditbeat.
+    Changes:
+        - auditbeat.yml
+        - auditbeat service restart
+    """
+    replConfigFile(AUDITBEAT_CONFIG_PATH, "./activators/config/auditbeat.yml")
+    shutil.copy("./activators/config/auditbeat.rules", AUDITBEAT_RULES_PATH)
+
+    subprocess.call(['service', 'auditbeat', 'restart'])
+    return
+
 def logstash():
     """ 
     Setup configuration for dockerized Logstash (docker-elk).
@@ -83,12 +98,11 @@ def logstash():
     replConfigFile(LOGSTASH_DOCKERFILE_PATH, "./activators/config/Dockerfile.logstash")
     # os.rename(LOGSTASH_DOCKERFILE_PATH, LOGSTASH_DOCKERFILE_PATH + ".original")
     # shutil.copy("./activators/config/Dockerfile.logstash", LOGSTASH_DOCKERFILE_PATH)
-
     return
 
 def killswitch():
     """ 
-    Invoke reset for ELK system, turning off SIEM.
+    Invoke reset for ELK system, turning off SIEM engine.
     Changes:
         - All configurations will be reverted back to original
         - All engines will be offline
@@ -160,18 +174,23 @@ def elk():
 
     elkstack = subprocess.Popen(['/bin/bash', './activators/elkstack.sh'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     bufferOutput(elkstack)
-    # while True:
-    #     out = elkstack.stdout.readline()
-    #     outHand.info(out.decode("utf-8"))
-    #     if not out: break
 
 def configs():
-    depman()
+    # outHand.info("[*] Initiating dependency manager...")
+    # depman()
+    outHand.info("[*] Creating directories...")
     dirs()
+    outHand.info("[*] Configuring SQL Slow Query Log...")
     slog()
+    outHand.info("[*] Activating auditd module...")
     audit()
+    outHand.info("[*] Configuring filebeat module...")
     filebeat()
+    outHand.info("[*] Configuring auditbeat module...")
+    auditbeat()
+    outHand.info("[*] Configuring bashparse module...")
     bash()
+    outHand.info("[*] Configuring Logstash...")
     logstash()
     return
 
