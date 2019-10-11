@@ -24,9 +24,10 @@ outHand = OutputHandler().getInstance()
 # --- Helper methods
 
 def replConfigFile(original, modified):
+    if not os.path.exists(original):
+        shutil.copy(modified, original)
     if not os.path.exists(original + ".original"):
         os.rename(original, original + ".original")
-    shutil.copy(modified, original)
 
 def bufferOutput(process):
     while True:
@@ -176,10 +177,10 @@ def elk():
     bufferOutput(elkstack)
 
 def configs():
-    outHand.info("[*] Initiating dependency manager...")
-    depman()
-    outHand.info("[*] Creating directories...")
-    dirs()
+    # outHand.info("[*] Initiating dependency manager...")
+    # depman()
+    # outHand.info("[*] Creating directories...")
+    # dirs()
     outHand.info("[*] Configuring SQL Slow Query Log...")
     slog()
     outHand.info("[*] Activating auditd module...")

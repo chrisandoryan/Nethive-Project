@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo apt-get install git curl apt-transport-https ca-certificates curl software-properties-common snapd -y
+sudo apt-get install auditd audispd-plugins git curl apt-transport-https ca-certificates curl software-properties-common snapd -y
 
 # --- Docker
 sudo snap install docker
