@@ -8,6 +8,7 @@ sudo snap install docker
 # --- Filebeat
 curl https://packages.elasticsearch.org/GPG-KEY-elasticsearch | sudo apt-key add -
 echo "deb https://packages.elastic.co/beats/apt stable main" | sudo tee -a /etc/apt/sources.list.d/beats.list
+echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-6.x.list
 
 # --- Fetch dependencies
 sudo apt-get update && sudo apt-get install filebeat auditbeat heartbeat -y
