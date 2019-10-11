@@ -22,16 +22,16 @@ class OutputHandler:
             OutputHandler.__instance = self
     # --- Helper function to create multiple output types
     def success(self, buffer):
-        self.outerrQueue.put(buffer)
+        self.outerrQueue.put(buffer.strip())
         return        
     def info(self, buffer):
-        self.outerrQueue.put(buffer)
+        self.outerrQueue.put(buffer.strip())
         return
     def warning(self, buffer):
-        self.outerrQueue.put(buffer)
+        self.outerrQueue.put(buffer.strip())
         return
     def sendLog(self, buffer):
-        self.loggerQueue.put(buffer)
+        self.loggerQueue.put(buffer.strip())
         return
 
 def tail(logfile):

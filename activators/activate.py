@@ -26,10 +26,16 @@ def replConfigFile(original, modified):
         os.rename(original, original + ".original")
     shutil.copy(modified, original)
 
+def bufferOutput(process):
+    while True:
+        out = process.stdout.readline()
+        outHand.info(out.decode("utf-8"))
+        if not out: break
+
 # --- End of Helper methods
 
 def depman():
-    subprocess.call(['/bin/bash', './activators/depman.sh', DOCKER_ELK_REPO_PATH])
+    depman = subprocess.call(['/bin/bash', './activators/depman.sh', DOCKER_ELK_REPO_PATH])
     return
 
 def slog():
@@ -153,12 +159,13 @@ def elk():
     # shutil.copy("./activators/config/docker-compose.yml", DOCKER_ELK_COMPOSE_PATH)
 
     elkstack = subprocess.Popen(['/bin/bash', './activators/elkstack.sh'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    while True:
-        out = elkstack.stdout.readline()
-        outHand.info(out.decode("utf-8"))
-        if not out: break
+    bufferOutput(elkstack)
+    # while True:
+    #     out = elkstack.stdout.readline()
+    #     outHand.info(out.decode("utf-8"))
+    #     if not out: break
 
-def all():
+def configs():
     depman()
     dirs()
     slog()
@@ -166,7 +173,6 @@ def all():
     filebeat()
     bash()
     logstash()
-    elk()
     return
 
 if __name__ == "__main__":

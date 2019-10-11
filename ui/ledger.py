@@ -43,9 +43,7 @@ class MainPanel:
         self.stdscr.refresh()
 
     def run(self):
-        while True:
-            self.refresh()
-            time.sleep(1)
+        self.refresh()
 
     def close(self):
         curses.endwin()

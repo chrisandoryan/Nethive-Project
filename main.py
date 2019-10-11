@@ -7,6 +7,7 @@ import curses
 import queue
 import signal
 from utils import OutputHandler
+import os
 
 panel = None
 outHand = OutputHandler().getInstance()
@@ -14,6 +15,7 @@ outHand = OutputHandler().getInstance()
 def keyboardInterruptHandler(signal, frame):
     global panel
     panel.close()
+    os.system("reset")
     exit(0)
 
 def logQueMan():
@@ -50,8 +52,17 @@ def panMan(stdscr):
 
 if __name__ == "__main__":
 
-    # --- Dependency and installation management
-    activate.all()
+    # --- Set signal handlers
+    signal.signal(signal.SIGINT, keyboardInterruptHandler)
+
+    # --- Dependency and configuration management
+    activate.configs()
+
+    # --- UI Management
+    curses.wrapper(panMan)
+
+    # --- Run required infrastructures
+    activate.elk()
 
     # --- Thread initialization for every modules
     http = threading.Thread(target=sniffers.http.run, args=["*", "lo"])
@@ -62,12 +73,3 @@ if __name__ == "__main__":
     http.start()
     slog_parser.start()
     bash_parser.start()
-
-    signal.signal(signal.SIGINT, keyboardInterruptHandler)
-
-    # --- UI Management
-    curses.wrapper(panMan)
-
-    
-
-
