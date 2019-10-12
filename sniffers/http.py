@@ -6,6 +6,7 @@ import settings
 import json
 
 from processors import sql_tokenizer
+from processors import xss_watcher
 from parsers import slog_parser
 
 from utils import OutputHandler
@@ -60,11 +61,20 @@ def process_packets():
             payload = get_payload(packet)
             if mode is "GET":
                 write_httplog(packet, url)
+                xss_watcher.inspect(url)
             elif mode is "POST":
                 write_httplog(packet, payload)
+                xss_watcher.inspect(payload)
             elif mode is "*":
                 write_httplog(packet, url)
-                write_httplog(packet, payload)            
+                xss_watcher.inspect(url)
+
+                write_httplog(packet, payload)        
+                xss_watcher.inspect(payload)
+        if packet.haslayer(HTTPResponse):
+            body = ""
+            # TODO: get response body and send to domparser (go)
+            xss_watcher.domparse(body)
     return processor
 
 def get_referer(packet):
