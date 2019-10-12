@@ -62,10 +62,10 @@ if __name__ == "__main__":
     curses.wrapper(panMan)
 
     # --- Run required infrastructures
-    # activate.elk()
+    activate.elk()
 
     # --- Thread initialization for every modules
-    http = threading.Thread(target=sniffers.http.run, args=["*", "lo"])
+    http = threading.Thread(target=sniffers.http.run, args=["*", os.getenv("LISTEN_IFACE")])
     slog_parser = threading.Thread(target=parsers.slog_parser.run, args=())
     bash_parser = threading.Thread(target=parsers.bash_parser.run, args=())
 
