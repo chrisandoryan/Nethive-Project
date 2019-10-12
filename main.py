@@ -62,7 +62,7 @@ if __name__ == "__main__":
     curses.wrapper(panMan)
 
     # --- Run required infrastructures
-    activate.elk()
+    # activate.elk()
 
     # --- Thread initialization for every modules
     http = threading.Thread(target=sniffers.http.run, args=["*", "lo"])

@@ -1,3 +1,4 @@
+
 # --- Plug by SIEM, Do Not MODIFY
 alias whoamid="echo $(whoami)@$([ "$SSH_CONNECTION" == "" ] && echo local || echo $SSH_CONNECTION | awk '{print $1}')"
 track_commands() {

@@ -24,10 +24,9 @@ outHand = OutputHandler().getInstance()
 # --- Helper methods
 
 def replConfigFile(original, modified):
-    if not os.path.exists(original):
-        shutil.copy(modified, original)
     if not os.path.exists(original + ".original"):
         os.rename(original, original + ".original")
+    shutil.copy(modified, original)    
 
 def bufferOutput(process):
     while True:
@@ -108,6 +107,8 @@ def killswitch():
         - All configurations will be reverted back to original
         - All engines will be offline
     """
+    # sudo aa-remove-unknown
+    # 
     return
 
 def bash():
@@ -173,14 +174,15 @@ def elk():
     # os.rename(DOCKER_ELK_COMPOSE_PATH, DOCKER_ELK_COMPOSE_PATH + ".original")
     # shutil.copy("./activators/config/docker-compose.yml", DOCKER_ELK_COMPOSE_PATH)
 
+    outHand.info("[*] Starting ELKStack...")
     elkstack = subprocess.Popen(['/bin/bash', './activators/elkstack.sh'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     bufferOutput(elkstack)
 
 def configs():
-    # outHand.info("[*] Initiating dependency manager...")
-    # depman()
-    # outHand.info("[*] Creating directories...")
-    # dirs()
+    outHand.info("[*] Initiating dependency manager...")
+    depman()
+    outHand.info("[*] Creating directories...")
+    dirs()
     outHand.info("[*] Configuring SQL Slow Query Log...")
     slog()
     outHand.info("[*] Activating auditd module...")
@@ -191,7 +193,7 @@ def configs():
     auditbeat()
     outHand.info("[*] Configuring bashparse module...")
     bash()
-    outHand.info("[*] Configuring Logstash...")
+    outHand.info("[*] Updating Logstash configuration...")
     logstash()
     return
 

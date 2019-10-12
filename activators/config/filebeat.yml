@@ -1,5 +1,5 @@
 filebeat:
-  prospectors:
+  inputs:
     -
       paths:
         - '/var/log/audit/*.log'
@@ -35,7 +35,7 @@ filebeat:
       fields:
         log_type: TYPE_BASH_CENTRALIZED
       fields_under_root: true
-  registry_file: /var/lib/filebeat/registry
+  # registry_file: /var/lib/filebeat/registry
 output:
   logstash:
     hosts:
