@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strings"
 
 	"github.com/jbowtie/gokogiri"
 )
@@ -16,6 +17,7 @@ const (
 
 var safeJavaScriptURL = []string{"javascript:void(0)"}
 var extContentAttrs = []string{"src"}
+var theRequest = "?username=<script src='http://evil.com/hack.js' />&password=<script>alert(1)</script>"
 
 func main() {
 	// Listen for incoming connections.
@@ -38,6 +40,12 @@ func main() {
 		// Handle connections in a new goroutine.
 		go handleRequest(conn)
 	}
+}
+
+func compareWithRequest(afterParse string, originalRequest string) bool {
+	// Could also perform data transformation here (to prevent obfuscation)
+	fmt.Println(afterParse, originalRequest)
+	return strings.Contains(originalRequest, afterParse)
 }
 
 func stringInSlice(a string, list []string) bool {
@@ -71,19 +79,28 @@ func handleRequest(conn net.Conn) {
 			// --- Check if the user input appears in here
 			scriptInnerHTML := ist.InnerHtml()
 			if scriptInnerHTML != "" {
-				fmt.Println(i, ist.InnerHtml())
+				fmt.Println(i, scriptInnerHTML)
+				if compareWithRequest(scriptInnerHTML, theRequest) {
+					fmt.Println("DETECTED1!")
+				}
 			}
 
-			// --- Check if url attributes appears in here (src, attr, data, etc)
-			for j, attr := range ist.Attributes() {
-				if stringInSlice(attr.String(), extContentAttrs) {
-					fmt.Print(j, attr)
+			// --- Check if src attribute appears in here and contains the user input
+			scriptSrcAttr := ist.Attr("src")
+			if scriptSrcAttr != "" {
+				fmt.Println(i, scriptSrcAttr)
+				if compareWithRequest(scriptSrcAttr, theRequest) {
+					fmt.Println("DETECTED2!")
 				}
 			}
 		}
 
 		// --- Check appearance of JS url or event-handler
-
+		for j, attr := range s.Attributes() {
+			if stringInSlice(attr.String(), extContentAttrs) {
+				fmt.Print(j, attr)
+			}
+		}
 	}
 
 	conn.Write([]byte("doc"))
