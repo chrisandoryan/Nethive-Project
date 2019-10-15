@@ -2,7 +2,25 @@ import time
 import requests
 import sys
 import queue
+from collections import defaultdict
 
+class QueueHashmap(queue.Queue):
+
+    def __init__(self, maxsize=65535):
+        super().__init__(maxsize)
+        self._store = defaultdict(lambda: defaultdict(list))
+
+    def get_queue(self, key):
+        return self._store.get(key, [])
+
+    def pop(self, key, subkey):
+        queue = self.get_queue(key)
+        if queue:
+            return queue[subkey].pop()
+        return None
+    
+    def set(self, key, subkey, item):
+        self._store[key][subkey].insert(0, item)
 
 class OutputHandler:
     __instance = None

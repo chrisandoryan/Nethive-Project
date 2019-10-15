@@ -25,8 +25,11 @@ def logQueMan():
     global panel, outHand
     outHand.sendLog("[*] Waiting for output from sensory...")
     while True:
-        panel.out2logger(outHand.loggerQueue.get())
-        panel.refresh()
+        out = outHand.loggerQueue.get()
+        print(out)
+        if panel is not None:
+            panel.out2logger(out)
+            panel.refresh()
     return
 
 def outQueMan():
@@ -35,20 +38,19 @@ def outQueMan():
     """
     global panel, outHand
     while True:
-        panel.out2outerr(outHand.outerrQueue.get())
-        panel.refresh()
+        out = outHand.outerrQueue.get()
+        print(out)
+        if panel is not None:
+            panel.out2outerr(out)
+            panel.refresh()
     return
 
 
 def panMan(stdscr):
     global panel
-    panel = ledger.MainPanel(stdscr)
+    # panel = ledger.MainPanel(stdscr)
 
-    p_thread = threading.Thread(target=panel.run, args=()).start()
-
-    # --- Output Synchronization Management
-    lq_thread = threading.Thread(target=logQueMan, args=()).start()
-    oq_thread = threading.Thread(target=outQueMan, args=()).start()
+    # p_thread = threading.Thread(target=panel.run, args=()).start()
 
 if __name__ == "__main__":
 
@@ -56,20 +58,24 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, keyboardInterruptHandler)
 
     # --- Dependency and configuration management
-    activate.configs()
+    # activate.configs()
 
     # --- UI Management
     curses.wrapper(panMan)
 
+    # --- Output Synchronization Management
+    # lq_thread = threading.Thread(target=logQueMan, args=()).start()
+    # oq_thread = threading.Thread(target=outQueMan, args=()).start()
+
     # --- Run required infrastructures
-    activate.elk()
+    # activate.elk()
 
     # --- Thread initialization for every modules
     http = threading.Thread(target=sniffers.http.run, args=["*", os.getenv("LISTEN_IFACE")])
     slog_parser = threading.Thread(target=parsers.slog_parser.run, args=())
-    bash_parser = threading.Thread(target=parsers.bash_parser.run, args=())
+    # bash_parser = threading.Thread(target=parsers.bash_parser.run, args=())
 
     # --- Begin running modules and its sensors
     http.start()
     slog_parser.start()
-    bash_parser.start()
+    # bash_parser.start()
