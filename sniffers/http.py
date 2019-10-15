@@ -9,7 +9,7 @@ from processors import sql_tokenizer
 from processors import xss_watcher
 from parsers import slog_parser
 
-from utils import OutputHandler
+from utils import OutputHandler, QueueHashmap
 
 HTTP_LOG_PATH = os.getenv("HTTP_LOG_PATH")
 mode = None
@@ -17,12 +17,14 @@ mode = None
 # --- Handle output synchronization
 outHand = OutputHandler().getInstance()
 
+# --- (hopefully) Thread-safe request-to-response storage
+quehash = QueueHashmap()
+
 def sniff_packet(interface):
     sniff(iface=interface, store=False, prn=process_packets(), session=TCPSession)
 
 def write_httplog(packet, buffer):
     global HTTP_LOG_PATH, outHand
-    # print(packet[HTTPRequest].show())
 
     timestamp = int(time.time())
 
@@ -56,7 +58,13 @@ def write_httplog(packet, buffer):
 def process_packets():
     def processor(packet):
         global mode
+
+        src, dst = get_ip_port(packet)
+        ip_src, tcp_sport = src
+        ip_dst, tcp_dport = dst
+
         if packet.haslayer(HTTPRequest):
+            # print(packet[HTTPRequest].show())
             url = packet[HTTPRequest].Path
             payload = get_payload(packet)
             if mode is "GET":
@@ -68,13 +76,15 @@ def process_packets():
             elif mode is "*":
                 write_httplog(packet, url)
                 xss_watcher.inspect(url)
-
                 write_httplog(packet, payload)        
                 xss_watcher.inspect(payload)
+            quehash.set(ip_src, tcp_sport, packet) # 'packet' should be result from payload inspector
         if packet.haslayer(HTTPResponse):
-            body = ""
-            # TODO: get response body and send to domparser (go)
-            xss_watcher.domparse(body)
+            # print(packet[HTTPResponse].show())
+            request_packet = quehash.pop(ip_dst, tcp_dport)
+            body = get_payload(packet)
+            xss_watcher.domparse(body, request_packet)
+
     return processor
 
 def get_referer(packet):
@@ -96,6 +106,16 @@ def get_ua(packet):
     except Exception as e:
         outHand.warning("[!] %s" % e)
         return ""
+
+def get_ip_port(packet):
+    ip_src = ip_dst = tcp_sport = tcp_dport = None
+    if IP in packet:
+        ip_src = packet[IP].src
+        ip_dst = packet[IP].dst
+    if TCP in packet:
+        tcp_sport = packet[TCP].sport
+        tcp_dport = packet[TCP].dport
+    return((ip_src, tcp_sport), (ip_dst, tcp_dport))
 
 def get_content_type(packet):
     try:

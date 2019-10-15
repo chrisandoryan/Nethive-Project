@@ -13,11 +13,11 @@
 # entity decoded but inline event handlers are.
 # http://www.collinjackson.com/research/xssauditor.pdf
 
-def domparse(buffer):
+def domparse(buffer, packet):
     """
         Send HTTP Response to DOM Parser to detect XSS
     """
-
+    print("Response", buffer)
 
     return
 
@@ -25,6 +25,7 @@ def inspect(buffer):
     """
         Check HTTP Request content for potential XSS payload
     """
+    print("Request: ", buffer)
 
     return
 

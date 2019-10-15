@@ -36,3 +36,6 @@ https://github.com/moovweb/gokogiri/issues/100
 
 XSS Auditor
 https://github.com/chromium/chromium/tree/a0f11b59b5e4263cce152d2a6240b011f7b5da52/third_party/blink/renderer/core/html/parser
+
+https://stackoverflow.com/questions/43516512/how-does-a-browser-know-which-response-belongs-to-which-request
+https://stackoverflow.com/questions/5888734/dictionaryqueue-data-structure-with-active-removal-of-old-messages
