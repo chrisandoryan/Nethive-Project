@@ -5,19 +5,24 @@ import (
 	"net"
 	"os"
 	"strings"
+	"encoding/json"
 
 	"github.com/jbowtie/gokogiri"
 )
 
 const (
-	connHost = "0.0.0.0"
+	connHost = "localhost"
 	connPort = "5127"
 	connType = "tcp"
 )
 
+type AuditPackage struct {
+	ItsResponse string `json:"response_body"`
+	ItsRequest string `json:"request_packet"`
+}
+
 var safeJavaScriptURL = []string{"javascript:void(0)"}
 var extContentAttrs = []string{"src"}
-var theRequest = "?username=<script src='http://evil.com/hack.js' />&password=<script>alert(1)</script>"
 
 func main() {
 	// Listen for incoming connections.
@@ -60,11 +65,15 @@ func stringInSlice(a string, list []string) bool {
 func handleRequest(conn net.Conn) {
 	buf := make([]byte, 65535)
 	_, err := conn.Read(buf)
+
+	var audit AuditPackage
+	json.Unmarshal([]byte(buf), &audit)
+
 	if err != nil {
 		fmt.Println("Error reading:", err.Error())
 	}
 
-	doc, err := gokogiri.ParseHtml([]byte(buf))
+	doc, err := gokogiri.ParseHtml([]byte(audit.ItsResponse))
 
 	if err != nil {
 		fmt.Println("Parsing has error:", err)
@@ -80,7 +89,7 @@ func handleRequest(conn net.Conn) {
 			scriptInnerHTML := ist.InnerHtml()
 			if scriptInnerHTML != "" {
 				fmt.Println(i, scriptInnerHTML)
-				if compareWithRequest(scriptInnerHTML, theRequest) {
+				if compareWithRequest(scriptInnerHTML, audit.ItsRequest) {
 					fmt.Println("DETECTED1!")
 				}
 			}
@@ -89,7 +98,7 @@ func handleRequest(conn net.Conn) {
 			scriptSrcAttr := ist.Attr("src")
 			if scriptSrcAttr != "" {
 				fmt.Println(i, scriptSrcAttr)
-				if compareWithRequest(scriptSrcAttr, theRequest) {
+				if compareWithRequest(scriptSrcAttr, audit.ItsRequest) {
 					fmt.Println("DETECTED2!")
 				}
 			}

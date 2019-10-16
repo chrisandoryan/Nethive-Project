@@ -67,23 +67,23 @@ def process_packets():
             # print(packet[HTTPRequest].show())
             url = packet[HTTPRequest].Path
             payload = get_payload(packet)
-            if mode is "GET":
+
+            if mode == "GET":
                 write_httplog(packet, url)
-                xss_watcher.inspect(url)
-            elif mode is "POST":
+            elif mode == "POST":
                 write_httplog(packet, payload)
-                xss_watcher.inspect(payload)
-            elif mode is "*":
+            elif mode == "*":
                 write_httplog(packet, url)
-                xss_watcher.inspect(url)
                 write_httplog(packet, payload)        
-                xss_watcher.inspect(payload)
-            quehash.set(ip_src, tcp_sport, packet) # 'packet' should be result from payload inspector
+
+            xss_watcher.inspect([url, payload])
+            quehash.set(ip_src, tcp_sport, packet)
+
         if packet.haslayer(HTTPResponse):
             # print(packet[HTTPResponse].show())
-            request_packet = quehash.pop(ip_dst, tcp_dport)
+            rqst_pkt = quehash.pop(ip_dst, tcp_dport)
             body = get_payload(packet)
-            xss_watcher.domparse(body, request_packet)
+            xss_watcher.domparse(body, rqst_pkt, False)
 
     return processor
 

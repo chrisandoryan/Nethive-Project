@@ -1,3 +1,5 @@
+import socket
+import json
 
 # Matching Algorithm. 
 # Before searching for scripts in the
@@ -13,19 +15,32 @@
 # entity decoded but inline event handlers are.
 # http://www.collinjackson.com/research/xssauditor.pdf
 
-def domparse(buffer, packet):
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+WATCHMAN_HOST = 'localhost'
+WATCHMAN_PORT = 5127
+
+def domparse(the_response, the_request, flagged_xss):
     """
         Send HTTP Response to DOM Parser to detect XSS
     """
-    print("Response", buffer)
+    audit_package = {
+        "response_body": the_response.decode('utf-8'),
+        "request_packet": "HAHEHO",
+    }
 
+    s.connect((WATCHMAN_HOST, WATCHMAN_PORT))
+    s.sendall(json.dumps(audit_package))
+
+    s.close()
     return
 
-def inspect(buffer):
+def inspect(arr_buff):
     """
-        Check HTTP Request content for potential XSS payload
+        Check HTTP Request content for potential XSS payload (static analysis)
     """
-    print("Request: ", buffer)
+    for buff in arr_buff:
+        print(buff)
 
     return
 

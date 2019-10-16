@@ -167,6 +167,10 @@ def dirs():
     if not os.path.exists(CENTRALIZED_BASH_HISTORY_PATH):
         os.makedirs(os.path.dirname(CENTRALIZED_BASH_HISTORY_PATH))
 
+def watchman():
+    
+    return
+
 def elk():
     DOCKER_ELK_COMPOSE_PATH = DOCKER_ELK_REPO_PATH + 'docker-compose.yml'
 

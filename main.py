@@ -69,6 +69,7 @@ if __name__ == "__main__":
 
     # --- Run required infrastructures
     # activate.elk()
+    # activate.watchman()
 
     # --- Thread initialization for every modules
     http = threading.Thread(target=sniffers.http.run, args=["*", os.getenv("LISTEN_IFACE")])
