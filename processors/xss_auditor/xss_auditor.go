@@ -18,8 +18,8 @@ const (
 
 // RequestPacket contains
 type RequestPacket struct {
-	url  string `json:"url"`
-	body string `json:"body"`
+	URL  string `json:"url"`
+	Body string `json:"body"`
 }
 
 // AuditPackage contains parsed json data from xss_watcher
@@ -56,7 +56,7 @@ func main() {
 
 func compareWithRequest(afterParse string, originalRequest string) bool {
 	// Could also perform data transformation here (to prevent obfuscation)
-	fmt.Println(afterParse, originalRequest)
+	// fmt.Println(afterParse, originalRequest)
 	return strings.Contains(originalRequest, afterParse)
 }
 
@@ -92,17 +92,17 @@ func handleRequest(conn net.Conn) {
 		return
 	}
 
-	fmt.Println(doc.String())
+	// fmt.Println(doc.String())
 
 	rootParse, _ := doc.Root().Search(".//*")
 	for _, s := range rootParse {
 		// --- Find <script> tags
 		inlineScriptTags, _ := s.Search("//script")
-		for i, ist := range inlineScriptTags {
+		for _, ist := range inlineScriptTags {
 			// --- Check if the user input appears in here
 			scriptInnerHTML := ist.InnerHtml()
 			if scriptInnerHTML != "" {
-				fmt.Println(i, scriptInnerHTML)
+				// fmt.Println(i, scriptInnerHTML)
 				if compareWithRequest(scriptInnerHTML, "audit.ItsRequest") {
 					fmt.Println("DETECTED1!")
 				}
@@ -111,7 +111,7 @@ func handleRequest(conn net.Conn) {
 			// --- Check if src attribute appears in here and contains the user input
 			scriptSrcAttr := ist.Attr("src")
 			if scriptSrcAttr != "" {
-				fmt.Println(i, scriptSrcAttr)
+				// fmt.Println(i, scriptSrcAttr)
 				if compareWithRequest(scriptSrcAttr, "audit.ItsRequest") {
 					fmt.Println("DETECTED2!")
 				}
@@ -119,9 +119,9 @@ func handleRequest(conn net.Conn) {
 		}
 
 		// --- Check appearance of JS url or event-handler
-		for j, attr := range s.Attributes() {
+		for _, attr := range s.Attributes() {
 			if stringInSlice(attr.String(), extContentAttrs) {
-				fmt.Print(j, attr)
+				// fmt.Print(j, attr)
 			}
 		}
 	}

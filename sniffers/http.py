@@ -14,6 +14,12 @@ from utils import OutputHandler, QueueHashmap
 HTTP_LOG_PATH = os.getenv("HTTP_LOG_PATH")
 mode = None
 
+unsafe_content_types = [
+    "text/html",
+    "image/svg+xml",
+    "text/xml",
+]
+
 # --- Handle output synchronization
 outHand = OutputHandler().getInstance()
 
@@ -30,7 +36,7 @@ def write_httplog(packet, buffer):
 
     cookie = get_cookie(packet)
     user_agent = get_ua(packet)
-    content_type = get_content_type(packet)
+    content_type = get_content_type(packet, HTTPRequest)
     referer = packet[HTTPRequest].Referer
     request_method = packet[HTTPRequest].Method
     host = packet[HTTPRequest].Host
@@ -61,6 +67,10 @@ def wrap_for_auditor(packet):
     }
     return package
 
+def get_mime_type(content_type):
+    content_type, *extra = content_type.split(';')
+    return content_type, extra
+
 # https://gist.github.com/thepacketgeek/6876699
 def process_packets():
     def processor(packet):
@@ -88,9 +98,11 @@ def process_packets():
 
         if packet.haslayer(HTTPResponse):
             # print(packet[HTTPResponse].show())
-            req_data = quehash.pop(ip_dst, tcp_dport)
-            res_body = get_payload(packet)
-            xss_watcher.domparse(res_body, req_data, False)
+            content_type = get_content_type(packet, HTTPResponse)
+            if get_mime_type(content_type)[0] in unsafe_content_types:
+                req_data = quehash.pop(ip_dst, tcp_dport)
+                res_body = get_payload(packet)
+                xss_watcher.domparse(res_body, req_data, False)
 
     return processor
 
@@ -133,9 +145,9 @@ def get_ip_port(packet):
         tcp_dport = packet[TCP].dport
     return((ip_src, tcp_sport), (ip_dst, tcp_dport))
 
-def get_content_type(packet):
+def get_content_type(packet, state):
     try:
-        return getattr(packet[HTTPRequest], 'Content_Type').decode("utf-8")
+        return getattr(packet[state], 'Content_Type').decode("utf-8")
     except Exception as e:
         outHand.warning("[!] %s" % e)
         pass

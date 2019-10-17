@@ -22,12 +22,18 @@ def domparse(the_response, the_request, flagged_xss):
     """
         Send HTTP Response to DOM Parser to detect XSS
     """
+    print(the_response)
+    the_response = the_response.decode('ISO-8859-1')
+
+    # try:
+    # except Exception as e:
+    #     print("[!] %s" % e)
+    #     pass
+
     audit_package = {
-        "res_body": the_response.decode('utf-8'),
+        "res_body": the_response,
         "req_packet": the_request,
     }
-
-    print(audit_package)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((WATCHMAN_HOST, WATCHMAN_PORT))
