@@ -873,6 +873,8 @@ String XSSAuditor::Canonicalize(String snippet, TruncationKind treatment) {
   return decoded_snippet.RemoveCharacters(&IsNonCanonicalCharacter);
 }
 
+// THIS WILL LOOP THROUGH EVERY CHARACTER IN THE RESPONSE
+
 String XSSAuditor::CanonicalizedSnippetForJavaScript(
     const FilterTokenRequest& request) {
   String string = request.source_tracker.SourceForToken(request.token);

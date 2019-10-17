@@ -39,3 +39,4 @@ https://github.com/chromium/chromium/tree/a0f11b59b5e4263cce152d2a6240b011f7b5da
 https://github.com/masatokinugawa/filterbypass/wiki/Browser's-XSS-Filter-Bypass-Cheat-Sheet
 https://stackoverflow.com/questions/43516512/how-does-a-browser-know-which-response-belongs-to-which-request
 https://stackoverflow.com/questions/5888734/dictionaryqueue-data-structure-with-active-removal-of-old-messages
+http://www.collinjackson.com/research/xssauditor.pdf

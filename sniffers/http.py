@@ -54,6 +54,13 @@ def write_httplog(packet, buffer):
             f.writelines(json.dumps(s) + "\n")
         return    
 
+def wrap_for_auditor(packet):
+    package = {
+        "url": get_url_unidecoded(packet),
+        "body": get_payload_unidecoded(packet),
+    }
+    return package
+
 # https://gist.github.com/thepacketgeek/6876699
 def process_packets():
     def processor(packet):
@@ -65,7 +72,7 @@ def process_packets():
 
         if packet.haslayer(HTTPRequest):
             # print(packet[HTTPRequest].show())
-            url = packet[HTTPRequest].Path
+            url = get_url(packet)
             payload = get_payload(packet)
 
             if mode == "GET":
@@ -77,15 +84,21 @@ def process_packets():
                 write_httplog(packet, payload)        
 
             xss_watcher.inspect([url, payload])
-            quehash.set(ip_src, tcp_sport, packet)
+            quehash.set(ip_src, tcp_sport, wrap_for_auditor(packet))
 
         if packet.haslayer(HTTPResponse):
             # print(packet[HTTPResponse].show())
-            rqst_pkt = quehash.pop(ip_dst, tcp_dport)
-            body = get_payload(packet)
-            xss_watcher.domparse(body, rqst_pkt, False)
+            req_data = quehash.pop(ip_dst, tcp_dport)
+            res_body = get_payload(packet)
+            xss_watcher.domparse(res_body, req_data, False)
 
     return processor
+
+def get_url(packet):
+    return packet[HTTPRequest].Path
+
+def get_url_unidecoded(packet):
+    return get_url(packet).decode('utf-8')
 
 def get_referer(packet):
     return packet[HTTPRequest].Referer
@@ -95,10 +108,13 @@ def get_method(packet):
 
 def get_cookie(packet):
     try:
-        return packet[HTTPRequest].Cookie.decode("utf-8")
+        return packet[HTTPRequest].Cookie
     except Exception as e:
         outHand.warning("[!] %s" % e)
-        return ""
+        return bytearray('')
+
+def get_cookie_unidecoded(packet):
+    return get_cookie(packet).decode('utf-8')
 
 def get_ua(packet):
     try:
@@ -132,6 +148,9 @@ def get_payload(packet):
         return packet[Raw].load
     else:
         return bytearray()
+
+def get_payload_unidecoded(packet):
+    return get_payload(packet).decode('utf-8')
 
 """ mode: GET, POST, * """
 def run(sniffMode, iface):

@@ -15,8 +15,6 @@ import json
 # entity decoded but inline event handlers are.
 # http://www.collinjackson.com/research/xssauditor.pdf
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
 WATCHMAN_HOST = 'localhost'
 WATCHMAN_PORT = 5127
 
@@ -25,12 +23,15 @@ def domparse(the_response, the_request, flagged_xss):
         Send HTTP Response to DOM Parser to detect XSS
     """
     audit_package = {
-        "response_body": the_response.decode('utf-8'),
-        "request_packet": "HAHEHO",
+        "res_body": the_response.decode('utf-8'),
+        "req_packet": the_request,
     }
 
+    print(audit_package)
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((WATCHMAN_HOST, WATCHMAN_PORT))
-    s.sendall(json.dumps(audit_package))
+    s.sendall(json.dumps(audit_package).encode())
 
     s.close()
     return
