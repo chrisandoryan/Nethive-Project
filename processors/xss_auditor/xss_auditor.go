@@ -56,8 +56,8 @@ func main() {
 	}
 }
 
-func containsIgnoreCase(a, b string) bool {
-	return strings.Contains(strings.ToLower(a), strings.ToLower(b))
+func containsIgnoreCase(a_string, a_substring string) bool {
+	return strings.Contains(strings.ToLower(a_string), strings.ToLower(a_substring))
 }
 
 func compareWithRequest(afterParse string, originalRequest RequestPacket) bool {
@@ -85,7 +85,7 @@ func getPossiblyDangerousHundredCharacters(a string) string {
 }
 
 func isJavascriptUrl(a string) bool {
-
+	return strings.HasPrefix(a, "javascript:")
 }
 
 func handleRequest(conn net.Conn) {
@@ -144,7 +144,7 @@ func handleRequest(conn net.Conn) {
 		}
 
 		// --- Check External Content (Specific Tags)
-		
+
 
 
 	}
