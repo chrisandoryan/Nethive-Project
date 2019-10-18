@@ -29,7 +29,9 @@ type AuditPackage struct {
 }
 
 var safeJavaScriptURL = []string{"javascript:void(0)"}
-var extContentAttrs = []string{"src"}
+var extContentAttrs = []string{"src", "code", }
+var eventHandlerAttrs = []string{"onload", "onerror", "onclick", "oncut", "onunload", "onfocus", "onblur"}
+
 
 func main() {
 	// Listen for incoming connections.
@@ -82,6 +84,10 @@ func getPossiblyDangerousHundredCharacters(a string) string {
 	return a
 }
 
+func isJavascriptUrl(a string) bool {
+
+}
+
 func handleRequest(conn net.Conn) {
 	// buf := make([]byte, 65535)
 	// _, err := conn.Read(buf)
@@ -111,9 +117,10 @@ func handleRequest(conn net.Conn) {
 	for _, s := range rootParse {
 		// --- Find <script> tags
 		inlineScriptTags, _ := s.Search("//script")
-		for _, ist := range inlineScriptTags {
+		for _, scriptTag := range inlineScriptTags {
 			// --- Check Inline Script Tags
-			scriptInnerHTML := ist.InnerHtml()
+			// the Auditor checks whether the content of the script is contained within the request 
+			scriptInnerHTML := scriptTag.InnerHtml()
 			if scriptInnerHTML != "" {
 				// fmt.Println(i, scriptInnerHTML)
 				var hundredCharacters = getPossiblyDangerousHundredCharacters(scriptInnerHTML)
@@ -121,25 +128,25 @@ func handleRequest(conn net.Conn) {
 					fmt.Println("DETECTED1!")
 				}
 			}
+		}
 
-			// --- Check External Content Attributes
-			// --- FIXME: External Content Check can be other than script tag
-			scriptSrcAttr := ist.Attr("src")
-			if scriptSrcAttr != "" {
-				if compareWithRequest(scriptSrcAttr, audit.ItsRequest) {
+		// --- Check Dangerous HTML Attributes
+		for _, attr := range s.Attributes() {
+			// 1. checks whether the attribute contains a JavaScript URL
+			// 2. whether the attribute is an event handler
+			// 3. and if the complete attribute (content?) is contained in the request 
+			attrValue := s.Attr(attr)
+			if stringInSlice(atrr.String(), eventHandlerAttrs) || isJavascriptUrl(attrValue) {
+				if compareWithRequest(attrValue, AuditPackage.ItsRequest) {
 					fmt.Println("DETECTED2!")
 				}
 			}
 		}
 
-		// --- Check Dangerous HTML Attributes
-		for _, attr := range s.Attributes() {
-			// Check if attribute contains Javascript URL
-			if stringInSlice(attr.String(), extContentAttrs) {
-				fmt.Print(attr)
-			}
-			// Check if attribute is an event handler (onload, etc)
-		}
+		// --- Check External Content (Specific Tags)
+		
+
+
 	}
 
 	conn.Write([]byte("doc"))

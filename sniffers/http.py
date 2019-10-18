@@ -102,8 +102,8 @@ def process_packets():
 
             xss_watcher.inspect([url, payload])
             req_data = quehash.set(ip_src, tcp_sport, wrap_for_auditor(packet))
-            print(req_data)
-            memc.set("structured", {"a": ("b", "c"), "a2": fractions.Fraction(1, 3)})
+            # print(req_data)
+            # memc.set("structured", {"a": ("b", "c"), "a2": fractions.Fraction(1, 3)})
 
 
 
