@@ -11,6 +11,8 @@ from parsers import slog_parser
 
 from utils import OutputHandler, QueueHashmap
 
+from storage import memcache
+
 HTTP_LOG_PATH = os.getenv("HTTP_LOG_PATH")
 mode = None
 
@@ -23,8 +25,9 @@ unsafe_content_types = [
 # --- Handle output synchronization
 outHand = OutputHandler().getInstance()
 
-# --- (hopefully) Thread-safe request-to-response storage
+# --- (hopefully) Thread-safe request-to-response storage. Memc is used for system wide storage
 quehash = QueueHashmap()
+memc = memcache.MemcacheClient().getInstance()
 
 def sniff_packet(interface):
     sniff(iface=interface, store=False, prn=process_packets(), session=TCPSession)
@@ -98,7 +101,11 @@ def process_packets():
                 write_httplog(packet, payload)        
 
             xss_watcher.inspect([url, payload])
-            quehash.set(ip_src, tcp_sport, wrap_for_auditor(packet))
+            req_data = quehash.set(ip_src, tcp_sport, wrap_for_auditor(packet))
+            print(req_data)
+            memc.set("structured", {"a": ("b", "c"), "a2": fractions.Fraction(1, 3)})
+
+
 
         if packet.haslayer(HTTPResponse):
             # print(packet[HTTPResponse].show())

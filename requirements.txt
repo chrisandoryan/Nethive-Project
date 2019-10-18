@@ -14,3 +14,4 @@ mysqlclient
 python-dotenv
 requests
 pyyaml
+pylibmc==1.6.1

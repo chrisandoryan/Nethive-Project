@@ -5,7 +5,6 @@ import queue
 from collections import defaultdict
 
 class QueueHashmap(queue.Queue):
-
     def __init__(self, maxsize=65535):
         super().__init__(maxsize)
         self._store = defaultdict(lambda: defaultdict(list))
@@ -21,6 +20,7 @@ class QueueHashmap(queue.Queue):
     
     def set(self, key, subkey, item):
         self._store[key][subkey].insert(0, item)
+        return self._store[key][subkey]
 
 class OutputHandler:
     __instance = None
@@ -35,7 +35,7 @@ class OutputHandler:
     def __init__(self):
         """ Virtually private constructor. """
         if OutputHandler.__instance != None:
-            print("This class is a singleton!")
+            print("OutputHandler is a singleton!")
         else:
             OutputHandler.__instance = self
     # --- Helper function to create multiple output types

@@ -40,3 +40,6 @@ https://github.com/masatokinugawa/filterbypass/wiki/Browser's-XSS-Filter-Bypass-
 https://stackoverflow.com/questions/43516512/how-does-a-browser-know-which-response-belongs-to-which-request
 https://stackoverflow.com/questions/5888734/dictionaryqueue-data-structure-with-active-removal-of-old-messages
 http://www.collinjackson.com/research/xssauditor.pdf
+
+Memcaching
+http://sendapatch.se/projects/pylibmc/
