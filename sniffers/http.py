@@ -34,7 +34,7 @@ def write_httplog(packet, buffer):
 
     timestamp = int(time.time())
 
-    cookie = get_cookie(packet)
+    cookie = get_cookie_unidecoded(packet)
     user_agent = get_ua(packet)
     content_type = get_content_type(packet, HTTPRequest)
     referer = packet[HTTPRequest].Referer
@@ -55,8 +55,10 @@ def write_httplog(packet, buffer):
         s['centrality'] = ' '.join(map(str, list(s['centrality'].values())))
         s['host'] = host.decode("utf-8")
         s['timestamp'] = timestamp
+        # print(s)
+        # print(type(s))
         outHand.sendLog(json.dumps(s))
-        with open(HTTP_LOG_PATH, 'a') as f:
+        with open(HTTP_LOG_PATH, 'a+') as f:
             f.writelines(json.dumps(s) + "\n")
         return    
 
@@ -68,6 +70,8 @@ def wrap_for_auditor(packet):
     return package
 
 def get_mime_type(content_type):
+    if content_type is None:
+        return ['', '']
     content_type, *extra = content_type.split(';')
     return content_type, extra
 

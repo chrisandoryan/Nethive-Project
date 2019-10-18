@@ -54,10 +54,15 @@ func main() {
 	}
 }
 
-func compareWithRequest(afterParse string, originalRequest string) bool {
-	// Could also perform data transformation here (to prevent obfuscation)
-	// fmt.Println(afterParse, originalRequest)
-	return strings.Contains(originalRequest, afterParse)
+func containsIgnoreCase(a, b string) bool {
+	return strings.Contains(strings.ToLower(a), strings.ToLower(b))
+}
+
+func compareWithRequest(afterParse string, originalRequest RequestPacket) bool {
+	// ADDME: perform data transformation here (to prevent obfuscation)
+	// fmt.Println(afterParse, originalRequest.URL)
+	// fmt.Println(afterParse, originalRequest.Body)
+	return containsIgnoreCase(originalRequest.URL, afterParse) || containsIgnoreCase(originalRequest.Body, afterParse)
 }
 
 func stringInSlice(a string, list []string) bool {
@@ -69,6 +74,14 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
+func getPossiblyDangerousHundredCharacters(a string) string {
+	if commentIndex := strings.IndexByte(a, '//'); commentIndex >= 0
+		return a[:commentIndex]
+	else if len(a) >= 100
+		return a[:100]
+	return a
+}
+
 func handleRequest(conn net.Conn) {
 	// buf := make([]byte, 65535)
 	// _, err := conn.Read(buf)
@@ -78,7 +91,7 @@ func handleRequest(conn net.Conn) {
 	var audit AuditPackage
 
 	err := d.Decode(&audit)
-	fmt.Println(audit.ItsRequest, err)
+	// fmt.Println(audit.ItsRequest, err)
 	// fmt.Println(audit.ItsResponse, err)
 
 	if err != nil {
@@ -99,30 +112,33 @@ func handleRequest(conn net.Conn) {
 		// --- Find <script> tags
 		inlineScriptTags, _ := s.Search("//script")
 		for _, ist := range inlineScriptTags {
-			// --- Check if the user input appears in here
+			// --- Check Inline Script Tags
 			scriptInnerHTML := ist.InnerHtml()
 			if scriptInnerHTML != "" {
 				// fmt.Println(i, scriptInnerHTML)
-				if compareWithRequest(scriptInnerHTML, "audit.ItsRequest") {
+				var hundredCharacters = getPossiblyDangerousHundredCharacters(scriptInnerHTML)
+				if compareWithRequest(hundredCharacters, audit.ItsRequest) {
 					fmt.Println("DETECTED1!")
 				}
 			}
 
-			// --- Check if src attribute appears in here and contains the user input
+			// --- Check External Content Attributes
+			// --- FIXME: External Content Check can be other than script tag
 			scriptSrcAttr := ist.Attr("src")
 			if scriptSrcAttr != "" {
-				// fmt.Println(i, scriptSrcAttr)
-				if compareWithRequest(scriptSrcAttr, "audit.ItsRequest") {
+				if compareWithRequest(scriptSrcAttr, audit.ItsRequest) {
 					fmt.Println("DETECTED2!")
 				}
 			}
 		}
 
-		// --- Check appearance of JS url or event-handler
+		// --- Check Dangerous HTML Attributes
 		for _, attr := range s.Attributes() {
+			// Check if attribute contains Javascript URL
 			if stringInSlice(attr.String(), extContentAttrs) {
-				// fmt.Print(j, attr)
+				fmt.Print(attr)
 			}
+			// Check if attribute is an event handler (onload, etc)
 		}
 	}
 

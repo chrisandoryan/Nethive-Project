@@ -1,5 +1,7 @@
 import socket
 import json
+import html
+from urllib.parse import unquote
 
 # Matching Algorithm. 
 # Before searching for scripts in the
@@ -18,11 +20,21 @@ import json
 WATCHMAN_HOST = 'localhost'
 WATCHMAN_PORT = 5127
 
+def package_transform(the_package):
+    for key, value in the_package.items():
+        if isinstance(value, dict):
+            the_package[key] = package_transform(value)
+        else:
+            value = unquote(value) # 1. URL Decode
+            value = value # 2. Character-Set Decode
+            value = html.unescape(value) # 3. HTML Entity Decode
+            the_package[key] = value
+    return the_package
+
 def domparse(the_response, the_request, flagged_xss):
     """
         Send HTTP Response to DOM Parser to detect XSS
     """
-    print(the_response)
     the_response = the_response.decode('ISO-8859-1')
 
     # try:
@@ -34,6 +46,8 @@ def domparse(the_response, the_request, flagged_xss):
         "res_body": the_response,
         "req_packet": the_request,
     }
+
+    audit_package = package_transform(audit_package)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((WATCHMAN_HOST, WATCHMAN_PORT))
@@ -50,7 +64,6 @@ def inspect(arr_buff):
         print(buff)
 
     return
-
 
 if __name__ == "__main__":
     pass
