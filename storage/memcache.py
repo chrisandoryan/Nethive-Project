@@ -1,28 +1,9 @@
 import pylibmc
 import queue
 from collections import defaultdict
+from utils import QueueHashmap
 
-class QueueHashmap(queue.Queue):
-    def __init__(self, maxsize=65535):
-        super().__init__(maxsize)
-        self._store = defaultdict(lambda: defaultdict(list))
-
-    def get_queue(self, key):
-        print("GET_QUE", self._store.get(key, []))
-        return self._store.get(key, [])
-
-    def pop(self, key, subkey):
-        queue = self.get_queue(key)
-        if queue:
-            return queue[subkey].pop()
-        return None
-    
-    def set(self, key, subkey, item):
-        self._store[key][subkey].insert(0, item)
-        print("SET", self._store[key][subkey])
-        return self._store[key][subkey]
-
-class MemCacheClient:
+class MemCacheClient(QueueHashmap):
     __instance = None
     @staticmethod
     def getInstance():
@@ -36,8 +17,8 @@ class MemCacheClient:
             print("MemCacheClient is a singleton!")
         else:
             self._store = defaultdict(lambda: defaultdict(list))
-            MemCacheClient.__instance = pylibmc.Client(["127.0.0.1"], binary=True, behaviors={"tcp_nodelay": True, "ketama": True})
+            self.__memcache_client = pylibmc.Client(["127.0.0.1"], binary=True, behaviors={"tcp_nodelay": True, "ketama": True})
+            MemCacheClient.__instance = self
     def set(self, key, subkey, item):
-        super()
-        self._store[key][subkey].insert(0, item)
-        self.__instance.set(key, self._store[key])
+        super().set(key, subkey, item)
+        self.__memcache_client.set(key, self._store[key])

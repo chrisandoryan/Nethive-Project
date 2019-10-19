@@ -45,12 +45,16 @@ import time
 import csv
 import os
 import settings
+from storage.memcache import MemCacheClient
 
 MYSQL_SLOW_QUERY_LOG_PATH = os.getenv("MYSQL_SLOW_QUERY_LOG_PATH")
 PARSED_SLOW_QUERY_LOG_PATH = os.getenv("PARSED_SLOW_QUERY_LOG_PATH")
 
 # --- Handle output synchronization
 outHand = OutputHandler().getInstance()
+
+# --- (hopefully) Thread-safe request-to-response storage. Memc is used for system wide storage
+memcache = MemCacheClient().getInstance()
 
 class SlowQueryParser(object):
 

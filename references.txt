@@ -43,3 +43,4 @@ http://www.collinjackson.com/research/xssauditor.pdf
 
 Memcaching
 http://sendapatch.se/projects/pylibmc/
+https://devdocs.magento.com/guides/v2.3/config-guide/memcache/memcache_ubuntu.html
