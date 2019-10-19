@@ -59,6 +59,7 @@ if __name__ == "__main__":
 
     # --- Dependency and configuration management
     # activate.configs()
+    activate.slog()
 
     # --- UI Management
     curses.wrapper(panMan)

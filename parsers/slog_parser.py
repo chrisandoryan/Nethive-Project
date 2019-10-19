@@ -166,11 +166,16 @@ class SlowQueryParser(object):
                 with open(PARSED_SLOW_QUERY_LOG_PATH, 'a+') as f:
                     obj = {
                         'query': s['query'],
-                        'query_time': s['query_time'],
+                        'query_time': float(s['query_time']),
                         'rows_sent': s['rows_sent'],
                         'rows_examined': s['rows_examined'],
                         'timestamp': int(time.mktime(s['org']['datetime'].timetuple()))
                     }   
+                    print(json.dumps(obj))
+                    if s['rows_sent'] > 0:
+                        # --- TODO: somehow get the returned row from db and pass them to XSS Auditor
+                        
+                        print("")
                     outHand.sendLog(json.dumps(obj))
                     f.writelines(json.dumps(obj) + "\n") 
 
