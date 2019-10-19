@@ -29,9 +29,12 @@ type AuditPackage struct {
 }
 
 var safeJavaScriptURL = []string{"javascript:void(0)"}
-var extContentAttrs = []string{"src", "code", }
-var eventHandlerAttrs = []string{"onload", "onerror", "onclick", "oncut", "onunload", "onfocus", "onblur"}
 
+// Might not use this anymore since there are so many on* attributes
+var eventHandlerAttrList = []string{"onload", "onerror", "onclick", "oncut", "onunload", "onfocus", "onblur", "onpointerover", "onpointerdown"}
+
+var extContentTagList = []string{"script", "object", "param", "embed", "applet", "iframe", "meta", "base", "form", "input", "button"}
+var extContentAttrList = []string{"src", "code", "data", "content", "href"}
 
 func main() {
 	// Listen for incoming connections.
@@ -56,8 +59,16 @@ func main() {
 	}
 }
 
-func containsIgnoreCase(a_string, a_substring string) bool {
-	return strings.Contains(strings.ToLower(a_string), strings.ToLower(a_substring))
+func tagHasEventHandler(attrName string) bool {
+	return hasPrefixIgnoreCase(attrName, "on")
+}
+
+func containsIgnoreCase(aString, aSubstring string) bool {
+	return strings.Contains(strings.ToLower(aString), strings.ToLower(aSubstring))
+}
+
+func hasPrefixIgnoreCase(aString string, aPrefix string) bool {
+	return strings.HasPrefix(strings.ToLower(aString), strings.ToLower(aPrefix))
 }
 
 func compareWithRequest(afterParse string, originalRequest RequestPacket) bool {
@@ -76,16 +87,17 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-func getPossiblyDangerousHundredCharacters(a string) string {
-	if commentIndex := strings.IndexByte(a, '//'); commentIndex >= 0
-		return a[:commentIndex]
-	else if len(a) >= 100
-		return a[:100]
-	return a
+func getPossiblyDangerousHundredCharacters(aString string) string {
+	if commentIndex := strings.Index(aString, "//"); commentIndex >= 0 {
+		return aString[:commentIndex]
+	} else if len(aString) >= 100 {
+		return aString[:100]
+	}
+	return aString
 }
 
-func isJavascriptUrl(a string) bool {
-	return strings.HasPrefix(a, "javascript:")
+func isJavascriptURL(a string) bool {
+	return hasPrefixIgnoreCase(a, "javascript:")
 }
 
 func handleRequest(conn net.Conn) {
@@ -111,42 +123,50 @@ func handleRequest(conn net.Conn) {
 		return
 	}
 
-	// fmt.Println(doc.String())
-
-	rootParse, _ := doc.Root().Search(".//*")
-	for _, s := range rootParse {
-		// --- Find <script> tags
-		inlineScriptTags, _ := s.Search("//script")
-		for _, scriptTag := range inlineScriptTags {
-			// --- Check Inline Script Tags
-			// the Auditor checks whether the content of the script is contained within the request 
-			scriptInnerHTML := scriptTag.InnerHtml()
-			if scriptInnerHTML != "" {
-				// fmt.Println(i, scriptInnerHTML)
-				var hundredCharacters = getPossiblyDangerousHundredCharacters(scriptInnerHTML)
-				if compareWithRequest(hundredCharacters, audit.ItsRequest) {
-					fmt.Println("DETECTED1!")
-				}
+	inlineScriptTags, _ := doc.Root().Search("//script")
+	for _, scriptTag := range inlineScriptTags {
+		// --- Check Inline Script Tags
+		// the Auditor checks whether the content of the script is contained within the request
+		scriptInnerHTML := scriptTag.InnerHtml()
+		if scriptInnerHTML != "" {
+			// fmt.Println(i, scriptInnerHTML)
+			var hundredCharacters = getPossiblyDangerousHundredCharacters(scriptInnerHTML)
+			if compareWithRequest(hundredCharacters, audit.ItsRequest) {
+				fmt.Println(hundredCharacters, scriptTag)
+				fmt.Println("DETECTED1!")
 			}
 		}
+	}
 
+	rootParse, _ := doc.Root().Search(".//*")
+	for _, tag := range rootParse {
 		// --- Check Dangerous HTML Attributes
-		for _, attr := range s.Attributes() {
+		for attr, attrValue := range tag.Attributes() {
 			// 1. checks whether the attribute contains a JavaScript URL
 			// 2. whether the attribute is an event handler
-			// 3. and if the complete attribute (content?) is contained in the request 
-			attrValue := s.Attr(attr)
-			if stringInSlice(atrr.String(), eventHandlerAttrs) || isJavascriptUrl(attrValue) {
-				if compareWithRequest(attrValue, AuditPackage.ItsRequest) {
+			// 3. and if the complete attribute (content?) is contained in the request
+			if tagHasEventHandler(attr) || isJavascriptURL(attrValue.String()) {
+				if compareWithRequest(attrValue.String(), audit.ItsRequest) {
+					fmt.Println(attr, attrValue)
 					fmt.Println("DETECTED2!")
 				}
 			}
 		}
+	}
 
-		// --- Check External Content (Specific Tags)
-
-
-
+	// --- Check External Content (Specific Tags)
+	for _, tagName := range extContentTagList {
+		targetTags, _ := doc.Root().Search(".//" + tagName)
+		for _, tag := range targetTags {
+			for attr, attrValue := range tag.Attributes() {
+				if stringInSlice(attr, extContentAttrList) {
+					if compareWithRequest(attrValue.String(), audit.ItsRequest) {
+						fmt.Println(attr, attrValue)
+						fmt.Println("DETECTED3!")
+					}
+				}
+			}
+		}
 	}
 
 	conn.Write([]byte("doc"))

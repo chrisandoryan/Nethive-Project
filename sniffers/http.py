@@ -11,7 +11,7 @@ from parsers import slog_parser
 
 from utils import OutputHandler, QueueHashmap
 
-from storage import memcache
+from storage.memcache import MemCacheClient
 
 HTTP_LOG_PATH = os.getenv("HTTP_LOG_PATH")
 mode = None
@@ -27,7 +27,7 @@ outHand = OutputHandler().getInstance()
 
 # --- (hopefully) Thread-safe request-to-response storage. Memc is used for system wide storage
 quehash = QueueHashmap()
-memc = memcache.MemcacheClient().getInstance()
+memc = MemCacheClient().getInstance()
 
 def sniff_packet(interface):
     sniff(iface=interface, store=False, prn=process_packets(), session=TCPSession)
@@ -129,15 +129,12 @@ def get_referer(packet):
 def get_method(packet):
     return packet[HTTPRequest].Method
 
-def get_cookie(packet):
+def get_cookie_unidecoded(packet):
     try:
-        return packet[HTTPRequest].Cookie
+        return packet[HTTPRequest].Cookie.decode('utf-8')
     except Exception as e:
         outHand.warning("[!] %s" % e)
         return bytearray('')
-
-def get_cookie_unidecoded(packet):
-    return get_cookie(packet).decode('utf-8')
 
 def get_ua(packet):
     try:

@@ -20,6 +20,7 @@ class QueueHashmap(queue.Queue):
     
     def set(self, key, subkey, item):
         self._store[key][subkey].insert(0, item)
+        print("SET", self._store[key])
         return self._store[key][subkey]
 
 class OutputHandler:
