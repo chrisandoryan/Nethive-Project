@@ -9,3 +9,4 @@ RUN logstash-plugin install logstash-patterns-core
 RUN logstash-plugin install logstash-filter-json
 RUN logstash-plugin install logstash-filter-grok
 RUN logstash-plugin install logstash-filter-aggregate
+RUN logstash-plugin install logstash-output-tcp

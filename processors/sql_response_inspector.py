@@ -1,7 +1,7 @@
 import socket
 import threading
 
-bind_ip = '0.0.0.0'
+bind_ip = '127.0.0.1'
 bind_port = 5128
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -13,7 +13,6 @@ print('Listening on {}:{}'.format(bind_ip, bind_port))
 def handle_client_connection(client_socket):
     request = client_socket.recv(1024)
     print('Received {}'.format(request))
-    client_socket.send('ACK!')
     client_socket.close()
 
 while True:

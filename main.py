@@ -69,7 +69,7 @@ if __name__ == "__main__":
     # oq_thread = threading.Thread(target=outQueMan, args=()).start()
 
     # --- Run required infrastructures
-    activate.elk()
+    # activate.elk()
 
     # --- Thread initialization for every modules
     http = threading.Thread(target=sniffers.http.run, args=["*", os.getenv("LISTEN_IFACE")])
