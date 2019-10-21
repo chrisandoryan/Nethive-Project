@@ -58,7 +58,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, keyboardInterruptHandler)
 
     # --- Dependency and configuration management
-    activate.configs()
+    # activate.configs()
     # activate.slog()
 
     # --- UI Management
@@ -74,9 +74,11 @@ if __name__ == "__main__":
     # --- Thread initialization for every modules
     http = threading.Thread(target=sniffers.http.run, args=["*", os.getenv("LISTEN_IFACE")])
     slog_parser = threading.Thread(target=parsers.slog_parser.run, args=())
-    # bash_parser = threading.Thread(target=parsers.bash_parser.run, args=())
+    bash_parser = threading.Thread(target=parsers.bash_parser.run, args=())
+    sql_interceptor = threading.Thread(target=parsers.sql_interceptor.run, args=())
 
     # --- Begin running modules and its sensors
     http.start()
     slog_parser.start()
-    # bash_parser.start()
+    bash_parser.start()
+    sql_interceptor.start()

@@ -5,6 +5,7 @@ packetbeat.flows:
 packetbeat.protocols.mysql:
   enabled: true
   ports: [3306]
+  send_request: true
   send_response: true
   transaction_timeout: 15s
   fields:
@@ -22,6 +23,9 @@ output.logstash:
     compression_level: 3
     index: 'packetbeat'         
     bulk_max_size: 2048
+output.file:
+  path: "/var/log/mysql"
+  filename: response.log
 logging.to_files: true
 logging.files:
   rotateeverybytes: 10485760

@@ -45,7 +45,7 @@ func main() {
 	}
 	// Close the listener when the application closes.
 	defer l.Close()
-	fmt.Println("Listening on " + connHost + ":" + connPort)
+	fmt.Println("[XSS_Auditor] Listening on " + connHost + ":" + connPort)
 
 	for {
 		// Listen for an incoming connection.

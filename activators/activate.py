@@ -191,15 +191,15 @@ def elk():
     # os.rename(DOCKER_ELK_COMPOSE_PATH, DOCKER_ELK_COMPOSE_PATH + ".original")
     # shutil.copy("./activators/config/docker-compose.yml", DOCKER_ELK_COMPOSE_PATH)
 
-    outHand.info("[*] Starting ELKStack...")
-    elkstack = subprocess.Popen(['/bin/bash', './activators/elkstack.sh'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    bufferOutput(elkstack)
+    # outHand.info("[*] Starting ELKStack...")
+    # elkstack = subprocess.Popen(['/bin/bash', './activators/elkstack.sh'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    # bufferOutput(elkstack)
 
 def configs():
-    # outHand.info("[*] Initiating dependency manager...")
-    # depman()
-    # outHand.info("[*] Creating directories...")
-    # dirs()
+    outHand.info("[*] Initiating dependency manager...")
+    depman()
+    outHand.info("[*] Creating directories...")
+    dirs()
     outHand.info("[*] Configuring SQL Slow Query Log...")
     slog()
     outHand.info("[*] Activating auditd module...")
