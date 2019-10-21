@@ -13,6 +13,7 @@ AUDIT_RULES_PATH = os.getenv("AUDIT_RULES_PATH")
 AUDITBEAT_RULES_PATH = os.getenv("AUDITBEAT_RULES_PATH")
 FILEBEAT_CONFIG_PATH = os.getenv("FILEBEAT_CONFIG_PATH")
 AUDITBEAT_CONFIG_PATH = os.getenv("AUDITBEAT_CONFIG_PATH")
+PACKETBEAT_CONFIG_PATH = os.getenv("PACKETBEAT_CONFIG_PATH")
 AUDIT_LOG_PATH = os.getenv("AUDIT_LOG_PATH")
 MSQL_SLOW_QUERY_LOG_PATH = os.getenv("MYSQL_SLOW_QUERY_LOG_PATH")
 HTTP_LOG_PATH = os.getenv("HTTP_LOG_PATH")
@@ -32,6 +33,7 @@ def bufferOutput(process):
     while True:
         out = process.stdout.readline()
         outHand.info(out.decode("utf-8"))
+        print(out)
         if not out: break
 
 # --- End of Helper methods
@@ -167,8 +169,19 @@ def dirs():
     if not os.path.exists(CENTRALIZED_BASH_HISTORY_PATH):
         os.makedirs(os.path.dirname(CENTRALIZED_BASH_HISTORY_PATH))
 
-def watchman():
-    
+def memcache():
+    # TODO: setup memcache configuration
+    return
+
+def packetbeat():
+    """ 
+    Setup configuration for Packetbeat, packet shipper.
+    Changes:
+        - packetbeat.yml
+        - packetbeat service restart
+    """
+    replConfigFile(PACKETBEAT_CONFIG_PATH, "./activators/config/packetbeat.yml")
+    subprocess.call(['service', 'packetbeat', 'restart'])
     return
 
 def elk():
@@ -183,10 +196,10 @@ def elk():
     bufferOutput(elkstack)
 
 def configs():
-    outHand.info("[*] Initiating dependency manager...")
-    depman()
-    outHand.info("[*] Creating directories...")
-    dirs()
+    # outHand.info("[*] Initiating dependency manager...")
+    # depman()
+    # outHand.info("[*] Creating directories...")
+    # dirs()
     outHand.info("[*] Configuring SQL Slow Query Log...")
     slog()
     outHand.info("[*] Activating auditd module...")
@@ -195,6 +208,8 @@ def configs():
     filebeat()
     outHand.info("[*] Configuring auditbeat module...")
     auditbeat()
+    outHand.info("[*] Configuring packetbeat module...")
+    packetbeat()
     outHand.info("[*] Configuring bashparse module...")
     bash()
     outHand.info("[*] Updating Logstash configuration...")

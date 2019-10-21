@@ -58,8 +58,8 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, keyboardInterruptHandler)
 
     # --- Dependency and configuration management
-    # activate.configs()
-    activate.slog()
+    activate.configs()
+    # activate.slog()
 
     # --- UI Management
     curses.wrapper(panMan)
@@ -69,8 +69,7 @@ if __name__ == "__main__":
     # oq_thread = threading.Thread(target=outQueMan, args=()).start()
 
     # --- Run required infrastructures
-    # activate.elk()
-    # activate.watchman()
+    activate.elk()
 
     # --- Thread initialization for every modules
     http = threading.Thread(target=sniffers.http.run, args=["*", os.getenv("LISTEN_IFACE")])
