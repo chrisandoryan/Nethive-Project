@@ -11,7 +11,7 @@ echo "deb https://packages.elastic.co/beats/apt stable main" | sudo tee -a /etc/
 echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-6.x.list
 
 # --- Fetch dependencies
-sudo apt-get update && sudo apt-get install filebeat auditbeat heartbeat -y
+sudo apt-get update && sudo apt-get install filebeat auditbeat heartbeat packetbeat -y
 
 # --- HTML DOM Parser
 # go get github.com/moovweb/gokogiri

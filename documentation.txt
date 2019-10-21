@@ -1,3 +1,7 @@
 # --- HTTPSensor Log Format
 timestamp - request_method - source_address - 
 2018-07-13 13:57:45 - GET - 
+
+# --- Local Listener
+XSS Auditor: 5127
+SQL Response Interceptor: 5128

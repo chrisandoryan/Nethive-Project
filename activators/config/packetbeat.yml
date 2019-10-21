@@ -1,0 +1,27 @@
+packetbeat.interfaces.device: lo
+packetbeat.flows:
+  timeout: 30s
+  period: 10s
+packetbeat.protocols.mysql:
+  enabled: true
+  ports: [3306]
+  send_response: true
+  transaction_timeout: 15s
+  fields:
+    log_type: TYPE_SQL_RESPONSE
+  fields_under_root: true
+packetbeat.processors:
+- add_fields:
+    target: ''
+    fields:
+      log_type: TYPE_SQL_RESPONSE
+output.logstash:
+    enabled: true
+    hosts: ["localhost:5044"]
+    worker: 1
+    compression_level: 3
+    index: 'packetbeat'         
+    bulk_max_size: 2048
+logging.to_files: true
+logging.files:
+  rotateeverybytes: 10485760
