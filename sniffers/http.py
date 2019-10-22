@@ -111,7 +111,7 @@ def process_packets():
             if get_mime_type(content_type)[0] in unsafe_content_types:
                 req_data = memcache.pop(ip_dst, tcp_dport)
                 res_body = get_payload(packet)
-                print(req_data)
+                # print(req_data)
                 # xss_watcher.domparse(res_body, req_data, False)
 
     return processor

@@ -164,6 +164,8 @@ def dirs():
         os.makedirs(os.path.dirname(AUDIT_LOG_PATH))
     if not os.path.exists(MSQL_SLOW_QUERY_LOG_PATH):    
         os.makedirs(os.path.dirname(MSQL_SLOW_QUERY_LOG_PATH))
+    if not os.path.exists(MSQL_SLOW_QUERY_LOG_PATH):    
+        os.makedirs(os.path.dirname(SQL_RESPONSE_LOG_PATH))
     if not os.path.exists(HTTP_LOG_PATH):
         os.makedirs(os.path.dirname(HTTP_LOG_PATH))
     if not os.path.exists(CENTRALIZED_BASH_HISTORY_PATH):

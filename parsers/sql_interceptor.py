@@ -22,13 +22,15 @@ def parse_output(line):
         if int(line['mysql']['num_rows']) > 0:
             query = line['query']
             result = line['response']
+            src_port = line['source']['port']
             print("===============")
             print(query)
+            print(src_port)
             print("===============")
             for row in result.splitlines()[1:]:
                 print(row)
             print("===============")
-            data = memcache.get('') # how to relate the data with the http request?
+            # data = memcache.get('', '') # how to relate the data with the http request?
         else:
             print("Skipping because of zero rows return")
 
