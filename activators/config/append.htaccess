@@ -1,4 +1,2 @@
-# Prepend the file
-
 # Append file to bottom of page
-php_value auto_prepend_file "/home/sh/Documents/Projects/Blackhead/activators/config/appender.php"
+php_value auto_append_file "/home/sh/Documents/Projects/Blackhead/activators/config/plugins/db_extension.php"
