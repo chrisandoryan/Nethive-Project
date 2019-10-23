@@ -18,6 +18,7 @@ from storage.mysql import MySQLClient
 
 HTTP_LOG_PATH = os.getenv("HTTP_LOG_PATH")
 mode = None
+sql_processes = []
 
 unsafe_content_types = [
     "text/html",
@@ -85,17 +86,21 @@ def get_mime_type(content_type):
 # https://gist.github.com/thepacketgeek/6876699
 def process_packets():
     # threading.Thread(target=observers.sql_connection.run, args=()).start()
+
     def processor(packet):
-        global mode
+        global mode, sql_processes
 
         src, dst = get_ip_port(packet)
         ip_src, tcp_sport = src
         ip_dst, tcp_dport = dst
-
-        sql_processes = observers.sql_connection.run()
+        
+        # TODO: make this a thread/nonblocking
+        foo = observers.sql_connection.run()
+        if len(sql_processes) == 0:
+            sql_processes = foo if len(foo) > 0 else sql_processes
 
         if packet.haslayer(HTTPRequest):
-            print(sql_processes)
+            print("sql_processes2: ", sql_processes)
             # print(packet[HTTPRequest].show())
             # sql_conn_observer.start()
 
