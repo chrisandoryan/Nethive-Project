@@ -58,7 +58,7 @@ memcache = MemCacheClient().getInstance()
 
 class SlowQueryParser(object):
 
-    outOfContextQueries = ("# administrator command:", "USE ")
+    outOfContextQueries = ("# administrator command:", "USE ", "show full processlist", "set autocommit=0")
 
     def __init__(self, stream):
         self.stream = stream
