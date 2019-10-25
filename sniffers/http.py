@@ -9,12 +9,16 @@ from processors import sql_tokenizer
 from processors import xss_watcher
 from parsers import slog_parser
 
+import observers
+
 from utils import OutputHandler, QueueHashmap
 
 from storage.memcache import MemCacheClient
+from storage.mysql import MySQLClient
 
 HTTP_LOG_PATH = os.getenv("HTTP_LOG_PATH")
 mode = None
+sql_processes = []
 
 unsafe_content_types = [
     "text/html",
@@ -28,6 +32,7 @@ outHand = OutputHandler().getInstance()
 # --- (hopefully) Thread-safe request-to-response storage. Memc is used for system wide storage
 # quehash = QueueHashmap() # merged into MemCacheClient
 memcache = MemCacheClient().getInstance()
+mysqlobj = MySQLClient.getInstance()
 
 def sniff_packet(interface):
     sniff(iface=interface, store=False, prn=process_packets(), session=TCPSession)
@@ -80,15 +85,25 @@ def get_mime_type(content_type):
 
 # https://gist.github.com/thepacketgeek/6876699
 def process_packets():
+    # threading.Thread(target=observers.sql_connection.run, args=()).start()
+
     def processor(packet):
-        global mode
+        global mode, sql_processes
 
         src, dst = get_ip_port(packet)
         ip_src, tcp_sport = src
         ip_dst, tcp_dport = dst
+        
+        # TODO: make this a thread/nonblocking
+        foo = observers.sql_connection.run()
+        if len(sql_processes) == 0:
+            sql_processes = foo if len(foo) > 0 else sql_processes
 
         if packet.haslayer(HTTPRequest):
+            print("sql_processes2: ", sql_processes)
             # print(packet[HTTPRequest].show())
+            # sql_conn_observer.start()
+
             url = get_url(packet)
             payload = get_payload(packet)
 
@@ -102,6 +117,7 @@ def process_packets():
 
             xss_watcher.inspect([url, payload])
             memcache.set(ip_src, tcp_sport, wrap_for_auditor(packet))
+            
             # print(req_data)
             # memc.set("structured", {"a": ("b", "c"), "a2": fractions.Fraction(1, 3)})
 

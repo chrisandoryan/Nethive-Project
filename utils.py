@@ -75,6 +75,3 @@ def expand(x):
     while x.payload:
         x = x.payload
         yield x
-
-
-    
