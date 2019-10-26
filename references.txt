@@ -49,3 +49,11 @@ MySql to HTTP
 https://pypi.org/project/mypsl/
 https://stackoverflow.com/questions/3841526/execute-php-script-before-every-php-script
 https://stackoverflow.com/questions/22840741/call-a-specific-function-before-request-ends
+https://github.com/krakjoe/uopz => user operation for zend
+
+UOPZ
+Build process completed successfully
+Installing '/usr/lib/php/20170718/uopz.so'
+install ok: channel://pecl.php.net/uopz-6.1.1
+configuration option "php_ini" is not set to php.ini location
+You should add "extension=uopz.so" to php.ini
