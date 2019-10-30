@@ -50,6 +50,8 @@ https://pypi.org/project/mypsl/
 https://stackoverflow.com/questions/3841526/execute-php-script-before-every-php-script
 https://stackoverflow.com/questions/22840741/call-a-specific-function-before-request-ends
 https://github.com/krakjoe/uopz => user operation for zend
+https://stackoverflow.com/questions/2092179/how-to-show-running-mysql-queries-in-php => rename function (not working in php > 6.0)
+https://github.com/mushorg/BFR.git
 
 UOPZ
 Build process completed successfully

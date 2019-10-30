@@ -20,10 +20,10 @@ except ImportError:
         sys.exit(1)
 
 CMD_PROCESSLIST = "show full processlist"
-DELAY = 0.000001 # 0.000002 # delay between processlist check
-LIMIT = DELAY * 501 # 1 # max wait for the web to open connection to the db)
+DELAY = 0.000000001 # 0.000002 # delay between processlist check
+LIMIT = DELAY * 50100000000000 # 1 # max wait for the web to open connection to the db)
 def connect():
-    return MySQLdb.connect(host='localhost', user='root', passwd='007isKingsman!')
+    return MySQLdb.connect(host='127.0.0.1', user='maintainer', passwd='sudotoor')
 
 def processlist(con):
     con.query(CMD_PROCESSLIST)
@@ -60,14 +60,12 @@ def run():
     time_elapsed = 0.0
     try:
         while time_elapsed < float(LIMIT):
-            # print(time_elapsed)
             for row in processlist(con):
-                # print(row['Info'])
                 if row['Info'] == CMD_PROCESSLIST:
                     continue
                 proc_haystack.append(row)
-                # print(row)
-            sleep(DELAY)
+                print(row)
+            # sleep(DELAY)
             time_elapsed += DELAY # update how many time has elapsed
         return list({v['Info']:v for v in proc_haystack}.values())
     except Exception as e:
