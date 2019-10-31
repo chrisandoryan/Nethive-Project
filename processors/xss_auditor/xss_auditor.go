@@ -18,8 +18,9 @@ const (
 
 // RequestPacket contains
 type RequestPacket struct {
-	URL  string `json:"url"`
-	Body string `json:"body"`
+	URL         string `json:"url"`
+	Body        string `json:"body"`
+	SQLResponse string `json:"sql_response"`
 }
 
 // AuditPackage contains parsed json data from xss_watcher
@@ -75,7 +76,7 @@ func compareWithRequest(afterParse string, originalRequest RequestPacket) bool {
 	// ADDME: perform data transformation here (to prevent obfuscation)
 	// fmt.Println(afterParse, originalRequest.URL)
 	// fmt.Println(afterParse, originalRequest.Body)
-	return containsIgnoreCase(originalRequest.URL, afterParse) || containsIgnoreCase(originalRequest.Body, afterParse)
+	return containsIgnoreCase(originalRequest.URL, afterParse) || containsIgnoreCase(originalRequest.Body, afterParse) || containsIgnoreCase(originalRequest.SQLResponse, afterParse)
 }
 
 func stringInSlice(a string, list []string) bool {

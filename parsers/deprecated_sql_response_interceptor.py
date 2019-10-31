@@ -6,6 +6,12 @@ import json
 from storage.memcache import MemCacheClient
 from observers import sql_connection
 
+"""
+SQL Response Interceptor powered by Packetbeat
+(currently not used anymore)
+
+"""
+
 # --- Handle output synchronization
 outHand = OutputHandler().getInstance()
 

@@ -1,7 +1,15 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-"""myprofiler - Casual MySQL Profiler
+"""
+SQL Process Viewer by simultaniously executing "SHOW FULL PROCESSLIST"
+deprecated since this method requires lot of computing and processes
+
+"""
+
+"""
+Based on: 
+myprofiler - Casual MySQL Profiler
 
 https://github.com/methane/myprofiler
 """

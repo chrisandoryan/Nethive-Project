@@ -16,12 +16,24 @@
         $execOn = $_SERVER["SCRIPT_FILENAME"];
     
         echo $ipAddress . ":" . $port;
-        print_r($data);
 
-        //TODO: sync with memcache
+        //TODO: sync with python engine
 
-        $memres = $mem->get($ipAddress);
-        print_r($memres);
+        if (count($data) > 0) {
+            $package = array(
+                'client_ip' => $ipAddress,
+                'client_port' => $port,
+                'sql_response' => $data
+            );
+    
+            $fp = fsockopen("127.0.0.1", 5128, $errno, $errstr, 30);
+            if (!$fp) {
+                echo "$errstr ($errno)<br />\n";
+            } else {
+                fwrite($fp, json_encode($package));
+                fclose($fp);
+            }
+        }
 
         // end here
 
