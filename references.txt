@@ -44,6 +44,7 @@ http://www.collinjackson.com/research/xssauditor.pdf
 Memcaching
 http://sendapatch.se/projects/pylibmc/
 https://devdocs.magento.com/guides/v2.3/config-guide/memcache/memcache_ubuntu.html
+https://www.cloudways.com/blog/memcached-with-php/
 
 MySql to HTTP
 https://pypi.org/project/mypsl/
@@ -52,6 +53,10 @@ https://stackoverflow.com/questions/22840741/call-a-specific-function-before-req
 https://github.com/krakjoe/uopz => user operation for zend
 https://stackoverflow.com/questions/2092179/how-to-show-running-mysql-queries-in-php => rename function (not working in php > 6.0)
 https://github.com/mushorg/BFR.git
+
+https://till.klampaeckel.de/blog/archives/105-Monkey-patching-in-PHP.html
+https://stackoverflow.com/questions/10065210/monkey-patching-in-php
+https://stackoverflow.com/questions/3620659/is-it-possible-to-overwrite-a-function-in-php
 
 UOPZ
 Build process completed successfully

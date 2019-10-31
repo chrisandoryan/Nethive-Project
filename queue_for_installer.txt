@@ -1,1 +1,2 @@
 1. add uopz and BFR (https://github.com/mushorg/BFR) installation
+2. add memcached installation

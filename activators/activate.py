@@ -173,6 +173,9 @@ def dirs():
 
 def memcache():
     # TODO: setup memcache configuration
+    # apt install memcached php-memcached
+    # copy /etc/memcached.conf to /etc/memcached.conf.orig
+    # write custom configuration from ./config/memcached.conf into /etc/memcached.conf
     return
 
 def packetbeat():

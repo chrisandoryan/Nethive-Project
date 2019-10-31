@@ -95,12 +95,12 @@ def process_packets():
         ip_dst, tcp_dport = dst
         
         # TODO: make this a thread/nonblocking
-        foo = observers.sql_connection.run()
-        if len(sql_processes) == 0:
-            sql_processes = foo if len(foo) > 0 else sql_processes
+        # foo = observers.sql_connection.run()
+        # if len(sql_processes) == 0:
+        #     sql_processes = foo if len(foo) > 0 else sql_processes
 
         if packet.haslayer(HTTPRequest):
-            print("sql_processes2: ", sql_processes)
+            # print("sql_processes2: ", sql_processes)
             # print(packet[HTTPRequest].show())
             # sql_conn_observer.start()
 

@@ -21,6 +21,7 @@ class MemCacheClient(QueueHashmap):
             MemCacheClient.__instance = self
     def set(self, key, subkey, item):
         super().set(key, subkey, item)
+        print("Set to {} with data {}".format(key, self._store[key]))
         return self.__memcache_client.set(key, self._store[key])
     def get(self, key, subkey):
         return self.__memcache_client.get('key')
