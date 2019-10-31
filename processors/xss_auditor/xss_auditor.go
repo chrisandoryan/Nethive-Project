@@ -16,11 +16,14 @@ const (
 	connType = "tcp"
 )
 
+type SQLResponse struct {
+}
+
 // RequestPacket contains
 type RequestPacket struct {
-	URL         string `json:"url"`
-	Body        string `json:"body"`
-	SQLResponse string `json:"sql_response"`
+	URL    string      `json:"url"`
+	Body   string      `json:"body"`
+	FromDb SQLResponse `json:"sql_response"`
 }
 
 // AuditPackage contains parsed json data from xss_watcher

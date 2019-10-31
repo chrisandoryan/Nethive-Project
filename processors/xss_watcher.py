@@ -49,6 +49,8 @@ def domparse(the_response, the_request, flagged_xss):
 
     audit_package = package_transform(audit_package)
 
+    print(audit_package)
+
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((WATCHMAN_HOST, WATCHMAN_PORT))
     s.sendall(json.dumps(audit_package).encode())
