@@ -4,4 +4,4 @@ timestamp - request_method - source_address -
 
 # --- Local Listener
 XSS Auditor: 5127
-SQL Response Interceptor: 5128
+SQL Response Observer: 5128

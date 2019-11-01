@@ -22,9 +22,12 @@ WATCHMAN_PORT = 5127
 
 def package_transform(the_package):
     for key, value in the_package.items():
+        print(key, value)
         if isinstance(value, dict):
             the_package[key] = package_transform(value)
         else:
+            if isinstance(value, list):
+                continue;
             value = unquote(value) # 1. URL Decode
             value = value # 2. Character-Set Decode
             value = html.unescape(value) # 3. HTML Entity Decode
@@ -48,6 +51,8 @@ def domparse(the_response, the_request, flagged_xss):
     }
 
     audit_package = package_transform(audit_package)
+
+    print(audit_package['req_packet'])
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((WATCHMAN_HOST, WATCHMAN_PORT))

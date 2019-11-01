@@ -95,12 +95,12 @@ def process_packets():
         ip_dst, tcp_dport = dst
         
         # TODO: make this a thread/nonblocking
-        foo = observers.sql_connection.run()
-        if len(sql_processes) == 0:
-            sql_processes = foo if len(foo) > 0 else sql_processes
+        # foo = observers.sql_connection.run()
+        # if len(sql_processes) == 0:
+        #     sql_processes = foo if len(foo) > 0 else sql_processes
 
         if packet.haslayer(HTTPRequest):
-            print("sql_processes2: ", sql_processes)
+            # print("sql_processes2: ", sql_processes)
             # print(packet[HTTPRequest].show())
             # sql_conn_observer.start()
 
@@ -125,10 +125,11 @@ def process_packets():
             # print(packet[HTTPResponse].show())
             content_type = get_content_type(packet, HTTPResponse)
             if get_mime_type(content_type)[0] in unsafe_content_types:
+                # FIXME: old data is not deleted on pop call
                 req_data = memcache.pop(ip_dst, tcp_dport)
                 res_body = get_payload(packet)
-                # print(req_data)
-                # xss_watcher.domparse(res_body, req_data, False)
+                print(req_data, "BEFORE AUDITING")
+                xss_watcher.domparse(res_body, req_data, False)
 
     return processor
 
@@ -149,7 +150,7 @@ def get_cookie_unidecoded(packet):
         return packet[HTTPRequest].Cookie.decode('utf-8')
     except Exception as e:
         outHand.warning("[!] %s" % e)
-        return bytearray('')
+        return bytearray()
 
 def get_ua(packet):
     try:
