@@ -65,6 +65,7 @@ func tagHasEventHandler(attrName string) bool {
 }
 
 func containsIgnoreCase(aString, aSubstring string) bool {
+	fmt.Println("Comparing " + strings.ToLower(aString) + " with " + strings.ToLower(aSubstring))
 	return strings.Contains(strings.ToLower(aString), strings.ToLower(aSubstring))
 }
 
@@ -120,7 +121,7 @@ func handleRequest(conn net.Conn) {
 
 	err := d.Decode(&audit)
 
-	fmt.Println(audit)
+	// fmt.Println(audit)
 
 	// fmt.Println(audit.ItsRequest, err)
 	// fmt.Println(audit.ItsResponse, err)

@@ -17,7 +17,7 @@
             
             echo $ipAddress . ":" . $port;
 
-            //TODO: sync with python engine
+            //TODO: sync with python engine DONE
 
             if (count($data) > 0) {
                 $package = array(

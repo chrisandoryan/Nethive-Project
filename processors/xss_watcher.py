@@ -17,21 +17,22 @@ from urllib.parse import unquote
 # entity decoded but inline event handlers are.
 # http://www.collinjackson.com/research/xssauditor.pdf
 
-WATCHMAN_HOST = 'localhost'
+WATCHMAN_HOST = '127.0.0.1'
 WATCHMAN_PORT = 5127
 
 def package_transform(the_package):
     for key, value in the_package.items():
-        # print(key, value)
         if isinstance(value, dict):
             the_package[key] = package_transform(value)
         else:
             if isinstance(value, list):
                 continue;
-            value = unquote(value) # 1. URL Decode
-            value = value # 2. Character-Set Decode
-            value = html.unescape(value) # 3. HTML Entity Decode
-            the_package[key] = value
+            if value != None:
+                value = unquote(value) # 1. URL Decode
+                value = value # 2. Character-Set Decode
+                value = html.unescape(value) # 3. HTML Entity Decode
+                the_package[key] = value
+                print(the_package[key])
     return the_package
 
 def domparse(the_response, the_request, flagged_xss):
