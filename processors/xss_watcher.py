@@ -1,7 +1,7 @@
 import socket
 import json
 import html
-from urllib.parse import unquote
+from urllib.parse import unquote, unquote_plus
 
 # Matching Algorithm. 
 # Before searching for scripts in the
@@ -28,7 +28,8 @@ def package_transform(the_package):
             if isinstance(value, list):
                 continue;
             if value != None:
-                value = unquote(value) # 1. URL Decode
+                value = unquote(value) # 1.1 URL Decode
+                value = unquote_plus(value) # 1.2 URL Decode Plus Sign
                 value = value # 2. Character-Set Decode
                 value = html.unescape(value) # 3. HTML Entity Decode
                 the_package[key] = value

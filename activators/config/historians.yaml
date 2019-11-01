@@ -1,6 +1,6 @@
 users:
   -
-    username: ao
+    username: sh
     exclude_commands: 
       - ls
       - whoami
