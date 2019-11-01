@@ -150,7 +150,7 @@ def get_cookie_unidecoded(packet):
         return packet[HTTPRequest].Cookie.decode('utf-8')
     except Exception as e:
         outHand.warning("[!] %s" % e)
-        return bytearray('')
+        return bytearray()
 
 def get_ua(packet):
     try:
