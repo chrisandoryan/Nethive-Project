@@ -1,6 +1,5 @@
 <?php
     namespace blackhead;
-    use mysqli;
 
     //MAGIC: if I put include memcache_manager here (on the global scope), I cannot use them inside the function even if global $mem has been declared.
 
@@ -8,7 +7,8 @@
 
         $result = $link->query($query);
 
-        if ($result instanceof mysqli_result) {
+        if (mysqli_num_rows($result) > 0) {
+
             $data = $result->fetch_all(MYSQLI_ASSOC);
 
             $ipAddress = $_SERVER['REMOTE_ADDR'];
@@ -25,6 +25,8 @@
                     'client_port' => $port,
                     'sql_response' => $data
                 );
+
+                // print_r($package);
             
                 $fp = fsockopen("127.0.0.1", 5128, $errno, $errstr, 30);
                 if (!$fp) {
@@ -37,9 +39,6 @@
 
             $result->data_seek(0); // reset result pointer back to 0
         }
+
         return $result;        
     }
-
-    // function mysqli_fetch_assoc($result) {
-    //     return $result->fetch_assoc();
-    // }

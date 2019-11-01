@@ -18,6 +18,7 @@ AUDIT_LOG_PATH = os.getenv("AUDIT_LOG_PATH")
 MSQL_SLOW_QUERY_LOG_PATH = os.getenv("MYSQL_SLOW_QUERY_LOG_PATH")
 HTTP_LOG_PATH = os.getenv("HTTP_LOG_PATH")
 CENTRALIZED_BASH_HISTORY_PATH = os.getenv("CENTRALIZED_BASH_HISTORY_PATH")
+SQL_RESPONSE_LOG_PATH = os.getenv("SQL_RESPONSE_LOG_PATH")
 
 # --- Handle output synchronization
 outHand = OutputHandler().getInstance()
@@ -164,7 +165,7 @@ def dirs():
         os.makedirs(os.path.dirname(AUDIT_LOG_PATH))
     if not os.path.exists(MSQL_SLOW_QUERY_LOG_PATH):    
         os.makedirs(os.path.dirname(MSQL_SLOW_QUERY_LOG_PATH))
-    if not os.path.exists(MSQL_SLOW_QUERY_LOG_PATH):    
+    if not os.path.exists(SQL_RESPONSE_LOG_PATH):    
         os.makedirs(os.path.dirname(SQL_RESPONSE_LOG_PATH))
     if not os.path.exists(HTTP_LOG_PATH):
         os.makedirs(os.path.dirname(HTTP_LOG_PATH))

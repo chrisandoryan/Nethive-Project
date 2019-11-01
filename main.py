@@ -59,8 +59,8 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, keyboardInterruptHandler)
 
     # --- Dependency and configuration management
-    activate.configs()
-    activate.slog()
+    # activate.configs()
+    # activate.slog()
 
     # --- UI Management
     curses.wrapper(panMan)

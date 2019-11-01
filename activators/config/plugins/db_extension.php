@@ -55,6 +55,7 @@
 
     function use_namespace() {
         require "namespace_manager.php";
-        //TODO: make every file with db interaction to declare namespace blackhead.
+
+        //TODO: make every file with db interaction to declare 'namespace blackhead' (for dvwa read how-to_plugin_for_dvwa.txt).
 
     }

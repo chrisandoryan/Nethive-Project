@@ -119,6 +119,9 @@ func handleRequest(conn net.Conn) {
 	var audit AuditPackage
 
 	err := d.Decode(&audit)
+
+	fmt.Println(audit)
+
 	// fmt.Println(audit.ItsRequest, err)
 	// fmt.Println(audit.ItsResponse, err)
 
