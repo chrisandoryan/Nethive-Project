@@ -5,8 +5,6 @@
     //MAGIC: if I put include memcache_manager here (on the global scope), I cannot use them inside the function even if global $mem has been declared.
 
     function mysqli_query($link, $query) {
-        include_once "memcache_manager.php";
-
         $result = $link->query($query);
         $data = $result->fetch_all(MYSQLI_ASSOC);
         
@@ -18,6 +16,8 @@
         echo $ipAddress . ":" . $port;
 
         //TODO: sync with python engine
+
+        // print_r("JEHEE");
 
         if (count($data) > 0) {
             $package = array(

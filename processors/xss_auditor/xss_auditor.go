@@ -16,14 +16,11 @@ const (
 	connType = "tcp"
 )
 
-type SQLResponse struct {
-}
-
 // RequestPacket contains
 type RequestPacket struct {
-	URL    string      `json:"url"`
-	Body   string      `json:"body"`
-	FromDb SQLResponse `json:"sql_response"`
+	URL         string              `json:"url"`
+	Body        string              `json:"body"`
+	SQLResponse []map[string]string `json:"sql_response"`
 }
 
 // AuditPackage contains parsed json data from xss_watcher
@@ -79,7 +76,16 @@ func compareWithRequest(afterParse string, originalRequest RequestPacket) bool {
 	// ADDME: perform data transformation here (to prevent obfuscation)
 	// fmt.Println(afterParse, originalRequest.URL)
 	// fmt.Println(afterParse, originalRequest.Body)
-	return containsIgnoreCase(originalRequest.URL, afterParse) || containsIgnoreCase(originalRequest.Body, afterParse) || containsIgnoreCase(originalRequest.SQLResponse, afterParse)
+	storedXSSIndication := false
+	for _, response := range originalRequest.SQLResponse {
+		for _, payload := range response {
+			// fmt.Println("key:", key, "payload:", payload)
+			if containsIgnoreCase(payload, afterParse) {
+				storedXSSIndication = true
+			}
+		}
+	}
+	return storedXSSIndication || containsIgnoreCase(originalRequest.URL, afterParse) || containsIgnoreCase(originalRequest.Body, afterParse)
 }
 
 func stringInSlice(a string, list []string) bool {

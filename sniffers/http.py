@@ -128,7 +128,7 @@ def process_packets():
                 # FIXME: old data is not deleted on pop call
                 req_data = memcache.pop(ip_dst, tcp_dport)
                 res_body = get_payload(packet)
-                # print(req_data, "BEFORE AUDITING")
+                print(req_data, "BEFORE AUDITING")
                 xss_watcher.domparse(res_body, req_data, False)
 
     return processor

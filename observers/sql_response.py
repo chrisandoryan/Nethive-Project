@@ -27,7 +27,7 @@ def handle_client_connection(client_socket):
 
         memcache.update(client_ip, client_port, 'sql_response', sql_response)
         data = memcache.get(client_ip)
-        # print(data, "FROM RESPONSE OBSERVER")
+        print(data, "FROM RESPONSE OBSERVER")
 
     except Exception as e:
         print("[!] %s" % e)

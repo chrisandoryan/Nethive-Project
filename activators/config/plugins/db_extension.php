@@ -54,7 +54,7 @@
     }
 
     function use_namespace() {
-        require_once "namespace_manager.php";
+        require "namespace_manager.php";
         //TODO: make every file with db interaction to declare namespace blackhead.
 
     }
