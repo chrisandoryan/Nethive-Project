@@ -33,14 +33,14 @@ const (
 )
 
 const (
-	storeNonMaliciousAuditReportAsWell = false //change to true to report nonmalicious audit report as well (more processing, more storage used)
+	storeNonMaliciousAuditReportAsWell = false //change to true to report non-malicious audit report as well (more processing, more storage used)
 )
 
 // AuditResultPackage contains ...
 type AuditResultPackage struct {
-	SQLResponseLikelyInjected []AuditReport
-	QueryParamLikelyInjected  []AuditReport
-	RequestBodyLikelyInjected []AuditReport
+	SQLResponseAuditResult []AuditReport
+	QueryParamAuditResult  []AuditReport
+	RequestBodyAuditResult []AuditReport
 }
 
 // AuditReport contains ...
@@ -139,7 +139,7 @@ func constructAuditResultRecapitulation(checkCalledFrom string, inspectedElement
 				ClientPort:           originalRequest.ClientPort,
 			}
 			// fmt.Println(auditReport)
-			recapAuditResult.QueryParamLikelyInjected = append(recapAuditResult.QueryParamLikelyInjected, auditReport)
+			recapAuditResult.QueryParamAuditResult = append(recapAuditResult.QueryParamAuditResult, auditReport)
 			break
 		case constInjectionFromRequestBody:
 			auditReport := AuditReport{
@@ -151,7 +151,7 @@ func constructAuditResultRecapitulation(checkCalledFrom string, inspectedElement
 				ClientPort:           originalRequest.ClientPort,
 			}
 			// fmt.Println(auditReport)
-			recapAuditResult.RequestBodyLikelyInjected = append(recapAuditResult.RequestBodyLikelyInjected, auditReport)
+			recapAuditResult.RequestBodyAuditResult = append(recapAuditResult.RequestBodyAuditResult, auditReport)
 			break
 		case constInjectionFromSQLResponse:
 			auditReport := AuditReport{
@@ -163,7 +163,7 @@ func constructAuditResultRecapitulation(checkCalledFrom string, inspectedElement
 				ClientPort:           originalRequest.ClientPort,
 			}
 			// fmt.Println(auditReport)
-			recapAuditResult.SQLResponseLikelyInjected = append(recapAuditResult.SQLResponseLikelyInjected, auditReport)
+			recapAuditResult.SQLResponseAuditResult = append(recapAuditResult.SQLResponseAuditResult, auditReport)
 			break
 		}
 	}
