@@ -33,7 +33,6 @@ def package_transform(the_package):
                 value = value # 2. Character-Set Decode
                 value = html.unescape(value) # 3. HTML Entity Decode
                 the_package[key] = value
-                print(the_package[key])
     return the_package
 
 def domparse(the_response, the_request, flagged_xss):
@@ -54,12 +53,17 @@ def domparse(the_response, the_request, flagged_xss):
 
     audit_package = package_transform(audit_package)
 
-    # print(audit_package['req_packet'])
-
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((WATCHMAN_HOST, WATCHMAN_PORT))
-    s.sendall(json.dumps(audit_package).encode())
 
+    try:
+        s.connect((WATCHMAN_HOST, WATCHMAN_PORT))
+        s.sendall(json.dumps(audit_package).encode())
+
+        result = s.recv(4096)
+        print(result)
+    except Exception as e:
+        print(e)
+    
     s.close()
     return
 
@@ -67,8 +71,8 @@ def inspect(arr_buff):
     """
         Check HTTP Request content for potential XSS payload (static analysis)
     """
-    for buff in arr_buff:
-        print(buff)
+    # for buff in arr_buff:
+    #     print(buff)
 
     return
 

@@ -11,16 +11,57 @@ import (
 )
 
 const (
-	connHost = "localhost"
+	connHost = "127.0.0.1"
 	connPort = "5127"
 	connType = "tcp"
 )
 
-// RequestPacket contains
+const (
+	constNotLikelyInjection               = 0
+	constInjectionFromQueryParam          = 1
+	constInjectionLocationFromQueryParam  = "QUERY_PARAM"
+	constInjectionFromRequestBody         = 2
+	constInjectionLocationFromRequestBody = "REQUEST_BODY"
+	constInjectionFromSQLResponse         = 3
+	constInjectionLocationFromSQLResponse = "SQL_RESPONSE"
+)
+
+const (
+	constMethodNameCheckInlineScript        = "CHECK_INLINE_SCRIPT"
+	constMethodNameCheckDangerousAttributes = "CHECK_DANGEROUS_ATTRS"
+	constMethodNameCheckExternalContent     = "CHECK_EXT_CONTENT"
+)
+
+const (
+	storeNonMaliciousAuditReportAsWell = false //change to true to report nonmalicious audit report as well (more processing, more storage used)
+)
+
+// AuditResultPackage contains ...
+type AuditResultPackage struct {
+	SQLResponseLikelyInjected []AuditReport
+	QueryParamLikelyInjected  []AuditReport
+	RequestBodyLikelyInjected []AuditReport
+}
+
+// AuditReport contains ...
+type AuditReport struct {
+	LikelyMalicious      bool // is the result indicates malicious activity?
+	ClientIP             string
+	ClientPort           string
+	Payload              string
+	PayloadLocation      string // where is the payload located? URL? Body? SQL Response?
+	SinkholePath         string // which source code file is affected/injected?
+	TriggeredCheckMethod string // which method detected the payload as malicious?
+	Time                 string // time the auditing process is finished
+}
+
+// RequestPacket contains ...
 type RequestPacket struct {
 	URL         string              `json:"url"`
 	Body        string              `json:"body"`
 	SQLResponse []map[string]string `json:"sql_response"`
+	ClientIP    string              `json:"client_ip"`
+	ClientPort  string              `json:"client_port"`
 }
 
 // AuditPackage contains parsed json data from xss_watcher
@@ -73,20 +114,90 @@ func hasPrefixIgnoreCase(aString string, aPrefix string) bool {
 	return strings.HasPrefix(strings.ToLower(aString), strings.ToLower(aPrefix))
 }
 
-func compareWithRequest(afterParse string, originalRequest RequestPacket) bool {
-	// ADDME: perform data transformation here (to prevent obfuscation)
+func constructAuditResultRecapitulation(checkCalledFrom string, inspectedElement string, originalRequest RequestPacket, reqComparisonResults []int, recapAuditResult *AuditResultPackage) {
+
+	for _, reqComparisonValue := range reqComparisonResults {
+		switch reqComparisonValue {
+		case constNotLikelyInjection:
+			if storeNonMaliciousAuditReportAsWell {
+				auditReport := AuditReport{
+					LikelyMalicious: false,
+					Payload:         inspectedElement,
+					ClientIP:        originalRequest.ClientIP,
+					ClientPort:      originalRequest.ClientPort,
+				}
+				fmt.Println(auditReport)
+			}
+			break
+		case constInjectionFromQueryParam:
+			auditReport := AuditReport{
+				LikelyMalicious:      true,
+				Payload:              inspectedElement,
+				PayloadLocation:      constInjectionLocationFromQueryParam,
+				TriggeredCheckMethod: checkCalledFrom,
+				ClientIP:             originalRequest.ClientIP,
+				ClientPort:           originalRequest.ClientPort,
+			}
+			// fmt.Println(auditReport)
+			recapAuditResult.QueryParamLikelyInjected = append(recapAuditResult.QueryParamLikelyInjected, auditReport)
+			break
+		case constInjectionFromRequestBody:
+			auditReport := AuditReport{
+				LikelyMalicious:      true,
+				Payload:              inspectedElement,
+				PayloadLocation:      constInjectionLocationFromRequestBody,
+				TriggeredCheckMethod: checkCalledFrom,
+				ClientIP:             originalRequest.ClientIP,
+				ClientPort:           originalRequest.ClientPort,
+			}
+			// fmt.Println(auditReport)
+			recapAuditResult.RequestBodyLikelyInjected = append(recapAuditResult.RequestBodyLikelyInjected, auditReport)
+			break
+		case constInjectionFromSQLResponse:
+			auditReport := AuditReport{
+				LikelyMalicious:      true,
+				Payload:              inspectedElement,
+				PayloadLocation:      constInjectionLocationFromSQLResponse,
+				TriggeredCheckMethod: checkCalledFrom,
+				ClientIP:             originalRequest.ClientIP,
+				ClientPort:           originalRequest.ClientPort,
+			}
+			// fmt.Println(auditReport)
+			recapAuditResult.SQLResponseLikelyInjected = append(recapAuditResult.SQLResponseLikelyInjected, auditReport)
+			break
+		}
+	}
+}
+
+func compareWithRequest(afterParse string, originalRequest RequestPacket) []int {
+	// FIXME: perform data transformation here (to prevent obfuscation)
 	// fmt.Println(afterParse, originalRequest.URL)
 	// fmt.Println(afterParse, originalRequest.Body)
-	storedXSSIndication := false
+
+	fromQueryParam, fromRequestBody, fromSQLResponse := 0, 0, 0
+	// fmt.Println(originalRequest.SQLResponse)
 	for _, response := range originalRequest.SQLResponse {
 		for _, payload := range response {
 			// fmt.Println("key:", key, "payload:", payload)
 			if containsIgnoreCase(payload, afterParse) {
-				storedXSSIndication = true
+				fromSQLResponse = constInjectionFromSQLResponse
+				break
 			}
 		}
+		if fromSQLResponse > 0 {
+			break
+		}
 	}
-	return storedXSSIndication || containsIgnoreCase(originalRequest.URL, afterParse) || containsIgnoreCase(originalRequest.Body, afterParse)
+
+	if containsIgnoreCase(originalRequest.URL, afterParse) {
+		fromQueryParam = constInjectionFromQueryParam
+	}
+
+	if containsIgnoreCase(originalRequest.Body, afterParse) {
+		fromRequestBody = constInjectionFromRequestBody
+	}
+
+	return []int{fromQueryParam, fromRequestBody, fromSQLResponse}
 }
 
 func stringInSlice(a string, list []string) bool {
@@ -118,6 +229,7 @@ func handleRequest(conn net.Conn) {
 	d := json.NewDecoder(conn)
 
 	var audit AuditPackage
+	var recapAuditResult AuditResultPackage
 
 	err := d.Decode(&audit)
 
@@ -144,11 +256,10 @@ func handleRequest(conn net.Conn) {
 		scriptInnerHTML := scriptTag.InnerHtml()
 		if scriptInnerHTML != "" {
 			// fmt.Println(i, scriptInnerHTML)
-			var hundredCharacters = getPossiblyDangerousHundredCharacters(scriptInnerHTML)
-			if compareWithRequest(hundredCharacters, audit.ItsRequest) {
-				fmt.Println(hundredCharacters, scriptTag)
-				fmt.Println("DETECTED1!")
-			}
+			var firstHundredCharacters = getPossiblyDangerousHundredCharacters(scriptInnerHTML)
+
+			constructAuditResultRecapitulation(constMethodNameCheckInlineScript, firstHundredCharacters, audit.ItsRequest, compareWithRequest(firstHundredCharacters, audit.ItsRequest), &recapAuditResult)
+
 		}
 	}
 
@@ -160,10 +271,9 @@ func handleRequest(conn net.Conn) {
 			// 2. whether the attribute is an event handler
 			// 3. and if the complete attribute (content?) is contained in the request
 			if tagHasEventHandler(attr) || isJavascriptURL(attrValue.String()) {
-				if compareWithRequest(attrValue.String(), audit.ItsRequest) {
-					fmt.Println(attr, attrValue)
-					fmt.Println("DETECTED2!")
-				}
+				attributeValue := attrValue.String()
+
+				constructAuditResultRecapitulation(constMethodNameCheckDangerousAttributes, attributeValue, audit.ItsRequest, compareWithRequest(attributeValue, audit.ItsRequest), &recapAuditResult)
 			}
 		}
 	}
@@ -174,16 +284,22 @@ func handleRequest(conn net.Conn) {
 		for _, tag := range targetTags {
 			for attr, attrValue := range tag.Attributes() {
 				if stringInSlice(attr, extContentAttrList) {
-					if compareWithRequest(attrValue.String(), audit.ItsRequest) {
-						fmt.Println(attr, attrValue)
-						fmt.Println("DETECTED3!")
-					}
+					attributeValue := attrValue.String()
+
+					constructAuditResultRecapitulation(constMethodNameCheckExternalContent, attributeValue, audit.ItsRequest, compareWithRequest(attributeValue, audit.ItsRequest), &recapAuditResult)
+
 				}
 			}
 		}
 	}
 
-	conn.Write([]byte("doc"))
+	foo, err := json.Marshal(recapAuditResult)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	conn.Write([]byte(foo))
 	conn.Close()
 
 	doc.Free()

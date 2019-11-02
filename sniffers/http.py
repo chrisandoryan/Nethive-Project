@@ -127,8 +127,10 @@ def process_packets():
             if get_mime_type(content_type)[0] in unsafe_content_types:
                 # FIXME: old data is not deleted on pop call
                 req_data = memcache.pop(ip_dst, tcp_dport)
+                req_data['client_ip'] = ip_dst
+                req_data['client_port'] = str(tcp_dport)
+
                 res_body = get_payload(packet)
-                # print(req_data, "BEFORE AUDITING")
                 xss_watcher.domparse(res_body, req_data, False)
 
     return processor
