@@ -39,6 +39,7 @@ output:
   logstash:
     hosts:
       - '34.69.244.227:5044'
+      - '127.0.0.1:5044'
     worker: 1
     bulk_max_size: 2048
     compression_level: 3
