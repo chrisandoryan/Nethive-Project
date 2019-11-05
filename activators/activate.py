@@ -26,6 +26,7 @@ outHand = OutputHandler().getInstance()
 # --- Helper methods
 
 def replConfigFile(original, modified):
+    # For ELK Configuration, DO NOT COPY/CREATE BACKUP inside same directory!
     if not os.path.exists(original + ".original"):
         os.rename(original, original + ".original")
     shutil.copy(modified, original)    

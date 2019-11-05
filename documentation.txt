@@ -5,3 +5,6 @@ timestamp - request_method - source_address -
 # --- Local Listener
 XSS Auditor: 5127
 SQL Response Observer: 5128
+
+# --- enable debug mode in logstash
+curl -XPUT 'localhost:9600/_node/logging?pretty' -H 'Content-Type: application/json' -d '{"logger.logstash.inputs.tcp" : "DEBUG"}'

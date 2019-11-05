@@ -2,6 +2,9 @@ import socket
 import json
 import html
 from urllib.parse import unquote, unquote_plus
+# from logstash_async.handler import AsynchronousLogstashHandler
+# import logging
+import os
 
 # Matching Algorithm. 
 # Before searching for scripts in the
@@ -20,6 +23,13 @@ from urllib.parse import unquote, unquote_plus
 WATCHMAN_HOST = '127.0.0.1'
 WATCHMAN_PORT = 5127
 
+LOGSTASH_HOST = os.getenv('LOGSTASH_HOST')
+LOGSTASH_PORT = int(os.getenv('LOGSTASH_PORT'))
+
+# xss_logger = logging.getLogger('xss_audit_logger')
+# xss_logger.setLevel(logging.INFO)
+# xss_logger.addHandler(AsynchronousLogstashHandler(LOGSTASH_HOST, LOGSTASH_PORT, database_path='xss_audit_log.db'))
+
 def package_transform(the_package):
     for key, value in the_package.items():
         if isinstance(value, dict):
@@ -29,7 +39,7 @@ def package_transform(the_package):
                 continue;
             if value != None:
                 value = unquote(value) # 1.1 URL Decode
-                value = unquote_plus(value) # 1.2 URL Decode Plus Sign
+                value = unquote_plus(value) # 1.2 URL Decode Plus Sign (is this neccessary?)
                 value = value # 2. Character-Set Decode
                 value = html.unescape(value) # 3. HTML Entity Decode
                 the_package[key] = value
@@ -54,6 +64,7 @@ def domparse(the_response, the_request, flagged_xss):
     audit_package = package_transform(audit_package)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    ss = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
         s.connect((WATCHMAN_HOST, WATCHMAN_PORT))
@@ -61,10 +72,20 @@ def domparse(the_response, the_request, flagged_xss):
 
         result = s.recv(4096)
         print(result)
+        
+        s.close()
+
+        msg = {'@message': json.loads(result), 'log_type': 'TYPE_XSS_AUDITOR'}
+
+        ss.connect((LOGSTASH_HOST, LOGSTASH_PORT))
+        ss.sendall((json.dumps(msg) + "\n").encode())
+
+        ss.close()
+        # xss_logger.info(result)
+
     except Exception as e:
         print(e)
     
-    s.close()
     return
 
 def inspect(arr_buff):

@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     # --- Dependency and configuration management
     # activate.configs()
-    # activate.slog()
+    activate.slog()
     activate.filebeat()
     activate.auditbeat()
     activate.packetbeat()

@@ -33,7 +33,7 @@ const (
 )
 
 const (
-	storeNonMaliciousAuditReportAsWell = false //change to true to report non-malicious audit report as well (more processing, more storage used)
+	storeNonMaliciousAuditReportAsWell = true //change to true to report non-malicious audit report as well (more processing, more storage used)
 )
 
 // AuditResultPackage contains ...
@@ -127,6 +127,7 @@ func constructAuditResultRecapitulation(checkCalledFrom string, inspectedElement
 					ClientPort:      originalRequest.ClientPort,
 				}
 				fmt.Println(auditReport)
+				// recapAuditResult.QueryParamAuditResult = append(recapAuditResult.QueryParamAuditResult, auditReport)
 			}
 			break
 		case constInjectionFromQueryParam:
@@ -240,13 +241,19 @@ func handleRequest(conn net.Conn) {
 
 	if err != nil {
 		fmt.Println("Error reading:", err.Error())
+		return
+	}
+
+	if audit.ItsResponse == "" {
+		fmt.Println("Response is empty")
+		// return
 	}
 
 	doc, err := gokogiri.ParseHtml([]byte(audit.ItsResponse))
 
 	if err != nil {
 		fmt.Println("Parsing has error:", err)
-		return
+		// return
 	}
 
 	inlineScriptTags, _ := doc.Root().Search("//script")

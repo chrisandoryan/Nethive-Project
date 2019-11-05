@@ -18,7 +18,7 @@ packetbeat.processors:
       log_type: TYPE_SQL_RESPONSE
 output.logstash:
     enabled: true
-    hosts: ["34.69.244.227:5044", "127.0.0.1:5044"]
+    hosts: ["34.70.42.81:5044", "127.0.0.1:5044"]
     worker: 1
     compression_level: 3
     index: 'packetbeat'         
