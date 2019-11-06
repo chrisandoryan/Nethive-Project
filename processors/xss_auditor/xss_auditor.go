@@ -38,9 +38,10 @@ const (
 
 // AuditResultPackage contains ...
 type AuditResultPackage struct {
-	SQLResponseAuditResult []AuditReport
-	QueryParamAuditResult  []AuditReport
-	RequestBodyAuditResult []AuditReport
+	SQLResponseAuditResult  []AuditReport
+	QueryParamAuditResult   []AuditReport
+	RequestBodyAuditResult  []AuditReport
+	NonMaliciousAuditResult []AuditReport
 }
 
 // AuditReport contains ...
@@ -52,7 +53,7 @@ type AuditReport struct {
 	PayloadLocation      string // where is the payload located? URL? Body? SQL Response?
 	SinkholePath         string // which source code file is affected/injected?
 	TriggeredCheckMethod string // which method detected the payload as malicious?
-	Time                 string // time the auditing process is finished
+	Time                 int    // time the auditing process is finished
 }
 
 // RequestPacket contains ...
@@ -68,6 +69,7 @@ type RequestPacket struct {
 type AuditPackage struct {
 	ItsResponse string        `json:"res_body"`
 	ItsRequest  RequestPacket `json:"req_packet"`
+	Time        int           `json:time`
 }
 
 var safeJavaScriptURL = []string{"javascript:void(0)"}
@@ -114,21 +116,12 @@ func hasPrefixIgnoreCase(aString string, aPrefix string) bool {
 	return strings.HasPrefix(strings.ToLower(aString), strings.ToLower(aPrefix))
 }
 
-func constructAuditResultRecapitulation(checkCalledFrom string, inspectedElement string, originalRequest RequestPacket, reqComparisonResults []int, recapAuditResult *AuditResultPackage) {
-
+func constructAuditResultRecapitulation(checkCalledFrom string, inspectedElement string, auditPackage AuditPackage, reqComparisonResults []int, recapAuditResult *AuditResultPackage) {
+	isNonMaliciousResult := 0
 	for _, reqComparisonValue := range reqComparisonResults {
 		switch reqComparisonValue {
 		case constNotLikelyInjection:
-			if storeNonMaliciousAuditReportAsWell {
-				auditReport := AuditReport{
-					LikelyMalicious: false,
-					Payload:         inspectedElement,
-					ClientIP:        originalRequest.ClientIP,
-					ClientPort:      originalRequest.ClientPort,
-				}
-				fmt.Println(auditReport)
-				// recapAuditResult.QueryParamAuditResult = append(recapAuditResult.QueryParamAuditResult, auditReport)
-			}
+			isNonMaliciousResult++
 			break
 		case constInjectionFromQueryParam:
 			auditReport := AuditReport{
@@ -136,8 +129,10 @@ func constructAuditResultRecapitulation(checkCalledFrom string, inspectedElement
 				Payload:              inspectedElement,
 				PayloadLocation:      constInjectionLocationFromQueryParam,
 				TriggeredCheckMethod: checkCalledFrom,
-				ClientIP:             originalRequest.ClientIP,
-				ClientPort:           originalRequest.ClientPort,
+				ClientIP:             auditPackage.ItsRequest.ClientIP,
+				ClientPort:           auditPackage.ItsRequest.ClientPort,
+				SinkholePath:         auditPackage.ItsRequest.URL,
+				Time:                 auditPackage.Time,
 			}
 			// fmt.Println(auditReport)
 			recapAuditResult.QueryParamAuditResult = append(recapAuditResult.QueryParamAuditResult, auditReport)
@@ -148,8 +143,10 @@ func constructAuditResultRecapitulation(checkCalledFrom string, inspectedElement
 				Payload:              inspectedElement,
 				PayloadLocation:      constInjectionLocationFromRequestBody,
 				TriggeredCheckMethod: checkCalledFrom,
-				ClientIP:             originalRequest.ClientIP,
-				ClientPort:           originalRequest.ClientPort,
+				ClientIP:             auditPackage.ItsRequest.ClientIP,
+				ClientPort:           auditPackage.ItsRequest.ClientPort,
+				SinkholePath:         auditPackage.ItsRequest.URL,
+				Time:                 auditPackage.Time,
 			}
 			// fmt.Println(auditReport)
 			recapAuditResult.RequestBodyAuditResult = append(recapAuditResult.RequestBodyAuditResult, auditReport)
@@ -160,12 +157,29 @@ func constructAuditResultRecapitulation(checkCalledFrom string, inspectedElement
 				Payload:              inspectedElement,
 				PayloadLocation:      constInjectionLocationFromSQLResponse,
 				TriggeredCheckMethod: checkCalledFrom,
-				ClientIP:             originalRequest.ClientIP,
-				ClientPort:           originalRequest.ClientPort,
+				ClientIP:             auditPackage.ItsRequest.ClientIP,
+				ClientPort:           auditPackage.ItsRequest.ClientPort,
+				SinkholePath:         auditPackage.ItsRequest.URL,
+				Time:                 auditPackage.Time,
 			}
 			// fmt.Println(auditReport)
 			recapAuditResult.SQLResponseAuditResult = append(recapAuditResult.SQLResponseAuditResult, auditReport)
 			break
+		}
+	}
+	// Store inspection result for Non-malicious audit as well
+	if isNonMaliciousResult == 3 {
+		if storeNonMaliciousAuditReportAsWell {
+			auditReport := AuditReport{
+				LikelyMalicious:      false,
+				Payload:              inspectedElement,
+				ClientIP:             auditPackage.ItsRequest.ClientIP,
+				ClientPort:           auditPackage.ItsRequest.ClientPort,
+				Time:                 auditPackage.Time,
+				SinkholePath:         auditPackage.ItsRequest.URL,
+				TriggeredCheckMethod: checkCalledFrom,
+			}
+			recapAuditResult.NonMaliciousAuditResult = append(recapAuditResult.NonMaliciousAuditResult, auditReport)
 		}
 	}
 }
@@ -245,15 +259,15 @@ func handleRequest(conn net.Conn) {
 	}
 
 	if audit.ItsResponse == "" {
-		fmt.Println("Response is empty")
-		// return
+		fmt.Println("Got empty response")
+		return
 	}
 
 	doc, err := gokogiri.ParseHtml([]byte(audit.ItsResponse))
 
 	if err != nil {
 		fmt.Println("Parsing has error:", err)
-		// return
+		return
 	}
 
 	inlineScriptTags, _ := doc.Root().Search("//script")
@@ -265,7 +279,7 @@ func handleRequest(conn net.Conn) {
 			// fmt.Println(i, scriptInnerHTML)
 			var firstHundredCharacters = getPossiblyDangerousHundredCharacters(scriptInnerHTML)
 
-			constructAuditResultRecapitulation(constMethodNameCheckInlineScript, firstHundredCharacters, audit.ItsRequest, compareWithRequest(firstHundredCharacters, audit.ItsRequest), &recapAuditResult)
+			constructAuditResultRecapitulation(constMethodNameCheckInlineScript, firstHundredCharacters, audit, compareWithRequest(firstHundredCharacters, audit.ItsRequest), &recapAuditResult)
 
 		}
 	}
@@ -280,7 +294,7 @@ func handleRequest(conn net.Conn) {
 			if tagHasEventHandler(attr) || isJavascriptURL(attrValue.String()) {
 				attributeValue := attrValue.String()
 
-				constructAuditResultRecapitulation(constMethodNameCheckDangerousAttributes, attributeValue, audit.ItsRequest, compareWithRequest(attributeValue, audit.ItsRequest), &recapAuditResult)
+				constructAuditResultRecapitulation(constMethodNameCheckDangerousAttributes, attributeValue, audit, compareWithRequest(attributeValue, audit.ItsRequest), &recapAuditResult)
 			}
 		}
 	}
@@ -293,7 +307,7 @@ func handleRequest(conn net.Conn) {
 				if stringInSlice(attr, extContentAttrList) {
 					attributeValue := attrValue.String()
 
-					constructAuditResultRecapitulation(constMethodNameCheckExternalContent, attributeValue, audit.ItsRequest, compareWithRequest(attributeValue, audit.ItsRequest), &recapAuditResult)
+					constructAuditResultRecapitulation(constMethodNameCheckExternalContent, attributeValue, audit, compareWithRequest(attributeValue, audit.ItsRequest), &recapAuditResult)
 
 				}
 			}

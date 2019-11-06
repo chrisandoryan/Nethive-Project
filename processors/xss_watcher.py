@@ -5,6 +5,7 @@ from urllib.parse import unquote, unquote_plus
 # from logstash_async.handler import AsynchronousLogstashHandler
 # import logging
 import os
+import time
 
 # Matching Algorithm. 
 # Before searching for scripts in the
@@ -35,7 +36,7 @@ def package_transform(the_package):
         if isinstance(value, dict):
             the_package[key] = package_transform(value)
         else:
-            if isinstance(value, list):
+            if isinstance(value, list) or isinstance(value, int):
                 continue;
             if value != None:
                 value = unquote(value) # 1.1 URL Decode
@@ -59,6 +60,7 @@ def domparse(the_response, the_request, flagged_xss):
     audit_package = {
         "res_body": the_response,
         "req_packet": the_request,
+        "time": int(time.time())
     }
 
     audit_package = package_transform(audit_package)
@@ -75,7 +77,9 @@ def domparse(the_response, the_request, flagged_xss):
         
         s.close()
 
-        msg = {'@message': json.loads(result), 'log_type': 'TYPE_XSS_AUDITOR'}
+        msg = {'parsed_log': json.loads(result), 'log_type': 'TYPE_XSS_AUDITOR'}
+
+        print(msg)
 
         ss.connect((LOGSTASH_HOST, LOGSTASH_PORT))
         ss.sendall((json.dumps(msg) + "\n").encode())
