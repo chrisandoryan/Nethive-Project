@@ -65,9 +65,12 @@ def write_httplog(packet, buffer):
         s['timestamp'] = timestamp
         # print(s)
         # print(type(s))
-        outHand.sendLog(json.dumps(s))
-        with open(HTTP_LOG_PATH, 'a+') as f:
-            f.writelines(json.dumps(s) + "\n")
+        try:
+            outHand.sendLog(json.dumps(s))
+            with open(HTTP_LOG_PATH, 'a+') as f:
+                f.writelines(json.dumps(s) + "\n")
+        except Exception as e:
+            print("[!] %s" % e)
         return    
 
 def wrap_for_auditor(packet):
@@ -75,6 +78,7 @@ def wrap_for_auditor(packet):
         "url": get_url_unidecoded(packet),
         "body": get_payload_unidecoded(packet),
     }
+    print(package)
     return package
 
 def get_mime_type(content_type):
@@ -104,6 +108,8 @@ def process_packets():
             # print(packet[HTTPRequest].show())
             # sql_conn_observer.start()
 
+            
+
             url = get_url(packet)
             payload = get_payload(packet)
 
@@ -127,11 +133,12 @@ def process_packets():
             if get_mime_type(content_type)[0] in unsafe_content_types:
                 # FIXME: old data is not deleted on pop call
                 req_data = memcache.pop(ip_dst, tcp_dport)
-                req_data['client_ip'] = ip_dst
-                req_data['client_port'] = str(tcp_dport)
+                if req_data != None:
+                    req_data['client_ip'] = ip_dst
+                    req_data['client_port'] = str(tcp_dport)
 
-                res_body = get_payload(packet)
-                xss_watcher.domparse(res_body, req_data, False)
+                    res_body = get_payload(packet)
+                    xss_watcher.domparse(res_body, req_data, False)
 
     return processor
 

@@ -33,8 +33,11 @@ class MemCacheClient(QueueHashmap):
     def pop(self, key, subkey):
         queue = self.get(key)
         if queue:
-            popped = queue[int(subkey)].pop()
-            return popped
+            try:
+                popped = queue[int(subkey)].pop()
+                return popped
+            except Exception as e:
+                print("[!] %s" % e)
         return None
  
     def update(self, key, subkey, add_key, add_value):
