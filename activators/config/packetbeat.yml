@@ -1,7 +1,8 @@
 packetbeat.interfaces.device: lo
 packetbeat.flows:
+  enabled: false
   timeout: 30s
-  period: 10s
+  period: -1s
 packetbeat.protocols.mysql:
   enabled: true
   ports: [3306]
@@ -16,16 +17,23 @@ packetbeat.processors:
     target: ''
     fields:
       log_type: TYPE_SQL_RESPONSE
+queue.mem:
+  events: 4096
+  flush.min_events: 0
+  flush.timeout: 0s
+# output.file:
+#   path: /var/log/mysql
+#   filename: responses.log
+#   permissions: 0755
+# output.redis:
+#   hosts: ["127.0.0.1:6379"]
+#   key: "nethive-sqlpacket"
+#   db: 0
+#   timeout: 10
 output.logstash:
-    enabled: true
-    hosts: ["34.70.42.81:5044", "127.0.0.1:5044"]
-    worker: 1
-    compression_level: 3
-    index: 'packetbeat'         
-    bulk_max_size: 2048
-output.file:
-  path: "/var/log/mysql"
-  filename: response.log
+  hosts: 127.0.0.1:5044
+# output.elasticsearch:
+#   hosts: ["127.0.0.1:5129"]
 logging.to_files: true
 logging.files:
   rotateeverybytes: 10485760

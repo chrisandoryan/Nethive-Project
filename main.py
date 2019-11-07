@@ -82,6 +82,8 @@ if __name__ == "__main__":
     slog_parser = threading.Thread(target=parsers.slog_parser.run, args=())
     bash_parser = threading.Thread(target=parsers.bash_parser.run, args=())
     sql_response_observer = threading.Thread(target=observers.sql_response.run, args=())
+    packetbeat_receiver = threading.Thread(target=parsers.packetbeat_receiver.run, args=())
+    # packetbeat_parser = threading.Thread(target=parsers.packetbeat_parser.run, args=())
     # sql_response_interceptor = threading.Thread(target=parsers.sql_response_interceptor.run, args=())
 
     # --- Begin running modules and its sensors
@@ -89,4 +91,6 @@ if __name__ == "__main__":
     slog_parser.start()
     bash_parser.start()
     sql_response_observer.start()
+    packetbeat_receiver.start()
+    # packetbeat_parser.start()
     # sql_response_interceptor.start()

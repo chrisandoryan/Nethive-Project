@@ -16,6 +16,8 @@ from utils import OutputHandler, QueueHashmap
 from storage.memcache import MemCacheClient
 from storage.mysql import MySQLClient
 
+import subprocess
+
 HTTP_LOG_PATH = os.getenv("HTTP_LOG_PATH")
 mode = None
 sql_processes = []
@@ -108,7 +110,9 @@ def process_packets():
             # print(packet[HTTPRequest].show())
             # sql_conn_observer.start()
 
-            
+            # p = subprocess.Popen(['netstat', 'tulpn'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            # out, err = p.communicate()
+            # print(out)
 
             url = get_url(packet)
             payload = get_payload(packet)
