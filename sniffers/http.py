@@ -4,17 +4,19 @@ import time
 import os
 import settings
 import json
+import uuid
+import random
 
 from processors import sql_tokenizer
-from processors import xss_watcher
 from parsers import slog_parser
 
 import observers
 
-from utils import OutputHandler, QueueHashmap
+from utils import OutputHandler, QueueHashmap, convert
 
 from storage.memcache import MemCacheClient
 from storage.mysql import MySQLClient
+from storage.redistor import RedistorClient
 
 import subprocess
 
@@ -35,6 +37,7 @@ outHand = OutputHandler().getInstance()
 # quehash = QueueHashmap() # merged into MemCacheClient
 memcache = MemCacheClient().getInstance()
 mysqlobj = MySQLClient.getInstance()
+redis = RedistorClient.getInstance()
 
 def sniff_packet(interface):
     sniff(iface=interface, store=False, prn=process_packets(), session=TCPSession)
@@ -75,12 +78,20 @@ def write_httplog(packet, buffer):
             print("[!] %s" % e)
         return    
 
-def wrap_for_auditor(packet):
+def wrap_for_redis(packet):
     package = {
         "url": get_url_unidecoded(packet),
         "body": get_payload_unidecoded(packet),
     }
-    print(package)
+    # return json.dumps(package)
+    return package
+
+def wrap_for_auditor(req_data, res_body):
+    package = {
+        "req_data": json.dumps(req_data),
+        "res_body": res_body.decode()
+    }
+    # return json.dumps(package)
     return package
 
 def get_mime_type(content_type):
@@ -125,24 +136,36 @@ def process_packets():
                 write_httplog(packet, url)
                 write_httplog(packet, payload)        
 
-            xss_watcher.inspect([url, payload])
-            memcache.set(ip_src, tcp_sport, wrap_for_auditor(packet))
+            # xss_watcher.inspect([url, payload])
+            # memcache.set(ip_src, tcp_sport, wrap_for_redis(packet))
+            redis.rsMultiInsert("{}:{}".format(ip_src, tcp_sport), wrap_for_redis(convert(packet)))
             
             # print(req_data)
-            # memc.set("structured", {"a": ("b", "c"), "a2": fractions.Fraction(1, 3)})
 
         if packet.haslayer(HTTPResponse):
             # print(packet[HTTPResponse].show())
             content_type = get_content_type(packet, HTTPResponse)
             if get_mime_type(content_type)[0] in unsafe_content_types:
-                # FIXME: old data is not deleted on pop call
-                req_data = memcache.pop(ip_dst, tcp_dport)
+                # req_data = memcache.pop(ip_dst, tcp_dport)
+                req_data = redis.rsGetAllPopOne("{}:{}".format(ip_dst, tcp_dport))
+                # print("REQ_DATA: ", req_data)
                 if req_data != None:
                     req_data['client_ip'] = ip_dst
                     req_data['client_port'] = str(tcp_dport)
-
                     res_body = get_payload(packet)
-                    xss_watcher.domparse(res_body, req_data, False)
+
+                    """ 
+                    1. store timestamp and package_id in redistimeseries
+                    2. store package for inspection in redis
+                    """
+                    package_id = random.getrandbits(48) # uuid.uuid4().int >> 8
+                    # print("PACKAGE ID:", package_id)
+                    current_timestamp = int(time.time())
+                    # print("TIMESTAMP REGISTERED - DATA INSERTED FROM HTTP: ", current_timestamp)
+                    redis.tsInsert(RedistorClient.TS_SELECT_KEY, current_timestamp, package_id)
+                    redis.rsMultiInsert("audit:{}".format(package_id), wrap_for_auditor(convert(req_data), res_body))
+
+                    # xss_watcher.domparse(res_body, req_data, False)
 
     return processor
 

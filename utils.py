@@ -75,3 +75,10 @@ def expand(x):
     while x.payload:
         x = x.payload
         yield x
+
+def convert(data):
+    if isinstance(data, bytes):  return data.decode()
+    if isinstance(data, dict):   return dict(map(convert, data.items()))
+    if isinstance(data, tuple):  return tuple(map(convert, data))
+    if isinstance(data, list):   return list(map(convert, data))
+    return data

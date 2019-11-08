@@ -50,6 +50,7 @@ def domparse(the_response, the_request, flagged_xss):
     """
         Send HTTP Response to DOM Parser to detect XSS
     """
+    # TODO: make sure decode ISO is done
     the_response = the_response.decode('ISO-8859-1')
 
     # try:

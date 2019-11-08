@@ -31,7 +31,7 @@ queue.mem:
 #   db: 0
 #   timeout: 10
 output.logstash:
-  hosts: 127.0.0.1:5044
+  hosts: 127.0.0.1:5045
 # output.elasticsearch:
 #   hosts: ["127.0.0.1:5129"]
 logging.to_files: true
