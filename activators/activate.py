@@ -180,6 +180,11 @@ def memcache():
     # write custom configuration from ./config/memcached.conf into /etc/memcached.conf
     return
 
+def redis():
+    # TODO: create activator for redis server
+    # sudo docker run -p 6379:6379 -it --rm redislabs/redistimeseries
+    return
+
 def packetbeat():
     """ 
     Setup configuration for Packetbeat, packet shipper.
