@@ -76,9 +76,9 @@ def expand(x):
         x = x.payload
         yield x
 
-def convert(data):
+def decode_deeply(data):
     if isinstance(data, bytes):  return data.decode()
-    if isinstance(data, dict):   return dict(map(convert, data.items()))
-    if isinstance(data, tuple):  return tuple(map(convert, data))
-    if isinstance(data, list):   return list(map(convert, data))
+    if isinstance(data, dict):   return dict(map(decode_deeply, data.items()))
+    if isinstance(data, tuple):  return tuple(map(decode_deeply, data))
+    if isinstance(data, list):   return list(map(decode_deeply, data))
     return data

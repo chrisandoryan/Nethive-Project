@@ -6,13 +6,14 @@ import settings
 import json
 import uuid
 import random
+import socket
 
 from processors import sql_tokenizer
 from parsers import slog_parser
 
 import observers
 
-from utils import OutputHandler, QueueHashmap, convert
+from utils import OutputHandler, QueueHashmap, decode_deeply
 
 from storage.memcache import MemCacheClient
 from storage.mysql import MySQLClient
@@ -21,8 +22,10 @@ from storage.redistor import RedistorClient
 import subprocess
 
 HTTP_LOG_PATH = os.getenv("HTTP_LOG_PATH")
-mode = None
-sql_processes = []
+AUDIT_CONTROL_HOST = '127.0.0.1'
+AUDIT_CONTROL_PORT = 5129
+
+sniff_mode = None
 
 unsafe_content_types = [
     "text/html",
@@ -103,7 +106,7 @@ def process_packets():
     # threading.Thread(target=observers.sql_connection.run, args=()).start()
 
     def processor(packet):
-        global mode, sql_processes
+        global sniff_mode, sql_processes
 
         src, dst = get_ip_port(packet)
         ip_src, tcp_sport = src
@@ -126,17 +129,17 @@ def process_packets():
             url = get_url(packet)
             payload = get_payload(packet)
 
-            if mode == "GET":
+            if sniff_mode == "GET":
                 write_httplog(packet, url)
-            elif mode == "POST":
+            elif sniff_mode == "POST":
                 write_httplog(packet, payload)
-            elif mode == "*":
+            elif sniff_mode == "*":
                 write_httplog(packet, url)
                 write_httplog(packet, payload)        
 
             # xss_watcher.inspect([url, payload])
             # memcache.set(ip_src, tcp_sport, wrap_for_redis(packet))
-            redis.rsMultiInsert("{}:{}".format(ip_src, tcp_sport), wrap_for_redis(convert(packet)))
+            redis.rs_multi_insert("{}:{}".format(ip_src, tcp_sport), wrap_for_redis(decode_deeply(packet)))
             
             # print(req_data)
 
@@ -145,22 +148,41 @@ def process_packets():
             content_type = get_content_type(packet, HTTPResponse)
             if get_mime_type(content_type)[0] in unsafe_content_types:
                 # req_data = memcache.pop(ip_dst, tcp_dport)
-                req_data = redis.rsGetAllPopOne("{}:{}".format(ip_dst, tcp_dport))
+                req_data = redis.rs_get_all_pop_one("{}:{}".format(ip_dst, tcp_dport))
                 if req_data:
                     req_data['client_ip'] = ip_dst
                     req_data['client_port'] = str(tcp_dport)
                     res_body = get_payload(packet)
 
                     """ 
-                    1. store timestamp and package_id in redistimeseries
-                    2. store package for inspection in redis
+                    Algorithm for Deep Inspection:
+                        1. store timestamp and package_id in redistimeseries
+                        2. store package for inspection in redis
+                        3. from packetbeat_receptor.py, find all ids matching the specified timestamp
+                    
+                    Algorithm for Light Inspection:
+                        1. send inspection packet to packetbeat_receptor.py with 'http' as the packet type
+
+                    Light inspection works in near realtime, while deep inspection increases accuracy since it also checks the sql response data.
                     """
-                    package_id = random.getrandbits(48) # uuid.uuid4().int >> 8
-                    # print("PACKAGE ID:", package_id)
+                    package_id = random.getrandbits(48) # generate random 48bit integer # uuid.uuid4().int >> 8
                     current_timestamp = int(time.time())
-                    # print("TIMESTAMP REGISTERED - DATA INSERTED FROM HTTP: ", current_timestamp)
-                    redis.tsInsert(RedistorClient.TS_SELECT_KEY, current_timestamp, package_id)
-                    redis.rsMultiInsert("audit:{}".format(package_id), wrap_for_auditor(convert(req_data), res_body))
+
+                    the_package = wrap_for_auditor(decode_deeply(req_data), res_body)
+
+                    # --1. Deep Inspection
+                    redis.ts_insert(RedistorClient.TS_STORE_KEY, current_timestamp, package_id)
+                    # --2. Deep Inspection
+                    redis.rs_multi_insert("audit:{}".format(package_id), the_package)
+
+                    # --1. Light Inspection
+                    the_package['type'] = 'http'
+
+                    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    s.connect((AUDIT_CONTROL_HOST, AUDIT_CONTROL_PORT))
+
+                    s.send((json.dumps(the_package) + "\n").encode())
+                    s.close()
 
                     # xss_watcher.domparse(res_body, req_data, False)
 
@@ -221,10 +243,10 @@ def get_payload(packet):
 def get_payload_unidecoded(packet):
     return get_payload(packet).decode('utf-8')
 
-""" mode: GET, POST, * """
+""" sniff_mode: GET, POST, * """
 def run(sniffMode, iface):
-    global mode, outHand
-    mode = sniffMode
+    global sniff_mode, outHand
+    sniff_mode = sniffMode
     outHand.info("[*] Starting HTTPSensor Engine...")
     sniff_packet(iface)
 

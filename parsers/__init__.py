@@ -1,8 +1,7 @@
-from . import audit_parser
+from . import depr_auditd_parser
 from . import exceptions
 from . import Slog
 from . import slog_parser
 from . import bash_parser
-from . import packetbeat_parser
-from . import packetbeat_receptor
+from . import depr_packetbeat_parser
 # from . import sql_interceptor

@@ -2,8 +2,6 @@ import socket
 import json
 import html
 from urllib.parse import unquote, unquote_plus
-# from logstash_async.handler import AsynchronousLogstashHandler
-# import logging
 import os
 import time
 
@@ -61,24 +59,17 @@ def domparse(the_package, is_flagged_xss):
     try:
         s.connect((WATCHMAN_HOST, WATCHMAN_PORT))
         s.sendall(json.dumps(the_package).encode())
-
         result = s.recv(4096)
-        
         s.close()
 
         msg = {'parsed_log': json.loads(result), 'log_type': 'TYPE_XSS_AUDITOR'}
-
         print("XSS_AUDIT_RESULT", msg)
-
+        
         ss.connect((LOGSTASH_HOST, LOGSTASH_PORT))
         ss.sendall((json.dumps(msg) + "\n").encode())
-
         ss.close()
-        # xss_logger.info(result)
-
     except Exception as e:
-        print(e)
-    
+        print("[!] %s" % e)
     return
 
 def inspect(arr_buff):
