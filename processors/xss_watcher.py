@@ -46,41 +46,29 @@ def package_transform(the_package):
                 the_package[key] = value
     return the_package
 
-def domparse(the_response, the_request, flagged_xss):
+def domparse(the_package, is_flagged_xss):
     """
         Send HTTP Response to DOM Parser to detect XSS
     """
-    # TODO: make sure decode ISO is done
-    the_response = the_response.decode('ISO-8859-1')
 
-    # try:
-    # except Exception as e:
-    #     print("[!] %s" % e)
-    #     pass
-
-    audit_package = {
-        "res_body": the_response,
-        "req_packet": the_request,
-        "time": int(time.time())
-    }
-
-    audit_package = package_transform(audit_package)
+    # print("THE_PACKAGE", the_package)
+    the_package['res_body'] = the_package['res_body'].decode('ISO-8859-1')
+    the_package = package_transform(the_package)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     ss = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
         s.connect((WATCHMAN_HOST, WATCHMAN_PORT))
-        s.sendall(json.dumps(audit_package).encode())
+        s.sendall(json.dumps(the_package).encode())
 
         result = s.recv(4096)
-        print(result)
         
         s.close()
 
         msg = {'parsed_log': json.loads(result), 'log_type': 'TYPE_XSS_AUDITOR'}
 
-        print(msg)
+        print("XSS_AUDIT_RESULT", msg)
 
         ss.connect((LOGSTASH_HOST, LOGSTASH_PORT))
         ss.sendall((json.dumps(msg) + "\n").encode())

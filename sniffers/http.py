@@ -83,15 +83,13 @@ def wrap_for_redis(packet):
         "url": get_url_unidecoded(packet),
         "body": get_payload_unidecoded(packet),
     }
-    # return json.dumps(package)
     return package
 
 def wrap_for_auditor(req_data, res_body):
     package = {
-        "req_data": json.dumps(req_data),
+        "req_packet": json.dumps(req_data),
         "res_body": res_body.decode()
     }
-    # return json.dumps(package)
     return package
 
 def get_mime_type(content_type):
@@ -148,8 +146,7 @@ def process_packets():
             if get_mime_type(content_type)[0] in unsafe_content_types:
                 # req_data = memcache.pop(ip_dst, tcp_dport)
                 req_data = redis.rsGetAllPopOne("{}:{}".format(ip_dst, tcp_dport))
-                # print("REQ_DATA: ", req_data)
-                if req_data != None:
+                if req_data:
                     req_data['client_ip'] = ip_dst
                     req_data['client_port'] = str(tcp_dport)
                     res_body = get_payload(packet)

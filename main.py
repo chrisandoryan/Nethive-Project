@@ -81,8 +81,8 @@ if __name__ == "__main__":
     http = threading.Thread(target=sniffers.http.run, args=["*", os.getenv("LISTEN_IFACE")])
     slog_parser = threading.Thread(target=parsers.slog_parser.run, args=())
     bash_parser = threading.Thread(target=parsers.bash_parser.run, args=())
-    sql_response_observer = threading.Thread(target=observers.sql_response.run, args=())
     packetbeat_receptor = threading.Thread(target=parsers.packetbeat_receptor.run, args=())
+    # sql_response_observer = threading.Thread(target=observers.sql_response.run, args=())
     # packetbeat_parser = threading.Thread(target=parsers.packetbeat_parser.run, args=())
     # sql_response_interceptor = threading.Thread(target=parsers.sql_response_interceptor.run, args=())
 
@@ -90,7 +90,7 @@ if __name__ == "__main__":
     http.start()
     slog_parser.start()
     bash_parser.start()
-    sql_response_observer.start()
     packetbeat_receptor.start()
+    # sql_response_observer.start()
     # packetbeat_parser.start()
     # sql_response_interceptor.start()

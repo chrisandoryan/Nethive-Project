@@ -250,8 +250,8 @@ func handleRequest(conn net.Conn) {
 
 	// fmt.Println(audit)
 
-	// fmt.Println(audit.ItsRequest, err)
-	// fmt.Println(audit.ItsResponse, err)
+	fmt.Println(audit.ItsRequest, err)
+	fmt.Println(audit.ItsResponse, err)
 
 	if err != nil {
 		fmt.Println("Error reading:", err.Error())
