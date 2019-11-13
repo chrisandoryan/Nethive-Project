@@ -17,13 +17,13 @@ from utils import OutputHandler, QueueHashmap, decode_deeply
 
 from storage.memcache import MemCacheClient
 from storage.mysql import MySQLClient
-from storage.redistor import RedistorClient
+from storage.redistor import RedisClient
 
 import subprocess
 
 HTTP_LOG_PATH = os.getenv("HTTP_LOG_PATH")
-AUDIT_CONTROL_HOST = '127.0.0.1'
-AUDIT_CONTROL_PORT = 5129
+AUDIT_CONTROL_HOST = os.getenv("AUDIT_CONTROL_HOST")
+AUDIT_CONTROL_PORT = int(os.getenv("AUDIT_CONTROL_PORT"))
 
 sniff_mode = None
 
@@ -40,7 +40,7 @@ outHand = OutputHandler().getInstance()
 # quehash = QueueHashmap() # merged into MemCacheClient
 memcache = MemCacheClient().getInstance()
 mysqlobj = MySQLClient.getInstance()
-redis = RedistorClient.getInstance()
+redis = RedisClient.getInstance()
 
 def sniff_packet(interface):
     sniff(iface=interface, store=False, prn=process_packets(), session=TCPSession)
@@ -95,6 +95,12 @@ def wrap_for_auditor(req_data, res_body):
     }
     return package
 
+def relay_to_audit_control(the_package):
+    tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    tcp_socket.connect((AUDIT_CONTROL_HOST, AUDIT_CONTROL_PORT))
+    tcp_socket.send((json.dumps(the_package) + "\n").encode())
+    tcp_socket.close()
+
 def get_mime_type(content_type):
     if content_type is None:
         return ['', '']
@@ -106,7 +112,7 @@ def process_packets():
     # threading.Thread(target=observers.sql_connection.run, args=()).start()
 
     def processor(packet):
-        global sniff_mode, sql_processes
+        global sniff_mode
 
         src, dst = get_ip_port(packet)
         ip_src, tcp_sport = src
@@ -171,18 +177,13 @@ def process_packets():
                     the_package = wrap_for_auditor(decode_deeply(req_data), res_body)
 
                     # --1. Deep Inspection
-                    redis.ts_insert(RedistorClient.TS_STORE_KEY, current_timestamp, package_id)
+                    redis.ts_insert(RedisClient.TS_STORE_KEY, current_timestamp, package_id)
                     # --2. Deep Inspection
                     redis.rs_multi_insert("audit:{}".format(package_id), the_package)
 
                     # --1. Light Inspection
                     the_package['type'] = 'http'
-
-                    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    s.connect((AUDIT_CONTROL_HOST, AUDIT_CONTROL_PORT))
-
-                    s.send((json.dumps(the_package) + "\n").encode())
-                    s.close()
+                    relay_to_audit_control(the_package)
 
                     # xss_watcher.domparse(res_body, req_data, False)
 

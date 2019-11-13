@@ -4,20 +4,20 @@ from collections import defaultdict
 from utils import QueueHashmap
 import json
 
-class RedistorClient:
+class RedisClient:
     """Constants"""
     TS_STORE_KEY = "nethive"
     __instance = None
     @staticmethod
     def getInstance():
         """ Static access method. """
-        if RedistorClient.__instance == None:
-            RedistorClient()
-        return RedistorClient.__instance
+        if RedisClient.__instance == None:
+            RedisClient()
+        return RedisClient.__instance
     def __init__(self):
         """ Virtually private constructor. """
-        if RedistorClient.__instance != None:
-            print("RedistorClient is a singleton!")
+        if RedisClient.__instance != None:
+            print("RedisClient is a singleton!")
         else:
             self.__ts_client = Client() # timeseries redis client
             self.__redis_client = redis.Redis() # general redis client
@@ -25,7 +25,7 @@ class RedistorClient:
                 self.__ts_client.create(self.TS_STORE_KEY)
             except Exception as e:
                 pass
-            RedistorClient.__instance = self
+            RedisClient.__instance = self
     def ts_insert(self, key, timestamp, value):
         return self.__ts_client.add(key, timestamp, value)
     def rs_multi_insert(self, key_ns, value):

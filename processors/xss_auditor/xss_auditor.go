@@ -11,9 +11,10 @@ import (
 )
 
 const (
-	connHost = "127.0.0.1"
-	connPort = "5127"
-	connType = "tcp"
+	// connHost = "127.0.0.1"
+	// connPort = "5127"
+	connType = "unix"
+	sockPath = "/tmp/xss_auditor.sock"
 )
 
 const (
@@ -82,14 +83,14 @@ var extContentAttrList = []string{"src", "code", "data", "content", "href"}
 
 func main() {
 	// Listen for incoming connections.
-	l, err := net.Listen(connType, connHost+":"+connPort)
+	l, err := net.Listen(connType, sockPath)
 	if err != nil {
 		fmt.Println("Error listening:", err.Error())
 		os.Exit(1)
 	}
 	// Close the listener when the application closes.
 	defer l.Close()
-	fmt.Println("[XSS_Auditor] Listening on " + connHost + ":" + connPort)
+	fmt.Println("[XSS_Auditor] Listening on " + sockPath)
 
 	for {
 		// Listen for an incoming connection.

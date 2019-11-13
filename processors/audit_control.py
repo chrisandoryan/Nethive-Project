@@ -1,23 +1,24 @@
 import socket
 import threading
 import json
-from storage.redistor import RedistorClient
+from storage.redistor import RedisClient
 from dateutil.parser import parse
 import traceback
 import time
+import os
 from utils import decode_deeply
 from processors import xss_watcher
 
 # import signal
 
-bind_ip = '127.0.0.1'
-bind_port = 5129
+AUDIT_CONTROL_HOST = os.getenv("AUDIT_CONTROL_HOST")
+AUDIT_CONTROL_PORT = int(os.getenv("AUDIT_CONTROL_PORT"))
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((bind_ip, bind_port))
+server.bind((AUDIT_CONTROL_HOST, AUDIT_CONTROL_PORT))
 server.listen(5)
 
-redis = RedistorClient.getInstance()
+redis = RedisClient.getInstance()
 
 def keyboardInterruptHandler(signal, frame):
     server.close()
@@ -122,7 +123,7 @@ def handle_client_connection(client_socket):
         try:
             lower_boundary = int(int(time.time()) - get_flow_time_average())
             upper_boundary = int(int(time.time()) + get_flow_time_average())
-            package_identifiers = redis.ts_get_by_range(RedistorClient.TS_STORE_KEY, lower_boundary, upper_boundary)
+            package_identifiers = redis.ts_get_by_range(RedisClient.TS_STORE_KEY, lower_boundary, upper_boundary)
 
             beat_data = json.loads(request.decode("utf-8"))
 
@@ -156,5 +157,5 @@ def start():
     server.close()
 
 def run():
-    print('[Audit Control] Listening on {}:{}'.format(bind_ip, bind_port))
+    print('[Audit Control] Listening on {}:{}'.format(AUDIT_CONTROL_HOST, AUDIT_CONTROL_PORT))
     start()

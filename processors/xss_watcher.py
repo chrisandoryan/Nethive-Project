@@ -4,6 +4,7 @@ import html
 from urllib.parse import unquote, unquote_plus
 import os
 import time
+import traceback
 
 # Matching Algorithm. 
 # Before searching for scripts in the
@@ -22,12 +23,33 @@ import time
 WATCHMAN_HOST = '127.0.0.1'
 WATCHMAN_PORT = 5127
 
+XSS_WATCHMAN_SOCKET = os.getenv("XSS_WATCHMAN_SOCKET")
+
+
 LOGSTASH_HOST = os.getenv('LOGSTASH_HOST')
 LOGSTASH_PORT = int(os.getenv('LOGSTASH_PORT'))
 
 # xss_logger = logging.getLogger('xss_audit_logger')
 # xss_logger.setLevel(logging.INFO)
 # xss_logger.addHandler(AsynchronousLogstashHandler(LOGSTASH_HOST, LOGSTASH_PORT, database_path='xss_audit_log.db'))
+
+def send_to_logstash(message):
+    tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    tcp_socket.connect((LOGSTASH_HOST, LOGSTASH_PORT))
+    tcp_socket.sendall((json.dumps(message) + "\n").encode())
+    tcp_socket.close()
+    return
+
+def send_to_watchman(the_package):
+    if os.path.exists(XSS_WATCHMAN_SOCKET):
+        unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        unix_socket.connect(XSS_WATCHMAN_SOCKET)
+        unix_socket.sendall(json.dumps(the_package).encode())
+        result = unix_socket.recv(4096)
+        unix_socket.close()
+        return result
+    else:
+        print("[XSS_Watcher] No socket file on %s" % XSS_WATCHMAN_SOCKET)
 
 def package_transform(the_package):
     for key, value in the_package.items():
@@ -53,23 +75,15 @@ def domparse(the_package, is_flagged_xss):
     the_package['res_body'] = the_package['res_body'].decode('ISO-8859-1')
     the_package = package_transform(the_package)
 
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    ss = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
     try:
-        s.connect((WATCHMAN_HOST, WATCHMAN_PORT))
-        s.sendall(json.dumps(the_package).encode())
-        result = s.recv(4096)
-        s.close()
+        result = send_to_watchman(the_package)
 
-        msg = {'parsed_log': json.loads(result), 'log_type': 'TYPE_XSS_AUDITOR'}
-        print("XSS_AUDIT_RESULT", msg)
-        
-        ss.connect((LOGSTASH_HOST, LOGSTASH_PORT))
-        ss.sendall((json.dumps(msg) + "\n").encode())
-        ss.close()
+        message = {'parsed_log': json.loads(result), 'log_type': 'TYPE_XSS_AUDITOR'}
+        print("XSS_AUDIT_RESULT", message)
+        send_to_logstash(message)
+
     except Exception as e:
-        print("[!] %s" % e)
+        print(traceback.format_exc())
     return
 
 def inspect(arr_buff):
