@@ -4,21 +4,21 @@ auditbeat.modules:
   include_raw_message: false
   include_warnings: false
   audit_rule_files: [ '/etc/auditbeat/audit.rules.d/*.rules' ]
-- module: system
-  datasets:
-    - host    # General host information, e.g. uptime, IPs
-    - login   # User logins, logouts, and system boots.
-    - package # Installed, updated, and removed packages
-    - process # Started and stopped processes
-    - socket  # Opened and closed sockets
-    - user    # User information
-  # How often datasets send state updates with the
-  # current state of the system (e.g. all currently
-  # running processes, all open sockets).
-  state.period: 12h
-  user.detect_password_changes: true
-  login.wtmp_file_pattern: /var/log/wtmp*
-  login.btmp_file_pattern: /var/log/btmp*
+# - module: system
+#   datasets:
+#     - host    # General host information, e.g. uptime, IPs
+#     - login   # User logins, logouts, and system boots.
+#     - package # Installed, updated, and removed packages
+#     - process # Started and stopped processes
+#     - socket  # Opened and closed sockets
+#     - user    # User information
+#   # How often datasets send state updates with the
+#   # current state of the system (e.g. all currently
+#   # running processes, all open sockets).
+#   state.period: 12h
+#   user.detect_password_changes: true
+#   login.wtmp_file_pattern: /var/log/wtmp*
+#   login.btmp_file_pattern: /var/log/btmp*
 output:
   logstash:
     enabled: true

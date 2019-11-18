@@ -103,7 +103,7 @@
 -w /etc/security/opasswd -k opasswd
 
 ## Sudoers file changes
--w /etc/sudoers -p wa -k actions
+-w /etc/sudoers -p wa -k sudoers_modification
 
 ## Passwd
 -w /usr/bin/passwd -p x -k passwd_modification
@@ -125,8 +125,8 @@
 
 ## Network Environment
 ### Changes to hostname
--a always,exit -F arch=b32 -S sethostname -S setdomainname -k network_modifications
--a always,exit -F arch=b64 -S sethostname -S setdomainname -k network_modifications
+-a always,exit -F arch=b32 -S sethostname -S setdomainname -k hostname_change
+-a always,exit -F arch=b64 -S sethostname -S setdomainname -k hostname_change
 ### Changes to other files
 -w /etc/hosts -p wa -k network_modifications
 -w /etc/sysconfig/network -p wa -k network_modifications
