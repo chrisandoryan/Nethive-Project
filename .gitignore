@@ -1,2 +1,2 @@
 activators/config/auditbeat.reference.yml
-**/rls/*
+**/threlk_engine/target/*
