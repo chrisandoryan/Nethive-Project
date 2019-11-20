@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate crossbeam;
+use crossbeam::channel;
 
 extern crate elastic;
 #[macro_use]
@@ -9,97 +10,74 @@ extern crate elastic_derive;
 extern crate serde_derive;
 extern crate serde;
 
-use std::error::Error;
-use base64::{encode, decode};
+extern crate kafka;
 
-#[derive(Debug, Serialize, Deserialize, ElasticType)]
-struct MyType {
-    name: String
-}
+use std::time::Duration;
+use std::thread;
+use threadpool::ThreadPool;
 
-fn main() -> Result<(), Box<dyn Error>>{
-    use elastic::http::header::{self, AUTHORIZATION, HeaderValue};
-    use elastic::client::SyncClientBuilder;
-    use serde_json::json;
+mod es;
+mod processor;
 
-    let creds = base64::encode("elastic:changeme");
-    let auth = HeaderValue::from_str(&format!("Basic {}", creds))?;
+use kafka::producer::{Producer, Record, RequiredAcks};
+use serde_json::{Value, json, to_vec};
+use processor::MyType;
 
-    println!("{:?}", auth);
+const KAFKA_SERVER_ADDR: &str = "192.168.56.104:9092";
+const TOPIC: &str = "SIEM";
 
-    let builder = SyncClientBuilder::new()
-        .static_node("http://192.168.56.104:9200")
-        .params_fluent(move |p| p
-            .url_param("pretty", true)
-            .header(AUTHORIZATION, auth.clone()));
-
-    let client = builder.build()?;
-    
-    println!("sending request");
-
-    let query = "Jean Doe";
-
-    let response = client.search::<MyType>()
-                     .index("customer")
-                     .body(json!({
-                         "query": {
-                             "query_string": {
-                                 "query": query
-                             }
-                         }
-                     }))
-                     .send()?;
-
-    for hit in response.hits() {
-        println!("{:?}", hit);
-    }
-
-    Ok(())
-}
-
-#[test]
-fn test_chan_timer() {
-    use std::time::Duration;
-
-    println!("Hello, timer");
-
+fn main() {
+    let (s_raw, r_raw) = channel::unbounded();
+    let (s, r) = channel::unbounded();
     let tick = crossbeam::tick(Duration::from_millis(1000));
-    let tock = crossbeam::tick(Duration::from_millis(3000));
+    let tpool = ThreadPool::new(4);
 
-    
+    let t0 = thread::spawn(move || {
+        loop {
+            tick.recv().unwrap();
+            let resp = es::fetch_data::<MyType>(String::from("customer"), json!({
+                "query": {
+                    "query_string": {
+                        "query": "joan doe"
+                    }
+                }
+            }));
 
-    loop {
-        select! {
-            recv(tick) -> _ => sleep_print("tick"),
-            recv(tock) -> _ => sleep_print("tock")
+            for hit in resp.hits() {
+                let doc = hit.document().unwrap().clone();
+                s_raw.send(doc).unwrap();
+            }
         }
-    }
-}
+    });
 
-fn sleep_print(s: &str) {
-    use std::time::Duration;
-    use std::{thread, time};
 
-    thread::sleep(Duration::from_millis(5000));
-    println!("{}", s);
-}
+    let t1 = thread::spawn(move || {
+        loop {
+            let data = r_raw.recv().unwrap();
 
-#[test]
-fn test_threadpool() {
-    use threadpool::ThreadPool;
-    use std::time::Duration;
-    use std::thread::sleep;
-
-    let tick = crossbeam::tick(Duration::from_millis(1000));
-    let tock = crossbeam::tick(Duration::from_millis(3000));
-
-    let pool = ThreadPool::new(10);
-    loop {
-        select! {
-            recv(tick) -> _ => pool.execute(|| sleep_print("tick")),
-            recv(tock) -> _ => pool.execute(|| sleep_print("tock"))
+            let ss = s.clone();
+            tpool.execute(move || {
+                let output = processor::example(data);
+                ss.send(output).unwrap();
+            });
         }
-    }
+    });
 
-    //sleep(Duration::from_secs(1)); // wait for threads to start
+    let t2 = thread::spawn(move || {
+        let mut producer = Producer::from_hosts(vec!(String::from(KAFKA_SERVER_ADDR)))
+            .with_ack_timeout(Duration::from_secs(1))
+            .with_required_acks(RequiredAcks::One)
+            .create()
+            .unwrap();
+
+        loop {
+            let data = r.recv().unwrap();
+
+            producer.send(&Record::from_value(TOPIC, serde_json::to_vec(&data).unwrap())).unwrap();
+        }
+    });
+
+    t0.join().unwrap();
+    t1.join().unwrap();
+    t2.join().unwrap();
 }
