@@ -24,12 +24,25 @@ SQL_RESPONSE_LOG_PATH = os.getenv("SQL_RESPONSE_LOG_PATH")
 outHand = OutputHandler().getInstance()
 
 # --- Helper methods
+def backupOriginalConf(original):
+    if not os.path.exists(original + ".original"):
+        os.rename(original, original + ".original")
 
 def replConfigFile(original, modified):
     # For ELK Configuration, DO NOT COPY/CREATE BACKUP inside same directory!
-    if not os.path.exists(original + ".original"):
-        os.rename(original, original + ".original")
+    backupOriginalConf(original)
     shutil.copy(modified, original)    
+
+def copyTemplateFile(original, modified):
+    # For ELK Configuration, backup original config file
+    # then substitute in modified config file and place it in the original directory
+    backupOriginalConf(original)
+    with open(modified, 'r') as r:
+        t = Template(r.read())
+        new_conf = t.safe_substitute(LOGSTASH_HOST=os.getenv("LOGSTASH_HOST"))
+
+        with open(original, 'w') as w:
+            w.write(new_conf)
 
 def bufferOutput(process):
     while True:
@@ -66,7 +79,7 @@ def filebeat():
         - filebeat.yml
         - filebeat service restart
     """
-    replConfigFile(FILEBEAT_CONFIG_PATH, "./activators/config/filebeat.yml")
+    copyTemplateFile(FILEBEAT_CONFIG_PATH, "./activators/config/filebeat.yml")
     # os.rename(FILEBEAT_CONFIG_PATH, FILEBEAT_CONFIG_PATH + ".original")
     # shutil.copy("./activators/config/filebeat.yml", FILEBEAT_CONFIG_PATH)
     subprocess.call(['service', 'filebeat', 'restart'])
@@ -79,7 +92,7 @@ def auditbeat():
         - auditbeat.yml
         - auditbeat service restart
     """
-    replConfigFile(AUDITBEAT_CONFIG_PATH, "./activators/config/auditbeat.yml")
+    copyTemplateFile(AUDITBEAT_CONFIG_PATH, "./activators/config/auditbeat.yml")
     shutil.copy("./activators/config/auditbeat.rules", AUDITBEAT_RULES_PATH)
 
     subprocess.call(['service', 'auditbeat', 'restart'])

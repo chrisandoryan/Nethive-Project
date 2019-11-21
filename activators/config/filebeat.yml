@@ -38,7 +38,7 @@ filebeat:
 output:
   logstash:
     hosts:
-      - '34.70.42.81:5044'
+      - '$LOGSTASH_HOST:5044'
       - '127.0.0.1:5044'
     worker: 1
     bulk_max_size: 2048
