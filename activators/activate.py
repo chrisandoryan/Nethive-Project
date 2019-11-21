@@ -105,8 +105,8 @@ def logstash():
         - logstash.conf
         - docker-elk reload and restart
     """
-    LOGSTASH_CONFIG_PATH = DOCKER_ELK_REPO_PATH + '/logstash/pipeline/logstash.conf'
-    LOGSTASH_DOCKERFILE_PATH = DOCKER_ELK_REPO_PATH + '/logstash/Dockerfile'
+    LOGSTASH_CONFIG_PATH = DOCKER_ELK_REPO_PATH + 'logstash/pipeline/logstash.conf'
+    LOGSTASH_DOCKERFILE_PATH = DOCKER_ELK_REPO_PATH + 'logstash/Dockerfile'
 
     replConfigFile(LOGSTASH_CONFIG_PATH, "./activators/config/logstash.conf")
     # os.rename(LOGSTASH_CONFIG_PATH, LOGSTASH_CONFIG_PATH + ".original")
@@ -176,15 +176,15 @@ def bash():
 
 def dirs():
     if not os.path.exists(AUDIT_LOG_PATH):
-        os.makedirs(os.path.dirname(AUDIT_LOG_PATH))
+        os.makedirs(os.path.dirname(AUDIT_LOG_PATH), exist_ok=True)
     if not os.path.exists(MSQL_SLOW_QUERY_LOG_PATH):    
-        os.makedirs(os.path.dirname(MSQL_SLOW_QUERY_LOG_PATH))
+        os.makedirs(os.path.dirname(MSQL_SLOW_QUERY_LOG_PATH), exist_ok=True)
     if not os.path.exists(SQL_RESPONSE_LOG_PATH):    
-        os.makedirs(os.path.dirname(SQL_RESPONSE_LOG_PATH))
+        os.makedirs(os.path.dirname(SQL_RESPONSE_LOG_PATH), exist_ok=True)
     if not os.path.exists(HTTP_LOG_PATH):
-        os.makedirs(os.path.dirname(HTTP_LOG_PATH))
+        os.makedirs(os.path.dirname(HTTP_LOG_PATH), exist_ok=True)
     if not os.path.exists(CENTRALIZED_BASH_HISTORY_PATH):
-        os.makedirs(os.path.dirname(CENTRALIZED_BASH_HISTORY_PATH))
+        os.makedirs(os.path.dirname(CENTRALIZED_BASH_HISTORY_PATH), exist_ok=True)
 
 def memcache():
     # TODO: setup memcache configuration
@@ -216,9 +216,9 @@ def elk():
     # os.rename(DOCKER_ELK_COMPOSE_PATH, DOCKER_ELK_COMPOSE_PATH + ".original")
     # shutil.copy("./activators/config/docker-compose.yml", DOCKER_ELK_COMPOSE_PATH)
 
-    # outHand.info("[*] Starting ELKStack...")
-    # elkstack = subprocess.Popen(['/bin/bash', './activators/elkstack.sh'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    # bufferOutput(elkstack)
+    outHand.info("[*] Starting ELKStack...")
+    elkstack = subprocess.Popen(['/bin/bash', './activators/elkstack.sh'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    bufferOutput(elkstack)
 
 def configs():
     outHand.info("[*] Initiating dependency manager...")

@@ -4,6 +4,6 @@ else
   # envvar set
   cd ${DOCKER_ELK_REPO_PATH}
   sudo docker-compose down -v
-  sudo docker-compose build
+  # sudo docker-compose build
   sudo docker-compose up
 fi
