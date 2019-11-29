@@ -46,8 +46,8 @@ def copyTemplateFile(original, modified):
 
 def bufferOutput(process):
     while True:
-        out = process.stdout.readline()
-        outHand.info(out.decode("utf-8"))
+        out = process.stdout.readline().decode("utf-8")
+        outHand.info(out)
         print(out)
         if not out: break
 

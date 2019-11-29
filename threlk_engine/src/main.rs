@@ -10,6 +10,9 @@ extern crate elastic_derive;
 extern crate serde_derive;
 extern crate serde;
 
+#[macro_use] 
+extern crate log;
+
 extern crate kafka;
 
 use std::time::Duration;
@@ -27,6 +30,8 @@ const KAFKA_SERVER_ADDR: &str = "192.168.56.104:9092";
 const TOPIC: &str = "SIEM";
 
 fn main() {
+    env_logger::init();
+
     let (s_raw, r_raw) = channel::unbounded();
     let (s, r) = channel::unbounded();
     let tick = crossbeam::tick(Duration::from_millis(1000));
@@ -49,7 +54,7 @@ fn main() {
             }
         }
     });
-
+    info!("es data input thread started");
 
     let t1 = thread::spawn(move || {
         loop {
@@ -62,6 +67,7 @@ fn main() {
             });
         }
     });
+    info!("correlation thread pool started");
 
     let t2 = thread::spawn(move || {
         let mut producer = Producer::from_hosts(vec!(String::from(KAFKA_SERVER_ADDR)))
@@ -76,6 +82,7 @@ fn main() {
             producer.send(&Record::from_value(TOPIC, serde_json::to_vec(&data).unwrap())).unwrap();
         }
     });
+    info!("kafka producer thread started");
 
     t0.join().unwrap();
     t1.join().unwrap();

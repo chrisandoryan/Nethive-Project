@@ -1,2 +1,3 @@
 activators/config/auditbeat.reference.yml
 **/threlk_engine/target/*
+**/__pycache__/*

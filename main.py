@@ -69,6 +69,7 @@ if __name__ == "__main__":
     activate.packetbeat()
     activate.logstash()
     activate.elk()
+    activate.dirs()
 
     # --- UI Management
     curses.wrapper(panMan)
