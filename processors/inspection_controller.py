@@ -87,7 +87,7 @@ def add_sql_to_inspection_package(package, raw_inspection_data):
 
 def get_flow_time_average():
     # TODO: write an algorithm to calculate time between http and sql dynamically
-    return 0.0
+    return 1.0
 
 def normalize_json_quote_problem(the_data):
     """
@@ -135,6 +135,7 @@ def handle_client_connection(client_socket):
             http_bundles = redis.ts_get_http_bundles(lower_boundary, upper_boundary)
             # package_identifiers = redis.ts_get_by_range(RedisClient.TS_STORE_KEY, lower_boundary, upper_boundary)
             # print(package_identifiers.__dict__)
+            print("DATA TO CHECK: ", len(http_bundles))
 
             raw_inspection_data = json.loads(request.decode("utf-8"))
 
@@ -149,8 +150,9 @@ def handle_client_connection(client_socket):
                         # xss_watcher.domparse(deep_package, False) # inspect request data ALONG WITH sql response
 
                         # delete the data to prevent rechecking
-                        # x = redis.ts_expire_http_bundle(redis_key)
-                        # print("X", x)
+                        delete_status = redis.ts_expire_http_bundle(redis_key)
+                        if delete_status:
+                            print("Bundle {} Deleted!".format(redis_key))
 
             elif raw_inspection_data['type'] == 'http':
                 light_package = restructure_for_auditor(raw_inspection_data['package'])

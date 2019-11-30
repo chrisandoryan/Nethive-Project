@@ -29,9 +29,9 @@ class RedisClient:
 
     # Timeseries Query
 
-    def ts_insert_http_bundle(self, key, timestamp, value, label):
-        self.__ts_client.create(key)
-        return self.__ts_client.add(key, timestamp, value, retention_msecs=1, labels=label)
+    def ts_insert_http_bundle(self, store_key, package_id, timestamp, value, label):
+        self.__ts_client.create(store_key)
+        return self.__ts_client.add(package_id, timestamp, value, labels=label)
 
     def ts_get_http_bundles(self, start_time, end_time):
         return self.__ts_client.mrange(start_time, end_time, filters=['type=http'])
@@ -40,7 +40,7 @@ class RedisClient:
         # id = self.__ts_client.range(key, start_time, end_time)
     
     def ts_expire_http_bundle(self, key):
-        print(key)
+        key = "{}:{}".format(self.TS_STORE_KEY, key)
         return self.__ts_client.delete(key)
 
     # End of Timeseries Query    

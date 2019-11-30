@@ -215,7 +215,7 @@ def process_packets():
                     # print("DEEP BUNDLE", deep_bundle)
                     
                     # --1. Deep Inspection
-                    insert_status = redis.ts_insert_http_bundle(redis_store_key, current_timestamp, package_id, deep_bundle)
+                    insert_status = redis.ts_insert_http_bundle(redis_store_key, package_id, current_timestamp, package_id, deep_bundle)
 
                     # redis.ts_get_http_bundles(current_timestamp - 10, current_timestamp + 10)
 

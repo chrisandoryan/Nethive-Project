@@ -41,7 +41,7 @@ def transform_for_sqli_model(package):
 def inspect(inspection_package):
     batch = transform_for_sqli_model(inspection_package)
     if batch:
-        print(batch)
+        print("BATCH", batch)
         return predict(batch)
 
 
@@ -50,5 +50,5 @@ def teach(learning_package):
     return
 
 def predict(inspection_package):
-    
+
     return
