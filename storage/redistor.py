@@ -39,8 +39,9 @@ class RedisClient:
         # return self.__ts_client.mrange(start_time, end_time)
         # id = self.__ts_client.range(key, start_time, end_time)
     
-    def ts_expire_http_bundle(self, key):
-        key = "{}:{}".format(self.TS_STORE_KEY, key)
+    def ts_expire_http_bundle(self, package_id):
+        self.__ts_client.alter(package_id, labels={"type":"expired"})
+        key = "{}:{}".format(self.TS_STORE_KEY, package_id)
         return self.__ts_client.delete(key)
 
     # End of Timeseries Query    
