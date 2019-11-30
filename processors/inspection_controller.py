@@ -87,7 +87,7 @@ def add_sql_to_inspection_package(package, raw_inspection_data):
 
 def get_flow_time_average():
     # TODO: write an algorithm to calculate time between http and sql dynamically
-    return 1.0
+    return 0.0
 
 def normalize_json_quote_problem(the_data):
     """
@@ -143,19 +143,18 @@ def handle_client_connection(client_socket):
                 if raw_inspection_data:
                     for bundle in http_bundles:
                         redis_key, bundle_packed = unwrap_http_bundle(bundle)
-                        print("BUNDLE_PACKED", bundle_packed)
                         deep_package = add_sql_to_inspection_package(decode_deeply(bundle_packed), raw_inspection_data)
 
-                        # sql_inspector.inspect(deep_package) # inspect request to find sqli
+                        sql_inspector.inspect(deep_package) # inspect request to find sqli
+                        # xss_watcher.domparse(deep_package, False) # inspect request data ALONG WITH sql response
 
-                        xss_watcher.domparse(deep_package, False) # inspect request data ALONG WITH sql response
-
-                        # for package in find_related_redis_data(package_identifiers):
-                        #     package = add_sql_to_inspection_package(decode_deeply(package), raw_inspection_data)
+                        # delete the data to prevent rechecking
+                        # x = redis.ts_expire_http_bundle(redis_key)
+                        # print("X", x)
 
             elif raw_inspection_data['type'] == 'http':
                 light_package = restructure_for_auditor(raw_inspection_data['package'])
-                xss_watcher.domparse(light_package, False) # inspect request data WITHOUT sql response
+                # xss_watcher.domparse(light_package, False) # inspect request data WITHOUT sql response
                 
         except Exception as e:
             print(traceback.format_exc())
@@ -167,7 +166,7 @@ def start():
 
     while True:
         client_sock, address = server.accept()
-        print('[Audit Control] Accepted connection from {}:{}'.format(address[0], address[1]))
+        print('[Inspection Controller] Accepted connection from {}:{}'.format(address[0], address[1]))
         client_handler = threading.Thread(
             target=handle_client_connection,
             args=(client_sock,)

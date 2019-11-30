@@ -21,21 +21,27 @@ class RedisClient:
         else:
             self.__ts_client = Client() # timeseries redis client
             self.__redis_client = redis.Redis() # general redis client
-            try:
-                self.__ts_client.create(self.TS_STORE_KEY)
-            except Exception as e:
-                pass
+            # try:
+            #     self.__ts_client.create(self.TS_STORE_KEY)
+            # except Exception as e:
+            #     pass
             RedisClient.__instance = self
 
     # Timeseries Query
 
     def ts_insert_http_bundle(self, key, timestamp, value, label):
-        return self.__ts_client.add(key, timestamp, value, labels=label)
+        self.__ts_client.create(key)
+        return self.__ts_client.add(key, timestamp, value, retention_msecs=1, labels=label)
+
     def ts_get_http_bundles(self, start_time, end_time):
         return self.__ts_client.mrange(start_time, end_time, filters=['type=http'])
         # return self.__ts_client.info(key)
         # return self.__ts_client.mrange(start_time, end_time)
         # id = self.__ts_client.range(key, start_time, end_time)
+    
+    def ts_expire_http_bundle(self, key):
+        print(key)
+        return self.__ts_client.delete(key)
 
     # End of Timeseries Query    
 

@@ -75,7 +75,7 @@ def domparse(the_package, is_flagged_xss):
     # print("THE_PACKAGE", the_package)
     the_package['res_body'] = the_package['res_body'].decode('ISO-8859-1')
     the_package = package_transform(the_package)
-    print("THE PACKAGE", the_package)
+    # print("THE PACKAGE", the_package)
 
     try:
         result = send_to_watchman(the_package)

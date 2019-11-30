@@ -101,7 +101,7 @@ def pack_request_for_inspection(packet, sql_tokenize_result):
     return package
 
 def wrap_bundle_for_redis(package):
-    print("WRAP FOR REDIS", package)
+    # print("WRAP FOR REDIS", package)
     packed = {
         "type": "http",
         "package": base64.encodestring(package.encode("utf-8"))
@@ -113,7 +113,7 @@ def create_inspection_bundle(req_data, res_body):
         "req_packet": req_data, #json.dumps(req_data),
         "res_body": res_body.decode()
     }
-    print("CREATEINSPECTIONBUNDLE", inspection_bundle)
+    # print("CREATEINSPECTIONBUNDLE", inspection_bundle)
     return inspection_bundle
 
 def wrap_bundle_for_auditor(package):
@@ -172,7 +172,7 @@ def process_packets():
             elif sniff_mode == "*":
                 tokenized = sql_tokenize_request(packet, url) + sql_tokenize_request(packet, payload)        
 
-            print("TOKENIZED!!!!!", tokenized)
+            # print("TOKENIZED!!!!!", tokenized)
 
             # xss_watcher.inspect([url, payload])
             # memcache.set(ip_src, tcp_sport, pack_request_for_inspection(packet))
@@ -187,7 +187,7 @@ def process_packets():
                 # req_data = memcache.pop(ip_dst, tcp_dport)
                 req_data = redis.get_http_request("{}:{}".format(ip_dst, tcp_dport))
                 if req_data:
-                    print("REQ DATA", req_data)
+                    # print("REQ DATA", req_data)
                     req_data['client_ip'] = ip_dst
                     req_data['client_port'] = str(tcp_dport)
                     res_body = get_payload(packet)
@@ -212,7 +212,7 @@ def process_packets():
 
                     redis_store_key = "{}:{}".format(RedisClient.TS_STORE_KEY, package_id)
                     deep_bundle = wrap_bundle_for_redis(json.dumps(the_package))
-                    print("DEEP BUNDLE", deep_bundle)
+                    # print("DEEP BUNDLE", deep_bundle)
                     
                     # --1. Deep Inspection
                     insert_status = redis.ts_insert_http_bundle(redis_store_key, current_timestamp, package_id, deep_bundle)
