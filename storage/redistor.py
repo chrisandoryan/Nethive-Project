@@ -26,15 +26,28 @@ class RedisClient:
             except Exception as e:
                 pass
             RedisClient.__instance = self
-    def ts_insert(self, key, timestamp, value):
-        return self.__ts_client.add(key, timestamp, value)
+
+    # Timeseries Query
+
+    def ts_insert_http_bundle(self, key, timestamp, value, label):
+        return self.__ts_client.add(key, timestamp, value, labels=label)
+    def ts_get_http_bundles(self, start_time, end_time):
+        return self.__ts_client.mrange(start_time, end_time, filters=['type=http'])
+        # return self.__ts_client.info(key)
+        # return self.__ts_client.mrange(start_time, end_time)
+        # id = self.__ts_client.range(key, start_time, end_time)
+
+    # End of Timeseries Query    
+
+    # Redis Query
+
     def rs_multi_insert(self, key_ns, value):
         return self.__redis_client.hmset(key_ns, value)
-    def ts_get_by_range(self, key, start_time, end_time):
-        return self.__ts_client.range(key, start_time, end_time)
     def rs_get_all_pop_one(self, key):
         from_redis = self.__redis_client.hgetall(key)
         self.__redis_client.delete(key)
         return from_redis
+
+    # End of Redis Query
 
     

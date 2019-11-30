@@ -7,6 +7,7 @@ import json
 import uuid
 import random
 import socket
+import base64
 
 from processors import sql_tokenizer
 from parsers import slog_parser
@@ -81,16 +82,23 @@ def write_httplog(packet, buffer):
             print("[!] %s" % e)
         return    
 
-def wrap_for_redis(packet):
+def wrap_request_for_redis(packet):
     package = {
         "url": get_url_unidecoded(packet),
         "body": get_payload_unidecoded(packet),
     }
     return package
 
+def wrap_bundle_for_redis(package):
+    packed = {
+        "type": "http",
+        "package": base64.encodestring(package.encode("utf-8"))
+    }
+    return packed
+
 def wrap_for_auditor(req_data, res_body):
     package = {
-        "req_packet": json.dumps(req_data),
+        "req_packet": req_data, #json.dumps(req_data),
         "res_body": res_body.decode()
     }
     return package
@@ -98,7 +106,7 @@ def wrap_for_auditor(req_data, res_body):
 def relay_to_audit_control(the_package):
     tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     tcp_socket.connect((AUDIT_CONTROL_HOST, AUDIT_CONTROL_PORT))
-    tcp_socket.send((json.dumps(the_package) + "\n").encode())
+    tcp_socket.send(the_package + "\n").encode()
     tcp_socket.close()
 
 def get_mime_type(content_type):
@@ -144,8 +152,8 @@ def process_packets():
                 write_httplog(packet, payload)        
 
             # xss_watcher.inspect([url, payload])
-            # memcache.set(ip_src, tcp_sport, wrap_for_redis(packet))
-            redis.rs_multi_insert("{}:{}".format(ip_src, tcp_sport), wrap_for_redis(decode_deeply(packet)))
+            # memcache.set(ip_src, tcp_sport, wrap_request_for_redis(packet))
+            redis.rs_multi_insert("{}:{}".format(ip_src, tcp_sport), wrap_request_for_redis(decode_deeply(packet)))
             
             # print(req_data)
 
@@ -174,16 +182,21 @@ def process_packets():
                     package_id = random.getrandbits(48) # generate random 48bit integer # uuid.uuid4().int >> 8
                     current_timestamp = int(time.time())
 
-                    the_package = wrap_for_auditor(decode_deeply(req_data), res_body)
+                    the_package = json.dumps(wrap_for_auditor(decode_deeply(req_data), res_body))
 
+                    redis_store_key = "{}:{}".format(RedisClient.TS_STORE_KEY, package_id)
+                    bundle_packed = wrap_bundle_for_redis(the_package)
+                    
                     # --1. Deep Inspection
-                    redis.ts_insert(RedisClient.TS_STORE_KEY, current_timestamp, package_id)
-                    # --2. Deep Inspection
-                    redis.rs_multi_insert("audit:{}".format(package_id), the_package)
+                    insert_status = redis.ts_insert_http_bundle(redis_store_key, current_timestamp, package_id, bundle_packed)
 
-                    # --1. Light Inspection
-                    the_package['type'] = 'http'
-                    relay_to_audit_control(the_package)
+                    redis.ts_get_http_bundles(current_timestamp - 10, current_timestamp + 10)
+
+                    # --2. Deep Inspection
+                    # redis.rs_multi_insert("audit:{}".format(package_id), the_package)
+
+                    # --1. Light Inspection TODO
+                    # relay_to_audit_control(bundle_packed)
 
                     # xss_watcher.domparse(res_body, req_data, False)
 

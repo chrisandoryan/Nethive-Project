@@ -7,6 +7,7 @@ import traceback
 import time
 import os
 from utils import decode_deeply
+import base64
 from processors import xss_watcher
 
 # import signal
@@ -66,7 +67,7 @@ def parse_mysql_beat_packet(beat_packet):
 def restructure_for_auditor(package):
     try:
         package = {
-            "req_packet": json.loads(package['req_packet']),
+            "req_packet": package['req_packet'],
             "res_body": package['res_body'].encode(),
             "time": int(time.time())
         }
@@ -111,6 +112,12 @@ def find_related_redis_data(package_identifiers):
         package_id =  int(float(package_id))
         package = redis.rs_get_all_pop_one("audit:{}".format(package_id))
         yield package
+
+def unwrap_http_bundle(bundle_package):
+    for k in bundle_package:
+        redis_key = k
+        bundle_packed = json.loads(base64.decodestring(bundle_package[k][0]['package'].encode("utf-8")))
+        return (redis_key, bundle_packed)
         
 def handle_client_connection(client_socket):
     while True:
@@ -123,20 +130,27 @@ def handle_client_connection(client_socket):
         try:
             lower_boundary = int(int(time.time()) - get_flow_time_average())
             upper_boundary = int(int(time.time()) + get_flow_time_average())
-            package_identifiers = redis.ts_get_by_range(RedisClient.TS_STORE_KEY, lower_boundary, upper_boundary)
+            http_bundles = redis.ts_get_http_bundles(lower_boundary, upper_boundary)
+            # package_identifiers = redis.ts_get_by_range(RedisClient.TS_STORE_KEY, lower_boundary, upper_boundary)
+            # print(package_identifiers.__dict__)
 
             beat_data = json.loads(request.decode("utf-8"))
 
             if beat_data['type'] == 'mysql':
                 beat_data = parse_mysql_beat_packet(beat_data)
                 if beat_data:
-                    for package in find_related_redis_data(package_identifiers):
-                        package = add_sql_to_inspection_package(decode_deeply(package), beat_data)
-                        xss_watcher.domparse(package, False) # inspect request data ALONG WITH sql response
+                    for bundle in http_bundles:
+                        redis_key, bundle_packed = unwrap_http_bundle(bundle)
+                        deep_package = add_sql_to_inspection_package(decode_deeply(bundle_packed), beat_data)
+                        xss_watcher.domparse(deep_package, False) # inspect request data ALONG WITH sql response
+
+                        # for package in find_related_redis_data(package_identifiers):
+                        #     package = add_sql_to_inspection_package(decode_deeply(package), beat_data)
+
             elif beat_data['type'] == 'http':
-                package = restructure_for_auditor(beat_data)
-                xss_watcher.domparse(package, False) # inspect request data WITHOUT sql response
-                pass
+                light_package = restructure_for_auditor(beat_data)
+                xss_watcher.domparse(light_package, False) # inspect request data WITHOUT sql response
+                
         except Exception as e:
             print(traceback.format_exc())
             pass

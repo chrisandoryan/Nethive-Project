@@ -45,7 +45,7 @@ import time
 import csv
 import os
 import settings
-from storage.memcache import MemCacheClient
+# from storage.memcache import MemCacheClient
 
 MYSQL_SLOW_QUERY_LOG_PATH = os.getenv("MYSQL_SLOW_QUERY_LOG_PATH")
 PARSED_SLOW_QUERY_LOG_PATH = os.getenv("PARSED_SLOW_QUERY_LOG_PATH")
@@ -54,7 +54,7 @@ PARSED_SLOW_QUERY_LOG_PATH = os.getenv("PARSED_SLOW_QUERY_LOG_PATH")
 outHand = OutputHandler().getInstance()
 
 # --- (hopefully) Thread-safe request-to-response storage. Memc is used for system wide storage
-memcache = MemCacheClient().getInstance()
+# memcache = MemCacheClient().getInstance()
 
 class SlowQueryParser(object):
 
@@ -158,6 +158,10 @@ class SlowQueryParser(object):
             }
             yield entry
 
+    # def send_to_correlator(self, result):
+
+    #     return
+
     def start_parser(self, outHand):
         stats = self.calc_stats()
         res = []
@@ -171,13 +175,14 @@ class SlowQueryParser(object):
                         'rows_examined': s['rows_examined'],
                         'timestamp': int(time.mktime(s['org']['datetime'].timetuple()))
                     }   
-                    print(json.dumps(obj))
+                    json_obj = json.dumps(obj)
                     if s['rows_sent'] > 0:
-                        # --- TODO: somehow get the returned row from db and pass them to XSS Auditor
-                        
+                        # --- TODO: somehow get the returned row from db and pass them to XSS Auditor NOT USED ANYMORE.
                         print("")
-                    outHand.sendLog(json.dumps(obj))
-                    f.writelines(json.dumps(obj) + "\n") 
+                    # self.send_to_correlator(json_obj)
+                    outHand.sendLog(json_obj)
+
+                    f.writelines(json_obj + "\n") 
 
 def run():
     global MYSQL_SLOW_QUERY_LOG_PATH, PARSED_SLOW_QUERY_LOG_PATH
