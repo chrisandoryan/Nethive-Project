@@ -46,7 +46,16 @@ redis = RedisClient.getInstance()
 def sniff_packet(interface):
     sniff(iface=interface, store=False, prn=process_packets(), session=TCPSession)
 
-def write_httplog(packet, buffer):
+def write_http_log(data):
+    try:
+        outHand.sendLog(json.dumps(data))
+        with open(HTTP_LOG_PATH, 'a+') as f:
+            f.writelines(json.dumps(data) + "\n")
+    except Exception as e:
+        print("[!] %s" % e)
+    return
+
+def sql_tokenize_request(packet, buffer):
     global HTTP_LOG_PATH, outHand
 
     timestamp = int(time.time())
@@ -64,49 +73,60 @@ def write_httplog(packet, buffer):
         outHand.warning("[!] %s" % e)
         ip = ""
 
-    for s in sql_tokenizer.tokenize(buffer):
-        s['cookie'] = cookie
-        s['source_address'] = ip
-        s['request_method'] = request_method.decode("utf-8")
-        s['user_agent'] = user_agent
+    result = []
+    
+    for s in sql_tokenizer.tokenize(buffer): # loop for each request data in a single request
         s['centrality'] = ' '.join(map(str, list(s['centrality'].values())))
         s['host'] = host.decode("utf-8")
         s['timestamp'] = timestamp
-        # print(s)
-        # print(type(s))
-        try:
-            outHand.sendLog(json.dumps(s))
-            with open(HTTP_LOG_PATH, 'a+') as f:
-                f.writelines(json.dumps(s) + "\n")
-        except Exception as e:
-            print("[!] %s" % e)
-        return    
 
-def wrap_request_for_redis(packet):
+        # Additional data, should not be added here tho, so i commented it
+        # s['cookie'] = cookie
+        # s['request_method'] = request_method.decode("utf-8")
+        # s['user_agent'] = user_agent
+        # s['source_address'] = ip
+
+        result.append(s)
+
+        write_http_log(s) # write the result into log file
+    
+    return result
+
+def pack_request_for_inspection(packet, sql_tokenize_result):
     package = {
         "url": get_url_unidecoded(packet),
         "body": get_payload_unidecoded(packet),
+        "tokenization": json.dumps(sql_tokenize_result)
     }
     return package
 
 def wrap_bundle_for_redis(package):
+    print("WRAP FOR REDIS", package)
     packed = {
         "type": "http",
         "package": base64.encodestring(package.encode("utf-8"))
     }
     return packed
 
-def wrap_for_auditor(req_data, res_body):
-    package = {
+def create_inspection_bundle(req_data, res_body):
+    inspection_bundle = {
         "req_packet": req_data, #json.dumps(req_data),
         "res_body": res_body.decode()
     }
-    return package
+    print("CREATEINSPECTIONBUNDLE", inspection_bundle)
+    return inspection_bundle
+
+def wrap_bundle_for_auditor(package):
+    packed = {
+        "type": "http",
+        "package": package
+    }
+    return packed
 
 def relay_to_audit_control(the_package):
     tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     tcp_socket.connect((AUDIT_CONTROL_HOST, AUDIT_CONTROL_PORT))
-    tcp_socket.send(the_package + "\n").encode()
+    tcp_socket.send((the_package + "\n").encode())
     tcp_socket.close()
 
 def get_mime_type(content_type):
@@ -143,17 +163,20 @@ def process_packets():
             url = get_url(packet)
             payload = get_payload(packet)
 
+            tokenized = None
+
             if sniff_mode == "GET":
-                write_httplog(packet, url)
+                tokenized = sql_tokenize_request(packet, url)
             elif sniff_mode == "POST":
-                write_httplog(packet, payload)
+                tokenized = sql_tokenize_request(packet, payload)
             elif sniff_mode == "*":
-                write_httplog(packet, url)
-                write_httplog(packet, payload)        
+                tokenized = sql_tokenize_request(packet, url) + sql_tokenize_request(packet, payload)        
+
+            print("TOKENIZED!!!!!", tokenized)
 
             # xss_watcher.inspect([url, payload])
-            # memcache.set(ip_src, tcp_sport, wrap_request_for_redis(packet))
-            redis.rs_multi_insert("{}:{}".format(ip_src, tcp_sport), wrap_request_for_redis(decode_deeply(packet)))
+            # memcache.set(ip_src, tcp_sport, pack_request_for_inspection(packet))
+            redis.store_http_request("{}:{}".format(ip_src, tcp_sport), pack_request_for_inspection(decode_deeply(packet), tokenized))
             
             # print(req_data)
 
@@ -162,14 +185,17 @@ def process_packets():
             content_type = get_content_type(packet, HTTPResponse)
             if get_mime_type(content_type)[0] in unsafe_content_types:
                 # req_data = memcache.pop(ip_dst, tcp_dport)
-                req_data = redis.rs_get_all_pop_one("{}:{}".format(ip_dst, tcp_dport))
+                req_data = redis.get_http_request("{}:{}".format(ip_dst, tcp_dport))
                 if req_data:
+                    print("REQ DATA", req_data)
                     req_data['client_ip'] = ip_dst
                     req_data['client_port'] = str(tcp_dport)
                     res_body = get_payload(packet)
 
+                    # TODO: Add more detailed data such as request and response cookie, etc (separated)
+
                     """ 
-                    Algorithm for Deep Inspection:
+                    Algorithm for Deep Inspection: CHANGED, TODO: UPDATE PSEUDO HERE
                         1. store timestamp and package_id in redistimeseries
                         2. store package for inspection in redis
                         3. from packetbeat_receptor.py, find all ids matching the specified timestamp
@@ -182,21 +208,23 @@ def process_packets():
                     package_id = random.getrandbits(48) # generate random 48bit integer # uuid.uuid4().int >> 8
                     current_timestamp = int(time.time())
 
-                    the_package = json.dumps(wrap_for_auditor(decode_deeply(req_data), res_body))
+                    the_package = create_inspection_bundle(decode_deeply(req_data), res_body)
 
                     redis_store_key = "{}:{}".format(RedisClient.TS_STORE_KEY, package_id)
-                    bundle_packed = wrap_bundle_for_redis(the_package)
+                    deep_bundle = wrap_bundle_for_redis(json.dumps(the_package))
+                    print("DEEP BUNDLE", deep_bundle)
                     
                     # --1. Deep Inspection
-                    insert_status = redis.ts_insert_http_bundle(redis_store_key, current_timestamp, package_id, bundle_packed)
+                    insert_status = redis.ts_insert_http_bundle(redis_store_key, current_timestamp, package_id, deep_bundle)
 
-                    redis.ts_get_http_bundles(current_timestamp - 10, current_timestamp + 10)
+                    # redis.ts_get_http_bundles(current_timestamp - 10, current_timestamp + 10)
 
                     # --2. Deep Inspection
                     # redis.rs_multi_insert("audit:{}".format(package_id), the_package)
 
-                    # --1. Light Inspection TODO
-                    # relay_to_audit_control(bundle_packed)
+                    # --1. Light Inspection -> untuk request yang tidak perlu ke DB
+                    light_bundle = wrap_bundle_for_auditor(the_package)
+                    relay_to_audit_control(json.dumps(light_bundle))
 
                     # xss_watcher.domparse(res_body, req_data, False)
 

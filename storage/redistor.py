@@ -41,12 +41,12 @@ class RedisClient:
 
     # Redis Query
 
-    def rs_multi_insert(self, key_ns, value):
-        return self.__redis_client.hmset(key_ns, value)
-    def rs_get_all_pop_one(self, key):
-        from_redis = self.__redis_client.hgetall(key)
-        self.__redis_client.delete(key)
-        return from_redis
+    def store_http_request(self, key, value):
+        return self.__redis_client.hmset(key, value)
+    def get_http_request(self, key):
+        # from_redis = self.__redis_client.hgetall(key)
+        # self.__redis_client.delete(key)
+        return self.__redis_client.hgetall(key)
 
     # End of Redis Query
 
