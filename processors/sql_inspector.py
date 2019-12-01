@@ -18,7 +18,7 @@ def transform_for_sqli_model(package):
     try:
         """
         Features needed for model:
-        1. tokenized request payload
+        1. tokenized request payload -> need to process deeper
         2. centrality
         3. request payload length
         4. query stack
