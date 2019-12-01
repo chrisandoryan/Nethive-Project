@@ -1,5 +1,14 @@
 import json
 import sqlparse
+import joblib
+import csv
+
+""" Constants """
+
+MODEL_LEARNING = False
+PAYLOAD_TYPE = "normal"
+
+""" End of Constants """
 
 def count_stacked_query(query):
     res = sqlparse.split(query)
@@ -30,7 +39,8 @@ def transform_for_sqli_model(package):
                 "payload_length": t['payload_length'],
                 "stacked_query": count_stacked_query(t['payload']), #request_packet['sql_data']['query']
                 "rows_send": request_packet['sql_stat']['num_rows'],
-                "rows_affected": request_packet['sql_stat']['affected_rows']
+                "rows_affected": request_packet['sql_stat']['affected_rows'],
+                "label": PAYLOAD_TYPE
             }
             results.append(material)
 
@@ -39,16 +49,27 @@ def transform_for_sqli_model(package):
         print(e)
     
 def inspect(inspection_package):
-    batch = transform_for_sqli_model(inspection_package)
-    if batch:
-        print("BATCH", batch)
-        return predict(batch)
+    transformed = transform_for_sqli_model(inspection_package)
+    if transformed:
+        if MODEL_LEARNING:
+            write_learning_data(transformed)
+        return predict(transformed)
 
+def write_learning_data(learning_package):
+    # headers: token,centrality,payload_length,stacked_query,rows_send,rows_affected,label
+    with open("/tmp/sqlinspection.csv", "a+") as f:
+        writer = csv.writer(f)
+        for l in learning_package:
+            writer.writerow(list(l.values()))
 
 def teach(learning_package):
+    """ retrain model on-the-fly """
 
     return
 
 def predict(inspection_package):
+    sqli_model = joblib.load('./models/sqli.pkl')
+    sqli_cols = joblib.load('./models/sqli_cols.pkl')
+    # print(sqli_cols)
 
     return

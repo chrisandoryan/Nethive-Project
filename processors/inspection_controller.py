@@ -63,6 +63,7 @@ def parse_mysql_beat_packet(beat_packet):
         }
         return beat_packet
     except Exception as e:
+        pass
         print(traceback.format_exc())
 
 def restructure_for_auditor(package):
