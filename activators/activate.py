@@ -108,11 +108,11 @@ def logstash():
     LOGSTASH_CONFIG_PATH = DOCKER_ELK_REPO_PATH + 'logstash/pipeline/logstash.conf'
     LOGSTASH_DOCKERFILE_PATH = DOCKER_ELK_REPO_PATH + 'logstash/Dockerfile'
 
-    replConfigFile(LOGSTASH_CONFIG_PATH, "./activators/config/logstash.conf")
+    shutil.copy(LOGSTASH_CONFIG_PATH, "./activators/config/logstash.conf")
     # os.rename(LOGSTASH_CONFIG_PATH, LOGSTASH_CONFIG_PATH + ".original")
     # shutil.copy("./activators/config/logstash.conf", LOGSTASH_CONFIG_PATH)
 
-    replConfigFile(LOGSTASH_DOCKERFILE_PATH, "./activators/config/Dockerfile.logstash")
+    shutil.copy(LOGSTASH_DOCKERFILE_PATH, "./activators/config/Dockerfile.logstash")
     # os.rename(LOGSTASH_DOCKERFILE_PATH, LOGSTASH_DOCKERFILE_PATH + ".original")
     # shutil.copy("./activators/config/Dockerfile.logstash", LOGSTASH_DOCKERFILE_PATH)
     return

@@ -1,3 +1,9 @@
 activators/config/auditbeat.reference.yml
-**/threlk_engine/target/*
+**/threlk_engine/target/rls
+**/threlk_engine/target/debug/build
+**/threlk_engine/target/debug/deps
+**/threlk_engine/target/debug/examples
+**/threlk_engine/target/debug/incremental
+**/threlk_engine/target/debug/.fingerprint
+**/threlk_engine/target/debug/.cargo-lock
 **/__pycache__/*
