@@ -64,6 +64,7 @@ def package_transform(the_package):
                 value = value # 2. Character-Set Decode
                 value = html.unescape(value) # 3. HTML Entity Decode
                 the_package[key] = value
+
     return the_package
 
 def domparse(the_package, is_flagged_xss):
@@ -74,6 +75,7 @@ def domparse(the_package, is_flagged_xss):
     # print("THE_PACKAGE", the_package)
     the_package['res_body'] = the_package['res_body'].decode('ISO-8859-1')
     the_package = package_transform(the_package)
+    # print("THE PACKAGE", the_package)
 
     try:
         result = send_to_watchman(the_package)

@@ -18,3 +18,4 @@ pylibmc==1.6.1
 python-logstash-async
 redistimeseries
 uuid
+joblib

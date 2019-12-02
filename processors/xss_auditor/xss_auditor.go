@@ -57,13 +57,18 @@ type AuditReport struct {
 	Time                 int    // time the auditing process is finished
 }
 
+// SQLData contains ...
+type SQLData struct {
+	QueryResult []map[string]string `json:"response"`
+}
+
 // RequestPacket contains ...
 type RequestPacket struct {
-	URL         string              `json:"url"`
-	Body        string              `json:"body"`
-	SQLResponse []map[string]string `json:"sql_response"`
-	ClientIP    string              `json:"client_ip"`
-	ClientPort  string              `json:"client_port"`
+	URL        string  `json:"url"`
+	Body       string  `json:"body"`
+	SQLData    SQLData `json:"sql_data"`
+	ClientIP   string  `json:"client_ip"`
+	ClientPort string  `json:"client_port"`
 }
 
 // AuditPackage contains parsed json data from xss_watcher
@@ -192,7 +197,7 @@ func compareWithRequest(afterParse string, originalRequest RequestPacket) []int 
 
 	fromQueryParam, fromRequestBody, fromSQLResponse := 0, 0, 0
 	// fmt.Println(originalRequest.SQLResponse)
-	for _, response := range originalRequest.SQLResponse {
+	for _, response := range originalRequest.SQLData.QueryResult {
 		for _, payload := range response {
 			// fmt.Println("key:", key, "payload:", payload)
 			if containsIgnoreCase(payload, afterParse) {

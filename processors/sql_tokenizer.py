@@ -4,6 +4,47 @@ import re
 import numpy
 import networkx as nx
 
+class FeatureExtractor:
+    
+    DANGEROUS_TOKEN = ["rename", "drop", "delete", "insert", "create", "exec", "update", "union", "set", "alter", "database", "and", "or", "information_schema", "load_file", "select", "shutdown", "cmdshell", "hex", "ascii"]
+
+    SQL_TOKEN = ["where", "table", "like",
+    "select", "update", "and", "or", "set", "in", "having", "values", "into",
+    "alter", "as", "create", "revoke", "deny", "convert", "exec", "concat",
+    "char", "tuncat", "ASCII", "any", "asc", "desc", "check", "group by",
+    "order by", "delete from", "insert into", "drop table", "union",
+    "join"]
+
+    SQL_SPECIAL_CHAR = ["--", "#", "/*", "'", "''", "||", "\\", "=", "/**/","@@"]
+
+    PUNCTUATION_TOKEN = ["<", ">", "*", ";", "_", "-", "(",")", "=", "{", "}", "@", ".", ",", "&", "[", "]", "+", "-", "?", "%", "!", ":", "\\", "/"]
+
+    spec_char_freq = 0
+    dangerous_token_freq = 0
+    punct_token_freq = 0
+    sql_token_freq = 0
+    whitespace_freq = 0
+    hex_char_freq = 0
+
+    def __init__(self, query):
+        super().__init__()
+        self.extract_features(query)
+        
+    def extract_features(self, query):
+        self.whitespace_freq = query.count(' ')
+        for c in query:
+            if c in self.PUNCTUATION_TOKEN:
+                self.punct_token_freq += 1
+            elif c in self.SQL_SPECIAL_CHAR:
+                self.spec_char_freq += 1
+            elif c in self.SQL_TOKEN:
+                self.sql_token_freq += 1
+            elif c in self.DANGEROUS_TOKEN:
+                self.dangerous_token_freq += 1
+    
+    def count_hex_char(self, tokenized):
+        self.hex_char_freq = tokenized.count('HEX')
+    
 reserved = ['ACCESSIBLE', 'ACCOUNT', 'ACTION', 'ADD', 'ADMIN', 'AFTER', 'AGAINST', 'AGGREGATE', 'ALGORITHM', 'ALL', 'ALTER', 'ALWAYS', 'ANALYSE', 'ANALYZE', 'AND', 'ANY', 'AS', 'ASC', 'ASCII', 'ASENSITIVE', 'AT', 'AUTHORS', 'AVG', 'BACKUP', 'BEFORE', 'BEGIN', 'BETWEEN', 'BIGINT', 'BINARY', 'BINLOG', 'BIT', 'BLOB', 'BLOCK', 'BOOL', 'BOOLEAN', 'BOTH', 'BTREE', 'BUCKETS', 'BY', 'BYTE', 'CACHE', 'CALL', 'CASCADE', 'CASCADED', 'CASE', 'CAST', 'CHAIN', 'CHANGE', 'CHANGED', 'CHANNEL', 'CHAR', 'CHARACTER', 'CHARSET', 'CHECK', 'CHECKSUM', 'CIPHER', 'CLIENT', 'CLONE', 'CLOSE', 'COALESCE', 'CODE', 'COLLATE', 'COLLATION', 'COLUMN', 'COLUMNS', 'COMMENT', 'COMMIT', 'COMMITTED', 'COMPACT', 'COMPLETION', 'COMPONENT', 'COMPRESSED', 'COMPRESSION', 'CONCURRENT', 'CONCAT', 'CONDITION', 'CONNECTION', 'CONSISTENT', 'CONSTRAINT', 'CONTAINS', 'CONTEXT', 'CONTINUE', 'CONTRIBUTORS', 'CONVERT', 'CPU', 'CREATE', 'CROSS', 'CUBE', 'CURRENT', 'CURSOR', 'DATA', 'DATABASE', 'DATABASES', 'DATAFILE', 'DATE', 'DATETIME', 'DAY', 'DBMS_PIPE.RECEIVE_MESSAGE', 'DEALLOCATE', 'DEC', 'DECIMAL', 'DECLARE', 'DEFAULT', 'DEFINER', 'DEFINITION', 'DELAYED', 'DELETE', 'DESC', 'DESCRIBE', 'DESCRIPTION', 'DETERMINISTIC', 'DIAGNOSTICS', 'DIRECTORY', 'DISABLE', 'DISCARD', 'DISK', 'DISTINCT', 'DISTINCTROW', 'DIV', 'DO', 'DOUBLE', 'DROP', 'DUAL', 'DUMPFILE', 'DUPLICATE', 'DYNAMIC', 'EACH', 'ELSE', 'ELSEIF', 'EMPTY', 'ENABLE', 'ENCLOSED', 'ENCRYPTION', 'END', 'ENDS', 'ENGINE', 'ENGINES', 'ENUM', 'ERROR', 'ERRORS', 'ESCAPE', 'ESCAPED', 'EVENT', 'EVENTS', 'EVERY', 'EXCEPT', 'EXCHANGE', 'EXCLUDE', 'EXP', 'ELT', 'EXECUTE', 'EXISTS', 'EXIT', 'EXPANSION', 'EXPIRE', 'EXPLAIN', 'EXPORT', 'EXTENDED', 'FALSE', 'FAST', 'FAULTS', 'FETCH', 'FIELDS', 'FILE', 'FILTER', 'FIRST', 'FIXED', 'FLOAT', 'FLOOR', 'FLUSH', 'FOLLOWING', 'FOLLOWS', 'FOR', 'FORCE', 'FOREIGN', 'FORMAT', 'FOUND', 'FROM', 'FULL', 'FULLTEXT', 'FUNCTION', 'GENERAL', 'GENERATED', 'GEOMCOLLECTION', 'GEOMETRY', 'GEOMETRYCOLLECTION', 'GET', 'GLOBAL', 'GRANT', 'GRANTS', 'GROUP', 'GROUPING', 'GROUPS', 'HANDLER', 'HASH', 'HAVING', 'HELP', 'HISTOGRAM', 'HISTORY', 'HOST', 'HOSTS', 'HOUR', 'IDENTIFIED', 'IF', 'IGNORE', 'IMPORT', 'IN', 'INDEX', 'INDEXES', 'INFILE', 'INNER', 'INNOBASE', 'INNODB', 'INOUT', 'INSENSITIVE', 'INSERT', 'INSTALL', 'INSTANCE', 'INT', 'INTEGER', 'INTERVAL', 'INTO', 'INVISIBLE', 'INVOKER', 'IO', 'IPC', 'IS', 'ISOLATION', 'ISSUER', 'ITERATE', 'JOIN', 'JSON', 'KEY', 'KEYS', 'KILL', 'LAG', 'LANGUAGE', 'LAST', 'LEAD', 'LEADING', 'LEAVE', 'LEAVES', 'LEFT', 'LESS', 'LEVEL', 'LIKE', 'LIMIT', 'LINEAR', 'LINES', 'LINESTRING', 'LIST', 'LOAD', 'LOCAL', 'LOCALTIME', 'LOCALTIMESTAMP', 'LOCK', 'LOCKED', 'LOCKS', 'LOGFILE', 'LOGS', 'LONG', 'LONGBLOB', 'LONGTEXT', 'LOOP', 'MASTER', 'MATCH', 'MAXVALUE', 'MEDIUM', 'MEDIUMBLOB', 'MEDIUMINT', 'MEDIUMTEXT', 'MEMORY', 'MERGE', 'MICROSECOND', 'MIDDLEINT', 'MIGRATE', 'MINUTE', 'MOD', 'MODE', 'MODIFIES', 'MODIFY', 'MONTH', 'MULTILINESTRING', 'MULTIPOINT', 'MULTIPOLYGON', 'MUTEX', 'NAME', 'NAMES', 'NATIONAL', 'NATURAL', 'NCHAR', 'NDB', 'NDBCLUSTER', 'NESTED', 'NEVER', 'NEW', 'NEXT', 'NO', 'NODEGROUP', 'NONE', 'NOT', 'NOWAIT', 'NTILE', 'NULL', 'NULLS', 'NUMBER', 'NUMERIC', 'NVARCHAR', 'OF', 'OFFSET', 'MD5', 'ON', 'ONE', 'ONLY', 'OPEN', 'OPTIMIZE', 'OPTION', 'OPTIONALLY', 'OPTIONS', 'OR', 'ORDER', 'ORDINALITY', 'OTHERS', 'OUT', 'OUTER', 'OUTFILE', 'OVER', 'OWNER', 'PAGE', 'PARSER', 'PARTIAL', 'PARTITION', 'PARTITIONING', 'PARTITIONS', 'PASSWORD', 'PATH', 'PERSIST', 'PHASE', 'PLUGIN', 'PLUGINS', 'POINT', 'POLYGON', 'PORT', 'PRECEDES', 'PRECEDING', 'PRECISION', 'PREPARE', 'PRESERVE', 'PREV', 'PRIMARY', 'PRIVILEGES', 'PROCEDURE', 'PROCESS', 'PROCESSLIST', 'PROFILE', 'PROFILES', 'PROXY', 'PURGE', 'QUARTER', 'QUERY', 'QUICK', 'RANGE', 'RANK', 'READ', 'READS', 'REAL', 'REBUILD', 'RECOVER', 'RECURSIVE', 'REDOFILE', 'REDUNDANT', 'REFERENCE', 'REFERENCES', 'REGEXP', 'RELAY', 'RELAYLOG', 'RELEASE', 'RELOAD', 'REMOTE', 'REMOVE', 'RENAME', 'REORGANIZE', 'REPAIR', 'REPEAT', 'REPEATABLE', 'REPLACE', 'REPLICATION', 'REQUIRE', 'RESET', 'RESIGNAL', 'RESOURCE', 'RESPECT', 'RESTART', 'RESTORE', 'RESTRICT', 'RESUME', 'RETURN', 'RETURNS', 'REUSE', 'REVERSE', 'REVOKE', 'RIGHT', 'RLIKE', 'ROLE', 'ROLLBACK', 'ROLLUP', 'ROTATE', 'ROUTINE', 'ROW', 'ROWS', 'RTREE', 'SAVEPOINT', 'SCHEDULE', 'SCHEMA', 'SCHEMAS', 'SECOND', 'SECURITY', 'SELECT', 'SLEEP', 'SENSITIVE', 'SEPARATOR', 'SERIAL', 'SERIALIZABLE', 'SERVER', 'SESSION', 'SET', 'SHARE', 'SHOW', 'SHUTDOWN', 'SIGNAL', 'SIGNED', 'SIMPLE', 'SKIP', 'SLAVE', 'SLOW', 'SMALLINT', 'SNAPSHOT', 'SOCKET', 'SOME', 'SONAME', 'SOUNDS', 'SOURCE', 'SPATIAL', 'SPECIFIC', 'SQL', 'SQLEXCEPTION', 'SQLSTATE', 'SQLWARNING', 'SRID', 'SSL', 'STACKED', 'START', 'STARTING', 'STARTS', 'STATUS', 'STOP', 'STORAGE', 'STORED', 'STRING', 'SUBJECT', 'SUBPARTITION', 'SUBPARTITIONS', 'SUPER', 'SUSPEND', 'SWAPS', 'SWITCHES', 'SYSTEM', 'TABLE', 'TABLES', 'TABLESPACE', 'TEMPORARY', 'TEMPTABLE', 'TERMINATED', 'TEXT', 'THAN', 'THEN', 'TIES', 'TIME', 'TIMESTAMP', 'TIMESTAMPADD', 'TIMESTAMPDIFF', 'TINYBLOB', 'TINYINT', 'TINYTEXT', 'TO', 'TRAILING', 'TRANSACTION', 'TRIGGER', 'TRIGGERS', 'TRUE', 'TRUNCATE', 'TYPE', 'TYPES', 'UNBOUNDED', 'UNCOMMITTED', 'UNDEFINED', 'UNDO', 'UNDOFILE', 'UNICODE', 'UNINSTALL', 'UNION', 'UNIQUE', 'UNKNOWN', 'UNLOCK', 'UNSIGNED', 'UNTIL', 'UPDATE', 'UPGRADE', 'USAGE', 'USE', 'USER', 'USING', 'VALIDATION', 'VALUES', 'VARBINARY', 'VARCHAR', 'VARCHARACTER', 'VARIABLES', 'VARYING', 'VCPU', 'VIEW', 'VIRTUAL', 'VISIBLE', 'WAIT', 'WARNINGS', 'WEEK', 'WHEN', 'WHERE', 'WHILE', 'WINDOW', 'WITH', 'WITHOUT', 'WORK', 'WRAPPER', 'WRITE', 'XA', 'XID', 'XML', 'XOR', 'YEAR', 'ZEROFILL']
 
 token = ['HEX', 'DEC', 'INT', 'IPADDR', 'CHR', 'STR', 'NEQ', 'AND', 'OR', 'CMTST', 'CMEND', 'TLDE', 'EXCLM', 'ATR', 'HASH', 'DLLR', 'PRCNT', 'XOR', 'BITAND', 'BITOR', 'STAR', 'MINUS', 'PLUS', 'EQ', 'LPRN', 'RPRN', 'LCBR', 'RCBR', 'LSQBR', 'RSQBR', 'BSLSH', 'CLN', 'SMCLN', 'DQUT', 'SQUT', 'LT', 'GT', 'CMMA', 'DOT', 'QSTN', 'SLSH', 'DSCMT']
@@ -40,6 +81,7 @@ def tokenize(payload):
     for key, value in unquoted.items():
         # loop over similar query param names (e.g name=ando&name=kevin)
         for q in value:
+                extractor = FeatureExtractor(q)
                 # q = q.decode("utf-8")
                 # split query structure by empty comment occurences
                 q = q.split('/**/')
@@ -115,6 +157,8 @@ def tokenize(payload):
                         nq = nq.replace('/', ' SLSH ')
                         nq = nq.replace('`', ' BTCK ')
 
+                        extractor.count_hex_char(nq)
+
                         nq = nq.split()
 
                         for i, nd in enumerate(nq):
@@ -134,8 +178,14 @@ def tokenize(payload):
                         sample = {
                             'payload': raw,
                             'payload_length': len(raw),
-                            'token': nq,
-                            'centrality': cent
+                            'tokenized_payload': nq,
+                            'punct_token': extractor.punct_token_freq,
+                            'spec_char': extractor.spec_char_freq,
+                            'sql_token': extractor.sql_token_freq,
+                            'dangerous_token': extractor.dangerous_token_freq,
+                            'hex_char': extractor.hex_char_freq,
+                            'whitespace': extractor.whitespace_freq,
+                            'centrality': cent,
                         }
 
                         yield sample
