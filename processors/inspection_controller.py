@@ -11,6 +11,8 @@ import base64
 from processors import xss_watcher
 from processors import sql_inspector
 
+SQL_METHOD_LESS_INTEREST = ["USE"]
+
 # import signal
 
 AUDIT_CONTROL_HOST = os.getenv("AUDIT_CONTROL_HOST")
@@ -38,10 +40,12 @@ def parse_returned_sql_rows(raw_rows):
     return responses
 
 def parse_mysql_beat_packet(beat_packet):
-    try:
+    try:     
+        if beat_packet['method'] in SQL_METHOD_LESS_INTEREST:
+            return
         d = parse(beat_packet['@timestamp'])
-        beat_packet = {
-            'timestamp': int(time.mktime(d.timetuple())),
+        parsed_packet = {
+            # 'timestamp': int(time.mktime(d.timetuple())),
             'conn_stat': {
                 'from_ip': beat_packet['client']['ip'],
                 'from_port': beat_packet['client']['port'],
@@ -49,19 +53,29 @@ def parse_mysql_beat_packet(beat_packet):
             },
             'sql_method': beat_packet['method'],
             'sql_data': {
-                'db_object': beat_packet['path'],
                 'query': beat_packet['query'],
-                'response': parse_returned_sql_rows(beat_packet['response']),
             },
             'sql_stat': {
                 'affected_rows': beat_packet['mysql']['affected_rows'],
                 'insert_id': beat_packet['mysql']['insert_id'],
                 'num_fields': beat_packet['mysql']['num_fields'],
-                'num_rows': beat_packet['mysql']['num_rows'],
+                'num_rows': beat_packet['mysql']['num_rows'], 
             },
             'status': beat_packet['status']
         }
-        return beat_packet
+
+        if 'path' in beat_packet:
+            parsed_packet['db_object']: beat_packet['path']
+
+        if 'error_code' in beat_packet['mysql']:
+            parsed_packet['sql_stat']['error_code'] = beat_packet['mysql']['error_code']
+            parsed_packet['sql_stat']['error_message'] = beat_packet['mysql']['error_message']
+            parsed_packet['sql_data']['response'] = []
+        else:
+            parsed_packet['sql_data']['response'] = parse_returned_sql_rows(beat_packet['response'])
+
+        return parsed_packet
+
     except Exception as e:
         pass
         print(traceback.format_exc())
@@ -77,13 +91,19 @@ def restructure_for_auditor(package):
         print(traceback.format_exc())
     return package
 
-def add_sql_to_inspection_package(package, raw_inspection_data):
+def create_xss_audit_package(package, parsed_sql_data):
     try:
         package = restructure_for_auditor(package)
-        package['req_packet']['sql_data'] = raw_inspection_data['sql_data']
-        package['req_packet']['sql_stat'] = raw_inspection_data['sql_stat']
+        package['req_packet']['sql_data'] = parsed_sql_data['sql_data']
+        package['req_packet']['sql_stat'] = parsed_sql_data['sql_stat']
     except Exception as e:
         print(traceback.format_exc())
+    return package
+
+def create_sqli_inspection_package(package, parsed_sql_data):
+    package = restructure_for_auditor(package)
+    package['sql_response'] = parsed_sql_data
+
     return package
 
 def get_flow_time_average():
@@ -141,14 +161,22 @@ def handle_client_connection(client_socket):
             raw_inspection_data = json.loads(request.decode("utf-8"))
 
             if raw_inspection_data['type'] == 'mysql':
-                raw_inspection_data = parse_mysql_beat_packet(raw_inspection_data)
-                if raw_inspection_data:
+                # print("BEFORE", raw_inspection_data)
+                parsed_sql_data = parse_mysql_beat_packet(raw_inspection_data)
+                # print("AFTER", parsed_sql_data)
+                if parsed_sql_data:
                     for bundle in http_bundles:
                         redis_key, bundle_packed = unwrap_http_bundle(bundle)
-                        deep_package = add_sql_to_inspection_package(decode_deeply(bundle_packed), raw_inspection_data)
 
-                        sql_inspector.inspect(deep_package) # inspect request to find sqli
-                        # xss_watcher.domparse(deep_package, False) # inspect request data ALONG WITH sql response
+                        deep_xss_package = create_xss_audit_package(decode_deeply(bundle_packed), parsed_sql_data)
+
+                        deep_sqli_package = create_sqli_inspection_package(decode_deeply(bundle_packed), parsed_sql_data)
+
+                        # print("XSS PACKAGE", deep_xss_package)
+                        # print("SQLI PACKAGE", deep_sqli_package)
+
+                        sql_inspector.inspect(deep_sqli_package) # inspect request to find sqli
+                        xss_watcher.domparse(deep_xss_package, False) # inspect request data ALONG WITH sql response
 
                         # delete the data to prevent rechecking
                         delete_status = redis.ts_expire_http_bundle(redis_key)

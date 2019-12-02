@@ -60,8 +60,6 @@ type AuditReport struct {
 // SQLData contains ...
 type SQLData struct {
 	QueryResult []map[string]string `json:"response"`
-	Query       string              `json:"query"`
-	DBObject    string              `json:"db_object"`
 }
 
 // RequestPacket contains ...
