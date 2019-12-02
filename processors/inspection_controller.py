@@ -169,14 +169,17 @@ def handle_client_connection(client_socket):
                         redis_key, bundle_packed = unwrap_http_bundle(bundle)
 
                         deep_xss_package = create_xss_audit_package(decode_deeply(bundle_packed), parsed_sql_data)
-
                         deep_sqli_package = create_sqli_inspection_package(decode_deeply(bundle_packed), parsed_sql_data)
 
                         # print("XSS PACKAGE", deep_xss_package)
                         # print("SQLI PACKAGE", deep_sqli_package)
 
-                        sql_inspector.inspect(deep_sqli_package) # inspect request to find sqli
-                        xss_watcher.domparse(deep_xss_package, False) # inspect request data ALONG WITH sql response
+                        sql_inspection = threading.Thread(target=sql_inspector.inspect, args=(deep_sqli_package,)) # inspect request to find sqli
+
+                        xss_audit = threading.Thread(target=xss_watcher.domparse, args=(deep_xss_package, False,)) # inspect request data ALONG WITH sql response
+
+                        sql_inspection.start()
+                        xss_audit.start()
 
                         # delete the data to prevent rechecking
                         delete_status = redis.ts_expire_http_bundle(redis_key)
@@ -188,6 +191,7 @@ def handle_client_connection(client_socket):
                 # xss_watcher.domparse(light_package, False) # inspect request data WITHOUT sql response
                 
         except Exception as e:
+            print(request.decode("utf-8"))
             print(traceback.format_exc())
             pass
 
