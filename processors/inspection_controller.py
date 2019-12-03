@@ -156,7 +156,6 @@ def handle_client_connection(client_socket):
             http_bundles = redis.ts_get_http_bundles(lower_boundary, upper_boundary)
             # package_identifiers = redis.ts_get_by_range(RedisClient.TS_STORE_KEY, lower_boundary, upper_boundary)
             # print(package_identifiers.__dict__)
-            print("DATA TO CHECK: ", len(http_bundles))
 
             raw_inspection_data = json.loads(request.decode("utf-8"))
 
@@ -168,6 +167,11 @@ def handle_client_connection(client_socket):
                     for bundle in http_bundles:
                         redis_key, bundle_packed = unwrap_http_bundle(bundle)
 
+                        # delete the data to prevent rechecking
+                        delete_status = redis.ts_expire_http_bundle(redis_key)
+                        if delete_status:
+                            print("Bundle {} Deleted!".format(redis_key))
+
                         deep_xss_package = create_xss_audit_package(decode_deeply(bundle_packed), parsed_sql_data)
                         deep_sqli_package = create_sqli_inspection_package(decode_deeply(bundle_packed), parsed_sql_data)
 
@@ -176,19 +180,21 @@ def handle_client_connection(client_socket):
 
                         sql_inspection = threading.Thread(target=sql_inspector.inspect, args=(deep_sqli_package,)) # inspect request to find sqli
 
+                        # print("DATA TO CHECK: ", len(http_bundles))
+
                         xss_audit = threading.Thread(target=xss_watcher.domparse, args=(deep_xss_package, False,)) # inspect request data ALONG WITH sql response
 
                         sql_inspection.start()
-                        xss_audit.start()
+                        # xss_audit.start()
 
-                        # delete the data to prevent rechecking
-                        delete_status = redis.ts_expire_http_bundle(redis_key)
-                        if delete_status:
-                            print("Bundle {} Deleted!".format(redis_key))
+                        # print("Bottom!")
 
             elif raw_inspection_data['type'] == 'http':
                 light_package = restructure_for_auditor(raw_inspection_data['package'])
-                # xss_watcher.domparse(light_package, False) # inspect request data WITHOUT sql response
+
+                xss_audit = threading.Thread(target=xss_watcher.domparse, args=(light_package, False,)) # inspect request data WITHOUT sql response
+
+                # xss_audit.start()
                 
         except Exception as e:
             print(request.decode("utf-8"))

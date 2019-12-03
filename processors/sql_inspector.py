@@ -12,7 +12,7 @@ LOGSTASH_PORT = int(os.getenv('LOGSTASH_PORT'))
 """ Constants """
 
 MODEL_LEARNING = False
-ACTIVE_LABEL = ""
+ACTIVE_LABEL = "normal"
 
 """ End of Constants """
 
@@ -49,13 +49,8 @@ def transform_for_sqli_model(package):
         # username=ao&password=123456 -- will loop twice, yet still categorized as a single request 
         for t in json.loads(request_packet['tokenization']):
             material = {
-                # "payload": t['payload'],
-                # "tokenized_payload": t['tokenized_payload'],
-                # "centrality": t['centrality'],
-                "payload_length": t['payload_length'],
+                "payload": t['payload'],
                 "stacked_query": count_stacked_query(t['payload']), #request_packet['sql_data']['query']
-                "rows_send": sql_response['sql_stat']['num_rows'],
-                "rows_affected": sql_response['sql_stat']['affected_rows'],
                 'punct_token': t['punct_token'],
                 'spec_char': t['spec_char'],
                 'sql_token': t['sql_token'],
@@ -66,7 +61,14 @@ def transform_for_sqli_model(package):
             }
 
             if MODEL_LEARNING:
-                material["label"]: ACTIVE_LABEL
+                # material["payload"] = t['payload']
+                material["label"] = ACTIVE_LABEL
+                # "tokenized_payload": t['tokenized_payload'],
+                # "centrality": t['centrality'],
+                # "rows_send": sql_response['sql_stat']['num_rows'],
+                # "rows_affected": sql_response['sql_stat']['affected_rows'],
+                # "payload_length": t['payload_length'],
+
 
             if sql_response['status'] != "OK":
                 material['error_code'] = sql_response['sql_stat']['error_code']
@@ -83,7 +85,8 @@ def inspect(inspection_package):
     if transformed:
         if MODEL_LEARNING:
             write_learning_data(transformed)
-        return predict(transformed)
+        else:
+            return predict(transformed, inspection_package['req_packet'])
 
 def write_learning_data(learning_package):
     file_name = "/tmp/sqlinspection_%s.csv" % ACTIVE_LABEL
@@ -104,22 +107,31 @@ def retrain(learning_package):
 
     return
 
-def predict(inspection_package):
+def predict(inspection_package, request_data):
     sqli_model = joblib.load('./models/sqli.pkl')
     sqli_cols = joblib.load('./models/sqli_cols.pkl')
 
+    result = {}
+
     for pkg in inspection_package:
-        print(pkg)
+        # print(pkg)
 
         compat_package = pd.DataFrame.from_dict([pkg])
+        compat_package.drop('payload', axis=1, inplace=True)
 
         predict = sqli_model.predict(compat_package).tolist()
-        print(predict)
+        # print(predict)
 
         pkg['classification'] = predict[0]
 
-    message = {'parsed_log': json.loads(inspection_package), 'log_type': 'TYPE_SQLI_INSPECTOR'}
-    print("SQLI INSPECTION RESULT", inspection_package)
+    result['url'] = request_data['url']
+    result['body'] = request_data['body']
+    result['client_ip'] = request_data['client_ip']
+    result['client_port'] = request_data['client_port']
+    result['inspection_result'] = inspection_package
+
+    message = {'parsed_log': result, 'log_type': 'TYPE_SQLI_INSPECTOR'}
+    print("SQLI INSPECTION RESULT", result)
     send_to_logstash(message)
 
     return
