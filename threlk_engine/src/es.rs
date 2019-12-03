@@ -14,8 +14,6 @@ where for<'de> T: serde::Deserialize<'de> {
     let creds = base64::encode("elastic:changeme");
     let auth = HeaderValue::from_str(&format!("Basic {}", creds)).unwrap();
 
-    println!("{:?}", auth);
-
     let builder = SyncClientBuilder::new()
         .static_node("http://192.168.56.104:9200")
         .params_fluent(move |p| p
@@ -24,7 +22,7 @@ where for<'de> T: serde::Deserialize<'de> {
 
     let client = builder.build().unwrap();
     
-    println!("sending request");
+    info!("sending request");
 
     let response = client.search()
                     .index(index)

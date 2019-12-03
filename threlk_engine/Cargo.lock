@@ -1274,6 +1274,7 @@ name = "threlk_engine"
 version = "0.1.0"
 dependencies = [
  "base64 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "chrono 0.4.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "crossbeam 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "elastic 0.21.0-pre.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "elastic_derive 0.21.0-pre.5 (registry+https://github.com/rust-lang/crates.io-index)",

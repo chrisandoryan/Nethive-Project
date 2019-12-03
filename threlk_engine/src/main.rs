@@ -24,7 +24,7 @@ mod processor;
 
 use kafka::producer::{Producer, Record, RequiredAcks};
 use serde_json::{Value, json, to_vec};
-use processor::MyType;
+use processor::BashLog;
 
 const KAFKA_SERVER_ADDR: &str = "192.168.56.104:9092";
 const TOPIC: &str = "SIEM";
@@ -40,10 +40,18 @@ fn main() {
     let t0 = thread::spawn(move || {
         loop {
             tick.recv().unwrap();
-            let resp = es::fetch_data::<MyType>(String::from("customer"), json!({
+            // let resp = es::fetch_data::<MyType>(String::from("customer"), json!({
+            //     "query": {
+            //         "query_string": {
+            //             "query": "joan doe"
+            //         }
+            //     }
+            // }));
+
+            let resp = es::fetch_data::<BashLog>(String::from("nethive-bash-*"), json!({
                 "query": {
-                    "query_string": {
-                        "query": "joan doe"
+                    "match": {
+                        "log_type": "TYPE_BASH_CENTRALIZED"
                     }
                 }
             }));
@@ -62,7 +70,7 @@ fn main() {
 
             let ss = s.clone();
             tpool.execute(move || {
-                let output = processor::example(data);
+                let output = processor::clean_bash_log(data);
                 ss.send(output).unwrap();
             });
         }
