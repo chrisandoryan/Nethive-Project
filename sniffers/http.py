@@ -48,11 +48,11 @@ def sniff_packet(interface):
 
 def write_http_log(data):
     try:
-        outHand.sendLog(json.dumps(data))
+        # outHand.sendLog(json.dumps(data))
         with open(HTTP_LOG_PATH, 'a+') as f:
             f.writelines(json.dumps(data) + "\n")
     except Exception as e:
-        print("[!] %s" % e)
+        print("[HTTP Sniffer] %s" % e)
     return
 
 def sql_tokenize_request(packet, buffer):
@@ -70,7 +70,7 @@ def sql_tokenize_request(packet, buffer):
     try:
         ip = packet[IP].src
     except Exception as e:
-        outHand.warning("[!] %s" % e)
+        print("[HTTP Sniffer] %s" % e)
         ip = ""
 
     result = []
@@ -246,14 +246,14 @@ def get_cookie_unidecoded(packet):
     try:
         return packet[HTTPRequest].Cookie.decode('utf-8')
     except Exception as e:
-        outHand.warning("[!] %s" % e)
+        print("[HTTP Sniffer] %s" % e)
         return bytearray()
 
 def get_ua(packet):
     try:
         return getattr(packet[HTTPRequest], 'User_Agent').decode("utf-8")
     except Exception as e:
-        outHand.warning("[!] %s" % e)
+        print("[HTTP Sniffer] %s" % e)
         return ""
 
 def get_ip_port(packet):
@@ -270,7 +270,7 @@ def get_content_type(packet, state):
     try:
         return getattr(packet[state], 'Content_Type').decode("utf-8")
     except Exception as e:
-        outHand.warning("[!] %s" % e)
+        print("[HTTP Sniffer] %s" % e)
         pass
 
 def get_longurl(packet):
@@ -289,6 +289,5 @@ def get_payload_unidecoded(packet):
 def run(sniffMode, iface):
     global sniff_mode, outHand
     sniff_mode = sniffMode
-    outHand.info("[*] Starting HTTPSensor Engine...")
     sniff_packet(iface)
 

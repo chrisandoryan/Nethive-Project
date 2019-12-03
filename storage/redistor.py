@@ -17,7 +17,8 @@ class RedisClient:
     def __init__(self):
         """ Virtually private constructor. """
         if RedisClient.__instance != None:
-            print("RedisClient is a singleton!")
+            # print("RedisClient is a singleton!")
+            pass
         else:
             self.__ts_client = Client() # timeseries redis client
             self.__redis_client = redis.Redis() # general redis client

@@ -1,60 +1,63 @@
-import parsers
-import sniffers
 import threading
-import observers
-import processors
+import serviceguards
 
 from activators import activate
-from ui import ledger
-from utils import OutputHandler
 
-import curses
-import queue
+# from ui import ledger
+# from utils import OutputHandler
+
+# import curses
+# import queue
 import signal
 import os
+import subprocess
 
 panel = None
-outHand = OutputHandler().getInstance()
+# outHand = OutputHandler().getInstance()
 
 def keyboardInterruptHandler(signal, frame):
-    global panel
-    panel.close()
+    # global panel
+    # panel.close()
+    serviceguards.elkstack.stop()
+    serviceguards.beatsforwarder.stop()
+    serviceguards.xssauditor.stop()
+    serviceguards.redistimeseries.stop()
     os.system("reset")
     exit(0)
 
-def logQueMan():
-    """
-    Manage and display log output from every sensors
-    """
-    global panel, outHand
-    outHand.sendLog("[*] Waiting for output from sensory...")
-    while True:
-        out = outHand.loggerQueue.get()
-        print(out)
-        if panel is not None:
-            panel.out2logger(out)
-            panel.refresh()
-    return
+    
+# def logQueMan():
+#     """
+#     Manage and display log output from every sensors
+#     """
+#     global panel, outHand
+#     outHand.sendLog("[*] Waiting for output from sensory...")
+#     while True:
+#         out = outHand.loggerQueue.get()
+#         print(out)
+#         if panel is not None:
+#             panel.out2logger(out)
+#             panel.refresh()
+#     return
 
-def outQueMan():
-    """
-    Manage and display stdout/stderr output from engines
-    """
-    global panel, outHand
-    while True:
-        out = outHand.outerrQueue.get()
-        print(out)
-        if panel is not None:
-            panel.out2outerr(out)
-            panel.refresh()
-    return
+# def outQueMan():
+#     """
+#     Manage and display stdout/stderr output from engines
+#     """
+#     global panel, outHand
+#     while True:
+#         out = outHand.outerrQueue.get()
+#         print(out)
+#         if panel is not None:
+#             panel.out2outerr(out)
+#             panel.refresh()
+#     return
 
+# def panMan(stdscr):
+#     global panel
+#     # panel = ledger.MainPanel(stdscr)
 
-def panMan(stdscr):
-    global panel
-    # panel = ledger.MainPanel(stdscr)
-
-    # p_thread = threading.Thread(target=panel.run, args=()).start()
+#     # p_thread = threading.Thread(target=panel.run, args=()).start()
 
 if __name__ == "__main__":
 
@@ -62,43 +65,40 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, keyboardInterruptHandler)
 
     # --- Dependency and configuration management
-    # activate.configs()
-    activate.slog()
-    # activate.filebeat()
-    # activate.auditbeat()
-    # activate.packetbeat()
-    # activate.logstash()
-    # activate.elk()
-    activate.dirs()
+
+    print("Nethive, a SIEMxCVSS Project\n")
+    print("[1] Fresh Installation")
+    print("[2] Refresh Configuration")
+    print("[3] Just-Start-This-Thing")
+    setup = input(">> ")
+
+    if setup == "1":
+        activate.fresh()
+    elif setup == "2":
+        activate.configs()
+    elif setup == "3":
+        pass
+    else:
+        print("Invalid input, please try again.")
 
     # --- UI Management
-    curses.wrapper(panMan)
+    # curses.wrapper(panMan)
 
     # --- Output Synchronization Management
     # lq_thread = threading.Thread(target=logQueMan, args=()).start()
     # oq_thread = threading.Thread(target=outQueMan, args=()).start()
 
-    # --- Run required infrastructures
-    # activate.elk()
+    # --- Activating all sensories
 
-    # --- Thread initialization for every modules
-    http = threading.Thread(target=sniffers.http.run, args=["*", os.getenv("LISTEN_IFACE")])
-    slog_parser = threading.Thread(target=parsers.slog_parser.run, args=())
-    bash_parser = threading.Thread(target=parsers.bash_parser.run, args=())
-    inspection_controller = threading.Thread(target=processors.inspection_controller.run, args=())
-    
-    # packetbeat_receptor = threading.Thread(target=parsers.packetbeat_receptor.run, args=())
-    # sql_response_observer = threading.Thread(target=observers.sql_response.run, args=())
-    # packetbeat_parser = threading.Thread(target=parsers.packetbeat_parser.run, args=())
-    # sql_response_interceptor = threading.Thread(target=parsers.sql_response_interceptor.run, args=())
+    serviceguards.elkstack.run()
 
-    # --- Begin running modules and its sensors
-    http.start()
-    slog_parser.start()
-    bash_parser.start()
-    inspection_controller.start()
+    serviceguards.inspectioncontroller.run()
+    serviceguards.beatsforwarder.run()
 
-    # packetbeat_receptor.start()
-    # sql_response_observer.start()
-    # packetbeat_parser.start()
-    # sql_response_interceptor.start()
+    serviceguards.httpsniffer.run()
+    serviceguards.xssauditor.run()
+    serviceguards.slogparser.run()
+    serviceguards.redistimeseries.run()
+    serviceguards.threlkengine.run()
+
+    print("[Main] Nethive SIEM is active.")

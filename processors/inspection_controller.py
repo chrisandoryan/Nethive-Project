@@ -185,7 +185,7 @@ def handle_client_connection(client_socket):
                         xss_audit = threading.Thread(target=xss_watcher.domparse, args=(deep_xss_package, False,)) # inspect request data ALONG WITH sql response
 
                         sql_inspection.start()
-                        # xss_audit.start()
+                        xss_audit.start()
 
                         # print("Bottom!")
 
@@ -193,8 +193,7 @@ def handle_client_connection(client_socket):
                 light_package = restructure_for_auditor(raw_inspection_data['package'])
 
                 xss_audit = threading.Thread(target=xss_watcher.domparse, args=(light_package, False,)) # inspect request data WITHOUT sql response
-
-                # xss_audit.start()
+                xss_audit.start()
                 
         except Exception as e:
             print(request.decode("utf-8"))

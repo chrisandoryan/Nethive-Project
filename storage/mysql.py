@@ -25,7 +25,8 @@ class MySQLClient(threading.local):
         """ Virtually private constructor. """
         super(MySQLClient, self).__init__()
         if MySQLClient.__instance != None:
-            print("MySQLClient is a singleton!")
+            # print("MySQLClient is a singleton!")
+            pass
         else:
             MySQLClient._conn = MySQLdb.connect(host=os.getenv('MYSQL_HOSTNAME'), user=os.getenv('MYSQL_USER'), passwd=os.getenv('MYSQL_PASS'))
             MySQLClient.__instance = self

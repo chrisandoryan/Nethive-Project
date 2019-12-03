@@ -26,10 +26,11 @@ use kafka::producer::{Producer, Record, RequiredAcks};
 use serde_json::{Value, json, to_vec};
 use processor::BashLog;
 
-const KAFKA_SERVER_ADDR: &str = "192.168.56.104:9092";
-const TOPIC: &str = "SIEM";
+const KAFKA_SERVER_ADDR: &str = "localhost:9092";
+const TOPIC: &str = "LEXY";
 
 fn main() {
+    println!("Initiating.");
     env_logger::init();
 
     let (s_raw, r_raw) = channel::unbounded();
@@ -40,14 +41,7 @@ fn main() {
     let t0 = thread::spawn(move || {
         loop {
             tick.recv().unwrap();
-            // let resp = es::fetch_data::<MyType>(String::from("customer"), json!({
-            //     "query": {
-            //         "query_string": {
-            //             "query": "joan doe"
-            //         }
-            //     }
-            // }));
-
+            
             let resp = es::fetch_data::<BashLog>(String::from("nethive-bash-*"), json!({
                 "query": {
                     "match": {
@@ -87,7 +81,10 @@ fn main() {
         loop {
             let data = r.recv().unwrap();
 
-            producer.send(&Record::from_value(TOPIC, serde_json::to_vec(&data).unwrap())).unwrap();
+            println!("Get: {}", data.cmd);
+
+            let status = producer.send(&Record::from_value(TOPIC, serde_json::to_vec(&data).unwrap())).unwrap();
+            println!("LEXY: {:?}", status);
         }
     });
     info!("kafka producer thread started");

@@ -180,7 +180,7 @@ class SlowQueryParser(object):
                         # --- TODO: somehow get the returned row from db and pass them to XSS Auditor NOT USED ANYMORE.
                         print("")
                     # self.send_to_correlator(json_obj)
-                    outHand.sendLog(json_obj)
+                    # outHand.sendLog(json_obj)
 
                     f.writelines(json_obj + "\n") 
 
@@ -189,6 +189,5 @@ def run():
     logfile = open(MYSQL_SLOW_QUERY_LOG_PATH, 'r')
     loglines = tail(logfile)
 
-    outHand.info("[*] Starting SlogParser Engine...")
     query_parser = SlowQueryParser(loglines)
     query_parser.start_parser(outHand)

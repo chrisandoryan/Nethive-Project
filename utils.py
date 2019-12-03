@@ -32,7 +32,8 @@ class OutputHandler:
     def __init__(self):
         """ Virtually private constructor. """
         if OutputHandler.__instance != None:
-            print("OutputHandler is a singleton!")
+            # print("OutputHandler is a singleton!")
+            pass
         else:
             OutputHandler.__instance = self
     # --- Helper function to create multiple output types
@@ -82,3 +83,9 @@ def decode_deeply(data):
     if isinstance(data, tuple):  return tuple(map(decode_deeply, data))
     if isinstance(data, list):   return list(map(decode_deeply, data))
     return data
+
+def bufferOutput(process):
+    while True:
+        out = process.stdout.readline().decode("utf-8").strip()
+        print(out)
+        if not out: break

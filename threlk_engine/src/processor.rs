@@ -11,17 +11,17 @@ struct Beats {
 #[derive(Debug, Clone, Serialize, Deserialize, ElasticType)]
 pub struct BashLog {
     message: String,
-    beat: Beats,
+    agent: Beats,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BashMsg {
-    user: String,
-    cmd: String,
-    cwd: String,
-    time: String,
-    user_ip: String,
-    hostname: String
+    pub user: String,
+    pub cmd: String,
+    pub cwd: String,
+    pub time: String,
+    pub user_ip: String,
+    pub hostname: String
 }
 
 pub fn clean_bash_log(i: BashLog) -> BashMsg {
@@ -43,6 +43,6 @@ pub fn clean_bash_log(i: BashLog) -> BashMsg {
         cwd: data[2].to_string(),
         time: data[0].to_string(),
         user_ip: usr_host[1].to_string(),
-        hostname: i.beat.hostname.to_string()
+        hostname: i.agent.hostname.to_string()
     }
 }

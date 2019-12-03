@@ -32,7 +32,7 @@ class FeatureExtractor:
 
     def __init__(self, query):
         super().__init__()
-        print(query)
+        # print(query)
         self.extract_features(query)
 
     def count_tautology_occurence_in_tokenized(self, tokenized):

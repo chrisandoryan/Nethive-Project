@@ -30,7 +30,7 @@ def backupOriginalConf(original):
 
 def replConfigFile(original, modified):
     # For ELK Configuration, DO NOT COPY/CREATE BACKUP inside same directory!
-    backupOriginalConf(original)
+    # backupOriginalConf(original)
     shutil.copy(modified, original)    
 
 def copyTemplateFile(original, modified):
@@ -43,13 +43,6 @@ def copyTemplateFile(original, modified):
 
         with open(original, 'w') as w:
             w.write(new_conf)
-
-def bufferOutput(process):
-    while True:
-        out = process.stdout.readline().decode("utf-8")
-        outHand.info(out)
-        print(out)
-        if not out: break
 
 # --- End of Helper methods
 
@@ -65,7 +58,7 @@ def slog():
     db.close()
     return
 
-def audit():
+def audit(): # WILL BE REMOVED - NOT USED ANYMORE
     replConfigFile(AUDIT_RULES_PATH, "./activators/config/audit.rules")
     # os.rename(AUDIT_RULES_PATH, AUDIT_RULES_PATH + ".original")
     # shutil.copy("./activators/config/audit.rules", AUDIT_RULES_PATH)
@@ -139,7 +132,6 @@ def bash():
     f.close()
     for u in config['users']:
         BASHRC_PATH = "/home/%s/.bashrc" % u['username']
-        # os.rename(BASHRC_PATH, BASHRC_PATH + ".original")
         template = open('./activators/config/.bashrc', 'r')
         t = Template(template.read())
         config = t.safe_substitute(
@@ -187,14 +179,14 @@ def dirs():
         os.makedirs(os.path.dirname(CENTRALIZED_BASH_HISTORY_PATH), exist_ok=True)
 
 def memcache():
-    # TODO: setup memcache configuration
+    # TODO: setup memcache configuration WILL BE REMOVED - NOT USED ANYMORE
     # apt install memcached php-memcached
     # copy /etc/memcached.conf to /etc/memcached.conf.orig
     # write custom configuration from ./config/memcached.conf into /etc/memcached.conf
     return
 
 def redis():
-    # TODO: create activator for redis server
+    # TODO: create activator for redis server WILL BE REMOVED - NOT USED ANYMORE
     # sudo docker run -p 6379:6379 -it --rm redislabs/redistimeseries
     return
 
@@ -216,30 +208,36 @@ def elk():
     # os.rename(DOCKER_ELK_COMPOSE_PATH, DOCKER_ELK_COMPOSE_PATH + ".original")
     # shutil.copy("./activators/config/docker-compose.yml", DOCKER_ELK_COMPOSE_PATH)
 
-    outHand.info("[*] Starting ELKStack...")
-    elkstack = subprocess.Popen(['/bin/bash', './activators/elkstack.sh'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    bufferOutput(elkstack)
+    # print("[*] Starting ELKStack...")
+    # elkstack = subprocess.Popen(['/bin/bash', './activators/elkstack.sh'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    # bufferOutput(elkstack)
 
-def configs():
-    outHand.info("[*] Initiating dependency manager...")
+def fresh():
+    print("[*] Installing required dependencies...")
     depman()
-    outHand.info("[*] Creating directories...")
-    dirs()
-    outHand.info("[*] Configuring SQL Slow Query Log...")
-    slog()
-    outHand.info("[*] Activating auditd module...")
-    audit()
-    outHand.info("[*] Configuring filebeat module...")
-    filebeat()
-    outHand.info("[*] Configuring auditbeat module...")
-    auditbeat()
-    outHand.info("[*] Configuring packetbeat module...")
-    packetbeat()
-    outHand.info("[*] Configuring bashparse module...")
-    bash()
-    outHand.info("[*] Updating Logstash configuration...")
-    logstash()
+    print("Done.")
+    print()
+    print("[*] Setting up environment...")
+    configs()
     return
 
-if __name__ == "__main__":
+def configs():
+    print("[*] Creating required directories...")
+    dirs()
+    print("[*] Enabling MySQL Slow Query Log...")
+    slog()
+    print("[*] Configuring filebeat module...")
+    filebeat()
+    print("[*] Configuring auditbeat module...")
+    auditbeat()
+    print("[*] Configuring packetbeat module...")
+    packetbeat()
+    print("[*] Configuring bash \"historians\" module...")
     bash()
+    print("[*] Updating docker-elk configuration...")
+    elk()
+    print("[*] Updating Logstash configuration...")
+    logstash()
+
+if __name__ == "__main__":
+    pass

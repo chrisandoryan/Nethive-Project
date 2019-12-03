@@ -15,7 +15,7 @@ where for<'de> T: serde::Deserialize<'de> {
     let auth = HeaderValue::from_str(&format!("Basic {}", creds)).unwrap();
 
     let builder = SyncClientBuilder::new()
-        .static_node("http://192.168.56.104:9200")
+        .static_node("http://localhost:9200")
         .params_fluent(move |p| p
             .url_param("pretty", true)
             .header(AUTHORIZATION, auth.clone()));

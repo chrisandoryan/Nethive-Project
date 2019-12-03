@@ -15,7 +15,8 @@ class MemCacheClient(QueueHashmap):
     def __init__(self):
         """ Virtually private constructor. """
         if MemCacheClient.__instance != None:
-            print("MemCacheClient is a singleton!")
+            # print("MemCacheClient is a singleton!")
+            pass
         else:
             self._store = defaultdict(lambda: defaultdict(list))
             self.__memcache_client = pylibmc.Client(["127.0.0.1"], binary=True, behaviors={"cas": True, "tcp_nodelay": True, "ketama": True})
