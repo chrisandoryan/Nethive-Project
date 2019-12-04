@@ -40,7 +40,7 @@ from datetime import datetime, timedelta
 from parsers.Slog import SlowQueryLog
 from sqlparse.tokens import Token
 from utils import tail
-from utils import OutputHandler
+# from utils import OutputHandler
 import time
 import csv
 import os
@@ -51,7 +51,7 @@ MYSQL_SLOW_QUERY_LOG_PATH = os.getenv("MYSQL_SLOW_QUERY_LOG_PATH")
 PARSED_SLOW_QUERY_LOG_PATH = os.getenv("PARSED_SLOW_QUERY_LOG_PATH")
 
 # --- Handle output synchronization
-outHand = OutputHandler().getInstance()
+# outHand = OutputHandler().getInstance()
 
 # --- (hopefully) Thread-safe request-to-response storage. Memc is used for system wide storage
 # memcache = MemCacheClient().getInstance()
@@ -190,4 +190,4 @@ def run():
     loglines = tail(logfile)
 
     query_parser = SlowQueryParser(loglines)
-    query_parser.start_parser(outHand)
+    query_parser.start_parser(None)

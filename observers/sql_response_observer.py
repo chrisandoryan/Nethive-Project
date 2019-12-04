@@ -3,9 +3,9 @@ import threading
 import json
 # import signal
 
-from storage.memcache import MemCacheClient
+# from storage.memcache import MemCacheClient
 
-memcache = MemCacheClient().getInstance()
+memcache = None # MemCacheClient().getInstance()
 
 bind_ip = '0.0.0.0'
 bind_port = 5128

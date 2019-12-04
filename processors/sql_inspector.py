@@ -6,6 +6,11 @@ import os
 import socket
 import pandas as pd
 
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 LOGSTASH_HOST = os.getenv('LOGSTASH_HOST')
 LOGSTASH_PORT = int(os.getenv('LOGSTASH_PORT'))
 
@@ -18,10 +23,15 @@ ACTIVE_LABEL = "normal"
 
 
 def send_to_logstash(message):
-    tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    tcp_socket.connect((LOGSTASH_HOST, LOGSTASH_PORT))
-    tcp_socket.sendall((json.dumps(message) + "\n").encode())
-    tcp_socket.close()
+    try:
+        tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        tcp_socket.connect((LOGSTASH_HOST, LOGSTASH_PORT))
+        tcp_socket.sendall((json.dumps(message) + "\n").encode())
+        tcp_socket.close()
+    except Exception as e:
+        print("[SQL Inspector] %s" % e)
+        logger.exception(e)
+    
     return
 
 def count_stacked_query(query):

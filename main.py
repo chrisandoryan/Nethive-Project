@@ -8,6 +8,7 @@ from activators import activate
 
 # import curses
 # import queue
+
 import signal
 import os
 import subprocess
@@ -22,7 +23,7 @@ def keyboardInterruptHandler(signal, frame):
     serviceguards.beatsforwarder.stop()
     serviceguards.xssauditor.stop()
     serviceguards.redistimeseries.stop()
-    os.system("reset")
+    # os.system("reset")
     exit(0)
 
     
@@ -88,9 +89,10 @@ if __name__ == "__main__":
     # lq_thread = threading.Thread(target=logQueMan, args=()).start()
     # oq_thread = threading.Thread(target=outQueMan, args=()).start()
 
-    # --- Activating all sensories
+    # --- Activating SIEM Engines
 
     serviceguards.elkstack.run()
+    serviceguards.redistimeseries.run()
 
     serviceguards.inspectioncontroller.run()
     serviceguards.beatsforwarder.run()
@@ -98,7 +100,6 @@ if __name__ == "__main__":
     serviceguards.httpsniffer.run()
     serviceguards.xssauditor.run()
     serviceguards.slogparser.run()
-    serviceguards.redistimeseries.run()
     serviceguards.threlkengine.run()
 
     print("[Main] Nethive SIEM is active.")

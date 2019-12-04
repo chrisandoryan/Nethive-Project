@@ -77,8 +77,9 @@ def parse_mysql_beat_packet(beat_packet):
         return parsed_packet
 
     except Exception as e:
+        print("[Inspection Controller] %s" % e)
         pass
-        print(traceback.format_exc())
+        # print(traceback.format_exc())
 
 def restructure_for_auditor(package):
     try:
@@ -88,7 +89,8 @@ def restructure_for_auditor(package):
             "time": int(time.time())
         }
     except Exception as e:
-        print(traceback.format_exc())
+        print("[Inspection Controller] %s" % e)
+        # print(traceback.format_exc())
     return package
 
 def create_xss_audit_package(package, parsed_sql_data):
@@ -97,7 +99,8 @@ def create_xss_audit_package(package, parsed_sql_data):
         package['req_packet']['sql_data'] = parsed_sql_data['sql_data']
         package['req_packet']['sql_stat'] = parsed_sql_data['sql_stat']
     except Exception as e:
-        print(traceback.format_exc())
+        print("[Inspection Controller] %s" % e)
+        # print(traceback.format_exc())
     return package
 
 def create_sqli_inspection_package(package, parsed_sql_data):
@@ -196,8 +199,9 @@ def handle_client_connection(client_socket):
                 xss_audit.start()
                 
         except Exception as e:
-            print(request.decode("utf-8"))
-            print(traceback.format_exc())
+            print("[Inspection Controller] %s" % e)    
+            # print(request.decode("utf-8"))
+            # print(traceback.format_exc())
             pass
 
 def start():

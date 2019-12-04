@@ -5,6 +5,10 @@ from urllib.parse import unquote, unquote_plus
 import os
 import time
 import traceback
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # Matching Algorithm. 
 # Before searching for scripts in the
@@ -25,7 +29,6 @@ WATCHMAN_PORT = 5127
 
 XSS_WATCHMAN_SOCKET = os.getenv("XSS_WATCHMAN_SOCKET")
 
-
 LOGSTASH_HOST = os.getenv('LOGSTASH_HOST')
 LOGSTASH_PORT = int(os.getenv('LOGSTASH_PORT'))
 
@@ -34,10 +37,14 @@ LOGSTASH_PORT = int(os.getenv('LOGSTASH_PORT'))
 # xss_logger.addHandler(AsynchronousLogstashHandler(LOGSTASH_HOST, LOGSTASH_PORT, database_path='xss_audit_log.db'))
 
 def send_to_logstash(message):
-    tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    tcp_socket.connect((LOGSTASH_HOST, LOGSTASH_PORT))
-    tcp_socket.sendall((json.dumps(message) + "\n").encode())
-    tcp_socket.close()
+    try:
+        tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        tcp_socket.connect((LOGSTASH_HOST, LOGSTASH_PORT))
+        tcp_socket.sendall((json.dumps(message) + "\n").encode())
+        tcp_socket.close()
+    except Exception as e:
+        print("[XSS Watcher] %s" % e)
+        logger.exception(e)
     return
 
 def send_to_watchman(the_package):
@@ -85,7 +92,8 @@ def domparse(the_package, is_flagged_xss):
         send_to_logstash(message)
 
     except Exception as e:
-        print(traceback.format_exc())
+        print("[XSS Watcher] %s" % e)
+        # print(traceback.format_exc())
     return
 
 def inspect(arr_buff):

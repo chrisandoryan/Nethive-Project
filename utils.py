@@ -4,51 +4,51 @@ import sys
 import queue
 from collections import defaultdict
 
-class QueueHashmap(queue.Queue):
-    def __init__(self, maxsize=65535):
-        super().__init__(maxsize)
-        self._store = defaultdict(lambda: defaultdict(list))
-    def get_queue(self, key):
-        return self._store.get(key, [])
-    def pop(self, key, subkey):
-        queue = self.get_queue(key)
-        if queue:
-            return queue[subkey].pop()
-        return None
-    def set(self, key, subkey, item):
-        self._store[key][subkey].insert(0, item)
-        return self._store[key][subkey]
+# class QueueHashmap(queue.Queue):
+#     def __init__(self, maxsize=65535):
+#         super().__init__(maxsize)
+#         self._store = defaultdict(lambda: defaultdict(list))
+#     def get_queue(self, key):
+#         return self._store.get(key, [])
+#     def pop(self, key, subkey):
+#         queue = self.get_queue(key)
+#         if queue:
+#             return queue[subkey].pop()
+#         return None
+#     def set(self, key, subkey, item):
+#         self._store[key][subkey].insert(0, item)
+#         return self._store[key][subkey]
 
-class OutputHandler:
-    __instance = None
-    loggerQueue = queue.Queue()
-    outerrQueue = queue.Queue()
-    @staticmethod
-    def getInstance():
-        """ Static access method. """
-        if OutputHandler.__instance == None:
-            OutputHandler()
-        return OutputHandler.__instance
-    def __init__(self):
-        """ Virtually private constructor. """
-        if OutputHandler.__instance != None:
-            # print("OutputHandler is a singleton!")
-            pass
-        else:
-            OutputHandler.__instance = self
-    # --- Helper function to create multiple output types
-    def success(self, buffer):
-        self.outerrQueue.put(buffer.strip())
-        return        
-    def info(self, buffer):
-        self.outerrQueue.put(buffer.strip())
-        return
-    def warning(self, buffer):
-        self.outerrQueue.put(buffer.strip())
-        return
-    def sendLog(self, buffer):
-        self.loggerQueue.put(buffer.strip())
-        return
+# class OutputHandler:
+#     __instance = None
+#     loggerQueue = queue.Queue()
+#     outerrQueue = queue.Queue()
+#     @staticmethod
+#     def getInstance():
+#         """ Static access method. """
+#         if OutputHandler.__instance == None:
+#             OutputHandler()
+#         return OutputHandler.__instance
+#     def __init__(self):
+#         """ Virtually private constructor. """
+#         if OutputHandler.__instance != None:
+#             # print("OutputHandler is a singleton!")
+#             pass
+#         else:
+#             OutputHandler.__instance = self
+#     # --- Helper function to create multiple output types
+#     def success(self, buffer):
+#         self.outerrQueue.put(buffer.strip())
+#         return        
+#     def info(self, buffer):
+#         self.outerrQueue.put(buffer.strip())
+#         return
+#     def warning(self, buffer):
+#         self.outerrQueue.put(buffer.strip())
+#         return
+#     def sendLog(self, buffer):
+#         self.loggerQueue.put(buffer.strip())
+#         return
 
 def tail(logfile):
     logfile.seek(0, 2)
@@ -84,8 +84,13 @@ def decode_deeply(data):
     if isinstance(data, list):   return list(map(decode_deeply, data))
     return data
 
-def bufferOutput(process):
+def bufferOutput(process, max_line=0):
+    line_count = 0
     while True:
-        out = process.stdout.readline().decode("utf-8").strip()
-        print(out)
+        out = process.stdout.readline().decode("utf-8")
         if not out: break
+        else:
+            # sys.stdout.write(out + "\r\n")
+            line_count += 1
+        if max_line == 0: pass
+        elif line_count >= max_line: break

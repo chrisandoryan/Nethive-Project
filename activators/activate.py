@@ -6,7 +6,7 @@ import settings
 import yaml
 from string import Template
 import re
-from utils import OutputHandler
+# from utils import OutputHandler
 
 DOCKER_ELK_REPO_PATH = os.getenv("DOCKER_ELK_REPO_PATH")
 AUDIT_RULES_PATH = os.getenv("AUDIT_RULES_PATH")
@@ -21,7 +21,7 @@ CENTRALIZED_BASH_HISTORY_PATH = os.getenv("CENTRALIZED_BASH_HISTORY_PATH")
 SQL_RESPONSE_LOG_PATH = os.getenv("SQL_RESPONSE_LOG_PATH")
 
 # --- Handle output synchronization
-outHand = OutputHandler().getInstance()
+# outHand = OutputHandler().getInstance()
 
 # --- Helper methods
 def backupOriginalConf(original):

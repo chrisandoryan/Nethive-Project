@@ -1,7 +1,7 @@
 from redistimeseries.client import Client
 import redis
 from collections import defaultdict
-from utils import QueueHashmap
+# from utils import QueueHashmap
 import json
 
 class RedisClient:

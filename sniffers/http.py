@@ -10,14 +10,14 @@ import socket
 import base64
 
 from processors import sql_tokenizer
-from parsers import slog_parser
+# from parsers import slog_parser
 
-import observers
+# import observers
 
-from utils import OutputHandler, QueueHashmap, decode_deeply
+from utils import decode_deeply
 
-from storage.memcache import MemCacheClient
-from storage.mysql import MySQLClient
+# from storage.memcache import MemCacheClient
+# from storage.mysql import MySQLClient
 from storage.redistor import RedisClient
 
 import subprocess
@@ -35,12 +35,12 @@ unsafe_content_types = [
 ]
 
 # --- Handle output synchronization
-outHand = OutputHandler().getInstance()
+outHand = None # OutputHandler().getInstance()
 
 # --- (hopefully) Thread-safe request-to-response storage. Memc is used for system wide storage
 # quehash = QueueHashmap() # merged into MemCacheClient
-memcache = MemCacheClient().getInstance()
-mysqlobj = MySQLClient.getInstance()
+# memcache = MemCacheClient().getInstance()
+# mysqlobj = MySQLClient.getInstance()
 redis = RedisClient.getInstance()
 
 def sniff_packet(interface):
