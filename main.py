@@ -14,17 +14,26 @@ import os
 import subprocess
 
 panel = None
+exiting = False
 # outHand = OutputHandler().getInstance()
 
 def keyboardInterruptHandler(signal, frame):
-    # global panel
+    global exiting
     # panel.close()
-    serviceguards.elkstack.stop()
-    serviceguards.beatsforwarder.stop()
-    serviceguards.xssauditor.stop()
-    serviceguards.redistimeseries.stop()
-    # os.system("reset")
-    exit(0)
+    if not exiting:
+        exiting = True
+        kill_infra = input("Do you want to stop docker containers? [Y/n]: ")
+        if kill_infra.upper() == "Y":
+            print("[Main] Starting containers termination...")
+            serviceguards.elkstack.stop()
+            serviceguards.redistimeseries.stop()
+            print("[Main] Containers terminated.")
+        serviceguards.beatsforwarder.stop()
+        serviceguards.xssauditor.stop()
+        # os.system("reset")
+        exit(0)
+    else:
+        print("[Main] Already exiting... Please wait.")
 
     
 # def logQueMan():
@@ -95,11 +104,12 @@ if __name__ == "__main__":
     serviceguards.redistimeseries.run()
 
     serviceguards.inspectioncontroller.run()
-    serviceguards.beatsforwarder.run()
 
     serviceguards.httpsniffer.run()
     serviceguards.xssauditor.run()
     serviceguards.slogparser.run()
     serviceguards.threlkengine.run()
 
+    serviceguards.beatsforwarder.run()
+    
     print("[Main] Nethive SIEM is active.")

@@ -49,12 +49,16 @@ def send_to_logstash(message):
 
 def send_to_watchman(the_package):
     if os.path.exists(XSS_WATCHMAN_SOCKET):
-        unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        unix_socket.connect(XSS_WATCHMAN_SOCKET)
-        unix_socket.sendall(json.dumps(the_package).encode())
-        result = unix_socket.recv(4096)
-        unix_socket.close()
-        return result
+        try:
+            unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            unix_socket.connect(XSS_WATCHMAN_SOCKET)
+            unix_socket.sendall(json.dumps(the_package).encode())
+            result = unix_socket.recv(4096)
+            unix_socket.close()
+            return result
+        except Exception as e:
+            print("[XSS Watcher] %s" % e)
+            logger.exception(e)
     else:
         print("[XSS_Watcher] No socket file on %s" % XSS_WATCHMAN_SOCKET)
 
@@ -93,6 +97,7 @@ def domparse(the_package, is_flagged_xss):
 
     except Exception as e:
         print("[XSS Watcher] %s" % e)
+        logger.exception(e)
         # print(traceback.format_exc())
     return
 

@@ -87,10 +87,16 @@ def decode_deeply(data):
 def bufferOutput(process, max_line=0):
     line_count = 0
     while True:
-        out = process.stdout.readline().decode("utf-8")
+        out = process.stdout.readline()
         if not out: break
         else:
-            # sys.stdout.write(out + "\r\n")
+            sys.stdout.write(out.rstrip() + "\r\n")
             line_count += 1
         if max_line == 0: pass
         elif line_count >= max_line: break
+
+def checkProcess(process):
+    while True:
+        if process.poll() != None: # process is dead
+            return False
+        return True

@@ -11,6 +11,11 @@ import base64
 from processors import xss_watcher
 from processors import sql_inspector
 
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 SQL_METHOD_LESS_INTEREST = ["USE"]
 
 # import signal
@@ -78,6 +83,7 @@ def parse_mysql_beat_packet(beat_packet):
 
     except Exception as e:
         print("[Inspection Controller] %s" % e)
+        logger.exception(e)
         pass
         # print(traceback.format_exc())
 
@@ -90,16 +96,19 @@ def restructure_for_auditor(package):
         }
     except Exception as e:
         print("[Inspection Controller] %s" % e)
+        logger.exception(e)
         # print(traceback.format_exc())
     return package
 
 def create_xss_audit_package(package, parsed_sql_data):
     try:
+        print("XSS", parsed_sql_data)
         package = restructure_for_auditor(package)
         package['req_packet']['sql_data'] = parsed_sql_data['sql_data']
         package['req_packet']['sql_stat'] = parsed_sql_data['sql_stat']
     except Exception as e:
         print("[Inspection Controller] %s" % e)
+        logger.exception(e)
         # print(traceback.format_exc())
     return package
 
@@ -161,6 +170,7 @@ def handle_client_connection(client_socket):
             # print(package_identifiers.__dict__)
 
             raw_inspection_data = json.loads(request.decode("utf-8"))
+            print("RAW INSPECTION DATA", raw_inspection_data)
 
             if raw_inspection_data['type'] == 'mysql':
                 # print("BEFORE", raw_inspection_data)
@@ -178,12 +188,12 @@ def handle_client_connection(client_socket):
                         deep_xss_package = create_xss_audit_package(decode_deeply(bundle_packed), parsed_sql_data)
                         deep_sqli_package = create_sqli_inspection_package(decode_deeply(bundle_packed), parsed_sql_data)
 
-                        # print("XSS PACKAGE", deep_xss_package)
-                        # print("SQLI PACKAGE", deep_sqli_package)
+                        print("XSS PACKAGE", deep_xss_package)
+                        print("SQLI PACKAGE", deep_sqli_package)
 
                         sql_inspection = threading.Thread(target=sql_inspector.inspect, args=(deep_sqli_package,)) # inspect request to find sqli
 
-                        # print("DATA TO CHECK: ", len(http_bundles))
+                        print("DATA TO CHECK: ", len(http_bundles))
 
                         xss_audit = threading.Thread(target=xss_watcher.domparse, args=(deep_xss_package, False,)) # inspect request data ALONG WITH sql response
 
@@ -199,7 +209,8 @@ def handle_client_connection(client_socket):
                 xss_audit.start()
                 
         except Exception as e:
-            print("[Inspection Controller] %s" % e)    
+            print("[Inspection Controller] %s" % e)
+            logger.exception(e)
             # print(request.decode("utf-8"))
             # print(traceback.format_exc())
             pass

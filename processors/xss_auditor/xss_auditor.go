@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"strings"
@@ -87,6 +88,15 @@ var extContentTagList = []string{"script", "object", "param", "embed", "applet",
 var extContentAttrList = []string{"src", "code", "data", "content", "href"}
 
 func main() {
+	// Logging
+	logfile, err := os.OpenFile("xss_auditor.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer logfile.Close()
+
+	log.SetOutput(logfile)
+
 	// Listen for incoming connections.
 	l, err := net.Listen(connType, sockPath)
 	if err != nil {

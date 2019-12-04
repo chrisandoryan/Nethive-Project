@@ -5,12 +5,13 @@ proc = None
 
 def run():
     print("[Redis] Starting redis-timeseries docker...")
-    proc = subprocess.call("docker run -p 6379:6379 -it --rm redislabs/redistimeseries", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, universal_newlines=True)
+    proc = subprocess.Popen("docker run -d --name redis_ts -p 6379:6379 -it --rm redislabs/redistimeseries", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, encoding='utf-8', bufsize=1, universal_newlines=True)
+    utils.bufferOutput(proc)
     print("[Redis] Started.")
+    proc.stdout.close()
 
 def stop():
-    if proc:
-        print("[Redis] Stopping redis-timeseries...")
-        proc.kill()
-        print("[Redis] Stopped.")
+    print("[Redis] Stopping redis-timeseries...")
+    proc = subprocess.Popen("docker kill redis_ts", stdout=subprocess.PIPE,stderr=subprocess.STDOUT, shell=True, encoding='utf-8', bufsize=1,universal_newlines=True)
+    print("[Redis] Stopped.")
 
