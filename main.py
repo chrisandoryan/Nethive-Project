@@ -108,7 +108,7 @@ if __name__ == "__main__":
     serviceguards.httpsniffer.run()
     serviceguards.xssauditor.run()
     serviceguards.slogparser.run()
-    serviceguards.threlkengine.run()
+    # serviceguards.threlkengine.run()
 
     serviceguards.beatsforwarder.run()
     

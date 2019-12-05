@@ -22,6 +22,8 @@ SQL_METHOD_LESS_INTEREST = ["USE"]
 
 AUDIT_CONTROL_HOST = os.getenv("AUDIT_CONTROL_HOST")
 AUDIT_CONTROL_PORT = int(os.getenv("AUDIT_CONTROL_PORT"))
+LOGSTASH_HOST = os.getenv('LOGSTASH_HOST')
+LOGSTASH_PORT = int(os.getenv('LOGSTASH_PORT'))
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((AUDIT_CONTROL_HOST, AUDIT_CONTROL_PORT))
@@ -31,6 +33,17 @@ redis = RedisClient.getInstance()
 
 def keyboardInterruptHandler(signal, frame):
     server.close()
+
+def send_to_logstash(message):
+    try:
+        tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        tcp_socket.connect((LOGSTASH_HOST, LOGSTASH_PORT))
+        tcp_socket.sendall((json.dumps(message) + "\n").encode())
+        tcp_socket.close()
+    except Exception as e:
+        print("[Inspection Controller] %s" % e)
+        logger.exception(e)
+    return
 
 def parse_returned_sql_rows(raw_rows):
     raw_rows = list(filter(None, raw_rows.split("\n")))
@@ -102,7 +115,7 @@ def restructure_for_auditor(package):
 
 def create_xss_audit_package(package, parsed_sql_data):
     try:
-        print("XSS", parsed_sql_data)
+        # print("XSS", parsed_sql_data)
         package = restructure_for_auditor(package)
         package['req_packet']['sql_data'] = parsed_sql_data['sql_data']
         package['req_packet']['sql_stat'] = parsed_sql_data['sql_stat']
@@ -153,6 +166,31 @@ def unwrap_http_bundle(bundle_package):
         redis_key = k
         bundle_packed = json.loads(base64.decodestring(bundle_package[k][0]['package'].encode("utf-8")))
         return (redis_key, bundle_packed)
+
+def audit_the_package(sqli_package, xss_package, bundle_package):
+    print ("[Inspection Controller] Auditing...")
+    sqli_result = sql_inspector.inspect(sqli_package)
+    xss_result = xss_watcher.domparse(xss_package, False)
+
+    # print("BUNDLE PACKAGE", bundle_package)
+    # print("SQLI RESULT", sqli_result)
+    # print("XSS RESULT", xss_result)
+
+    result = {
+       "inspect_sqli": sqli_result,
+       "audit_xss": xss_result,
+       "url": bundle_package['req_packet']['url'],
+       "body": bundle_package['req_packet']['body'],
+       "source_address": bundle_package['req_packet']['client_ip'],
+       "source_port": bundle_package['req_packet']['client_port'],
+       "has_sql": True if "sql_data" in bundle_package['req_packet'] else False,
+       "arrived_at": bundle_package['req_packet']['arrived_at']
+    }
+
+    # print("\n", "RESULT", result, "\n")
+    message = {'result': result, 'log_type': 'TYPE_HTTP_MONITOR'}
+
+    return
         
 def handle_client_connection(client_socket):
     while True:
@@ -185,20 +223,26 @@ def handle_client_connection(client_socket):
                         if delete_status:
                             print("[Inspection Controller] Bundle {} Deleted!".format(redis_key))
 
-                        deep_xss_package = create_xss_audit_package(decode_deeply(bundle_packed), parsed_sql_data)
-                        deep_sqli_package = create_sqli_inspection_package(decode_deeply(bundle_packed), parsed_sql_data)
+                        decoded_package = decode_deeply(bundle_packed)
+
+                        deep_xss_package = create_xss_audit_package(decoded_package, parsed_sql_data)
+                        deep_sqli_package = create_sqli_inspection_package(decoded_package, parsed_sql_data)
 
                         # print("XSS PACKAGE", deep_xss_package)
                         # print("SQLI PACKAGE", deep_sqli_package)
 
-                        sql_inspection = threading.Thread(target=sql_inspector.inspect, args=(deep_sqli_package,)) # inspect request to find sqli
+                        # sql_inspection = threading.Thread(target=sql_inspector.inspect, args=(deep_sqli_package,)) # inspect request to find sqli
 
                         print("[Inspection Controller] Checking %d bundle(s) from Redis" % len(http_bundles))
 
-                        xss_audit = threading.Thread(target=xss_watcher.domparse, args=(deep_xss_package, False,)) # inspect request data ALONG WITH sql response
+                        vuln_check = threading.Thread(target=audit_the_package, args=(deep_sqli_package, deep_xss_package, decoded_package))
 
-                        sql_inspection.start()
-                        xss_audit.start()
+                        vuln_check.start()
+
+                        # xss_audit = threading.Thread(target=xss_watcher.domparse, args=(deep_xss_package, False,)) # inspect request data ALONG WITH sql response
+
+                        # sql_inspection.start()
+                        # xss_audit.start()
 
                         # print("Bottom!")
 

@@ -142,6 +142,6 @@ def predict(inspection_package, request_data):
 
     message = {'parsed_log': result, 'log_type': 'TYPE_SQLI_INSPECTOR'}
     print("SQLI INSPECTION RESULT", result)
-    send_to_logstash(message)
+    # send_to_logstash(message) # uncomment to store the result in its own index in elasticsearch
 
-    return
+    return result

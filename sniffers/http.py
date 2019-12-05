@@ -96,7 +96,8 @@ def pack_request_for_inspection(packet, sql_tokenize_result):
     package = {
         "url": get_url_unidecoded(packet),
         "body": get_payload_unidecoded(packet),
-        "tokenization": json.dumps(sql_tokenize_result)
+        "tokenization": json.dumps(sql_tokenize_result),
+        "arrived_at": int(time.time())
     }
     return package
 

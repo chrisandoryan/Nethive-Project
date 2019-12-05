@@ -90,16 +90,18 @@ def domparse(the_package, is_flagged_xss):
 
     try:
         result = send_to_watchman(the_package)
+        result = json.loads(result)
 
-        message = {'parsed_log': json.loads(result), 'log_type': 'TYPE_XSS_AUDITOR'}
+        message = {'parsed_log': result, 'log_type': 'TYPE_XSS_AUDITOR'}
         print("XSS_AUDIT_RESULT", message)
-        send_to_logstash(message)
+        # send_to_logstash(message) # uncomment to store the result in its own index in elasticsearch
+
+        return result
 
     except Exception as e:
         print("[XSS Watcher] %s" % e)
         logger.exception(e)
         # print(traceback.format_exc())
-    return
 
 def inspect(arr_buff):
     """

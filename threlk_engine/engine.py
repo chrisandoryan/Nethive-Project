@@ -1,7 +1,7 @@
 from elasticsearch import Elasticsearch
 from kafka import KafkaProducer
+from threlk_engine import historian, auditbeat, webflow
 
-import historian, auditbeat, webflow
 import threading
 import time
 import json
@@ -12,7 +12,7 @@ Threlk Engine is the engine that specifically constructed to process raw data fr
 """
 
 es = Elasticsearch(hosts="http://elastic:changeme@localhost:9200/")
-producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), compression_type='gzip', bootstrap_servers='localhost:1234')
+# producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), compression_type='gzip', bootstrap_servers='localhost:1234')
 
 BASH_INDEX = "nethive-bash-*"
 SQLI_INDEX = "nethive-sqli-*"
@@ -76,7 +76,8 @@ def display_hits(hits):
 def relay_to_kafka(parser_function, hits):
     for result in parser_function(hits):
         if result:
-            producer.send(KAFKA_TOPIC, {'foo': 'bar'})
+            # producer.send(KAFKA_TOPIC, {'foo': 'bar'})
+            print(result, "\n")
 
 def elastail(targetIndex, parser_function):
     first = initial_search(targetIndex)
