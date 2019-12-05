@@ -132,7 +132,9 @@ def elastail(targetIndex, parser_function):
         delay = delay + 0.5
 
 def start():
+    print("[Threlk Engine] Starting Threlk...")
     threading.Thread(target=elastail, args=(BASH_INDEX, historian.parse)).start() 
     threading.Thread(target=elastail, args=(AUDIT_INDEX, auditbeat.parse)).start()
+    print("[Threlk Engine] Started.")
 
 # https://gist.github.com/hmldd/44d12d3a61a8d8077a3091c4ff7b9307
