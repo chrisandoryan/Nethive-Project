@@ -170,7 +170,7 @@ def handle_client_connection(client_socket):
             # print(package_identifiers.__dict__)
 
             raw_inspection_data = json.loads(request.decode("utf-8"))
-            print("RAW INSPECTION DATA", raw_inspection_data)
+            # print("RAW INSPECTION DATA", raw_inspection_data)
 
             if raw_inspection_data['type'] == 'mysql':
                 # print("BEFORE", raw_inspection_data)
@@ -183,17 +183,17 @@ def handle_client_connection(client_socket):
                         # delete the data to prevent rechecking
                         delete_status = redis.ts_expire_http_bundle(redis_key)
                         if delete_status:
-                            print("Bundle {} Deleted!".format(redis_key))
+                            print("[Inspection Controller] Bundle {} Deleted!".format(redis_key))
 
                         deep_xss_package = create_xss_audit_package(decode_deeply(bundle_packed), parsed_sql_data)
                         deep_sqli_package = create_sqli_inspection_package(decode_deeply(bundle_packed), parsed_sql_data)
 
-                        print("XSS PACKAGE", deep_xss_package)
-                        print("SQLI PACKAGE", deep_sqli_package)
+                        # print("XSS PACKAGE", deep_xss_package)
+                        # print("SQLI PACKAGE", deep_sqli_package)
 
                         sql_inspection = threading.Thread(target=sql_inspector.inspect, args=(deep_sqli_package,)) # inspect request to find sqli
 
-                        print("DATA TO CHECK: ", len(http_bundles))
+                        print("[Inspection Controller] Checking %d bundle(s) from Redis" % len(http_bundles))
 
                         xss_audit = threading.Thread(target=xss_watcher.domparse, args=(deep_xss_package, False,)) # inspect request data ALONG WITH sql response
 

@@ -1,0 +1,1 @@
+./elktail -i "nethive-bash-*" -u "elastic" --v3

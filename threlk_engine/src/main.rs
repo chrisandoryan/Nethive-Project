@@ -35,25 +35,35 @@ fn main() {
 
     let (s_raw, r_raw) = channel::unbounded();
     let (s, r) = channel::unbounded();
-    let tick = crossbeam::tick(Duration::from_millis(1000));
+    let tick = crossbeam::tick(Duration::from_millis(100));
     let tpool = ThreadPool::new(4);
 
     let t0 = thread::spawn(move || {
+        let first_response = es::fetch_data::<BashLog>(String::from("nethive-bash-*"), json!({
+            "query": {
+              "match_all": {}
+            },
+            "size": 50,
+            "sort": [
+              {
+                "@timestamp": {
+                  "order": "desc"
+                }
+              }
+            ]
+          }));
+        
+        for hit in first_response.hits() {
+            let doc = hit.document().unwrap().clone();
+            println!("LEXYHIT: {:?}", hit);
+            s_raw.send(doc).unwrap();
+        }
+
+        // println!("LEXYHITLASTDOC: {:?}", doc);
+
         loop {
             tick.recv().unwrap();
-            
-            let resp = es::fetch_data::<BashLog>(String::from("nethive-bash-*"), json!({
-                "query": {
-                    "match": {
-                        "log_type": "TYPE_BASH_CENTRALIZED"
-                    }
-                }
-            }));
-
-            for hit in resp.hits() {
-                let doc = hit.document().unwrap().clone();
-                s_raw.send(doc).unwrap();
-            }
+            println!("HEHE")
         }
     });
     info!("es data input thread started");
@@ -71,25 +81,25 @@ fn main() {
     });
     info!("correlation thread pool started");
 
-    let t2 = thread::spawn(move || {
-        let mut producer = Producer::from_hosts(vec!(String::from(KAFKA_SERVER_ADDR)))
-            .with_ack_timeout(Duration::from_secs(1))
-            .with_required_acks(RequiredAcks::One)
-            .create()
-            .unwrap();
+    // let t2 = thread::spawn(move || {
+    //     let mut producer = Producer::from_hosts(vec!(String::from(KAFKA_SERVER_ADDR)))
+    //         .with_ack_timeout(Duration::from_secs(1))
+    //         .with_required_acks(RequiredAcks::One)
+    //         .create()
+    //         .unwrap();
 
-        loop {
-            let data = r.recv().unwrap();
+    //     loop {
+    //         let data = r.recv().unwrap();
 
-            println!("Get: {}", data.cmd);
+    //         println!("Get: {}", data.cmd);
 
-            let status = producer.send(&Record::from_value(TOPIC, serde_json::to_vec(&data).unwrap())).unwrap();
-            println!("LEXY: {:?}", status);
-        }
-    });
-    info!("kafka producer thread started");
+    //         let status = producer.send(&Record::from_value(TOPIC, serde_json::to_vec(&data).unwrap())).unwrap();
+    //         println!("LEXY: {:?}", status);
+    //     }
+    // });
+    // info!("kafka producer thread started");
 
     t0.join().unwrap();
     t1.join().unwrap();
-    t2.join().unwrap();
+    // t2.join().unwrap();
 }
