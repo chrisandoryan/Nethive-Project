@@ -19,3 +19,5 @@ python-logstash-async
 redistimeseries
 uuid
 joblib
+kafka-python
+elasticsearch

@@ -1,8 +1,8 @@
-SYSTEM_MODIFICATION_FLAG = "SYSMOD"
-ROLE_AND_AUTH_FLAG = "RNA"
-FILE_INTERACTION_FLAG = "FILE"
-EXTRA_WATCHLIST_FLAG = "EXTRA"
-NETWORK_ACTIVITY_FLAG = "NETACT"
+SYSTEM_MODIFICATION_FLAG = "SYSTEM_MODIFICATION"
+ROLE_AND_AUTH_FLAG = "ROLE_AND_AUTH"
+FILE_INTERACTION_FLAG = "FILE_INTERACTION"
+MISC_WATCHLIST_FLAG = "MISC_WATCHLIST"
+NETWORK_ACTIVITY_FLAG = "NETWORK_ACTIVITY"
 
 AUDIT_TRAIL_TAGS = {
     SYSTEM_MODIFICATION_FLAG: {
@@ -85,7 +85,7 @@ AUDIT_TRAIL_TAGS = {
             "etcissue"
         ]
     },
-    EXTRA_WATCHLIST_FLAG: {
+    MISC_WATCHLIST_FLAG: {
         "SUSPICIOUS_BINARY": [
             "susp_activity",
             "sbin_susp"
@@ -109,15 +109,33 @@ AUDIT_TRAIL_TAGS = {
 def parse(hits):
     for hit in hits:
         print(hit)
-    return
+        print()
+        package = {}
+        try:
+            data = hit['_source']
+            major_tag, minor_tag = categorize_message(data['tags'][0])
+            package = {
+                "elastic_id": hit['_id'],
+                "tag": data['tags'][0],
+                "trail_tag": {
+                    "major": major_tag,
+                    "minor": minor_tag
+                },
+                "summary": data['auditd']['summary'],
+                "hostname": data['host']['name'],
+                "user": {
+                    "id": data['user']['id'],
+                    "name": data['user']['name'],
+                    "group": data['user']['group']
+                },
+                "process": data['process'],
+            }
+        except Exception as e:
+            pass
+        yield package
 
-def categorize_message(hits):
-    for key, value in AUDIT_TRAIL_TAGS.items():
-        print("{} => {}".format(key, value))
-    return
-
-def extract_tags(beat_packet):
-    try:
-        return beat_packet['tags'][0]
-    except Exception as e:
-        return ""
+def categorize_message(tag):
+    for major_key, major_tags in AUDIT_TRAIL_TAGS.items():
+        for minor_key, minor_tags in major_tags.items():
+            if tag in minor_tags:
+                return (major_key, minor_key)
