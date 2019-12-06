@@ -91,11 +91,13 @@ def transform_for_sqli_model(package):
         print(e)
     
 def inspect(inspection_package):
+    print("[SQL Inspection] Restructuring inspection package...")
     transformed = transform_for_sqli_model(inspection_package)
     if transformed:
         if MODEL_LEARNING:
             write_learning_data(transformed)
         else:
+            print("[SQL Inspection] Finished. Predicting...")
             return predict(transformed, inspection_package['req_packet'])
 
 def write_learning_data(learning_package):
@@ -141,7 +143,7 @@ def predict(inspection_package, request_data):
     result['inspection_result'] = inspection_package
 
     message = {'parsed_log': result, 'log_type': 'TYPE_SQLI_INSPECTOR'}
-    print("SQLI INSPECTION RESULT", result)
+    # print("SQLI INSPECTION RESULT", result)
     # send_to_logstash(message) # uncomment to store the result in its own index in elasticsearch
 
     return result

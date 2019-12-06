@@ -1,6 +1,6 @@
 from elasticsearch import Elasticsearch
 from kafka import KafkaProducer
-from threlk_engine import historian, auditbeat, webflow
+import _auditmon, _bashmon, _httpmon
 
 import threading
 import time
@@ -12,15 +12,15 @@ Threlk Engine is the engine that specifically constructed to process raw data fr
 """
 
 es = Elasticsearch(hosts="http://elastic:changeme@localhost:9200/")
-# producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), compression_type='gzip', bootstrap_servers='localhost:1234')
+producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), compression_type='gzip', bootstrap_servers='localhost:9092')
 
 BASH_INDEX = "nethive-bash-*"
+HTTPMON_INDEX = "nethive-httpmon-*"
+AUDIT_INDEX = "nethive-audit-*"
 SQLI_INDEX = "nethive-sqli-*"
 XSS_INDEX = "nethive-xss-*"
-AUDIT_INDEX = "nethive-audit-*"
 
 KAFKA_TOPIC = "LEXY"
-
 FETCH_SIZE = 10
 SORT = "desc"
 
@@ -76,7 +76,7 @@ def display_hits(hits):
 def relay_to_kafka(parser_function, hits):
     for result in parser_function(hits):
         if result:
-            # producer.send(KAFKA_TOPIC, {'foo': 'bar'})
+            producer.send(KAFKA_TOPIC, {'foo': 'bar'})
             print(result, "\n")
 
 def elastail(targetIndex, parser_function):
@@ -134,8 +134,11 @@ def elastail(targetIndex, parser_function):
 
 def start():
     print("[Threlk Engine] Starting Threlk...")
-    threading.Thread(target=elastail, args=(BASH_INDEX, historian.parse)).start() 
-    threading.Thread(target=elastail, args=(AUDIT_INDEX, auditbeat.parse)).start()
+    # threading.Thread(target=elastail, args=(BASH_INDEX, _bashmon.parse)).start() 
+    # threading.Thread(target=elastail, args=(AUDIT_INDEX, _auditmon.parse)).start()
+    threading.Thread(target=elastail, args=(HTTPMON_INDEX, _httpmon.parse)).start()
     print("[Threlk Engine] Started.")
+
+start()
 
 # https://gist.github.com/hmldd/44d12d3a61a8d8077a3091c4ff7b9307

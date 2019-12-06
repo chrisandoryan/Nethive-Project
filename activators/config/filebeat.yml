@@ -1,19 +1,19 @@
 filebeat:
   inputs:
-    -
-      paths:
-        - '/var/log/audit/*.log'
-      input_type: log
-      fields:
-        log_type: TYPE_AUDIT
-      fields_under_root: true
-    -
-      paths:
-        - '/var/log/mysql/slog.log'
-      input_type: log
-      fields:
-        log_type: TYPE_PARSED_SLOG
-      fields_under_root: true
+    # -
+    #   paths:
+    #     - '/var/log/audit/*.log'
+    #   input_type: log
+    #   fields:
+    #     log_type: TYPE_AUDIT
+    #   fields_under_root: true
+    # -
+    #   paths:
+    #     - '/var/log/mysql/slog.log'
+    #   input_type: log
+    #   fields:
+    #     log_type: TYPE_PARSED_SLOG
+    #   fields_under_root: true
     -
       paths:
         - '/home/*/.bash_history'
@@ -21,13 +21,13 @@ filebeat:
       fields:
         log_type: TYPE_BASH
       fields_under_root: true
-    -
-      paths:
-        - '/var/log/http/inbound.log'
-      input_type: log
-      fields:
-        log_type: TYPE_HTTP
-      fields_under_root: true
+    # -
+    #   paths:
+    #     - '/var/log/http/inbound.log'
+    #   input_type: log
+    #   fields:
+    #     log_type: TYPE_HTTP
+    #   fields_under_root: true
     -
       paths:
         - '/var/log/bash/history.log'
@@ -40,7 +40,7 @@ output:
     hosts:
       - '$LOGSTASH_HOST:5044'
       - '127.0.0.1:5044'
-    worker: 1
+    worker: 2
     bulk_max_size: 2048
     compression_level: 3
     index: filebeat

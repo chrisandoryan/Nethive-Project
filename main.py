@@ -80,6 +80,7 @@ if __name__ == "__main__":
     print("[1] Fresh Installation")
     print("[2] Refresh Configuration")
     print("[3] Just-Start-This-Thing")
+    print("[4] Exit")
     setup = input(">> ")
 
     if setup == "1":
@@ -88,6 +89,8 @@ if __name__ == "__main__":
         activate.configs()
     elif setup == "3":
         pass
+    elif setup == "4":
+        exit(0)
     else:
         print("Invalid input, please try again.")
 

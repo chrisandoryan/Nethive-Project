@@ -94,8 +94,12 @@ def sql_tokenize_request(packet, buffer):
 
 def pack_request_for_inspection(packet, sql_tokenize_result):
     package = {
-        "url": get_url_unidecoded(packet),
+        "url": get_longurl(packet), # get_url_unidecoded(packet),
         "body": get_payload_unidecoded(packet),
+        "request_method": get_method(packet),
+        "cookies": get_cookie_unidecoded(packet),
+        "user_agent": get_ua(packet),
+        "referer": get_referer(packet),
         "tokenization": json.dumps(sql_tokenize_result),
         "arrived_at": int(time.time())
     }
@@ -290,5 +294,9 @@ def get_payload_unidecoded(packet):
 def run(sniffMode, iface):
     global sniff_mode, outHand
     sniff_mode = sniffMode
-    sniff_packet(iface)
+    try:
+        sniff_packet(iface)
+    except Exception as e:
+        print("[HTTP Sniffer] %s" % e)
+        pass
 
