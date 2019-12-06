@@ -11,8 +11,8 @@ Threlk Engine is the engine that specifically constructed to process raw data fr
 
 """
 
-es = Elasticsearch(hosts="http://elastic:changeme@localhost:9200/")
-producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), compression_type='gzip', bootstrap_servers='localhost:9092')
+es = None
+producer = None
 
 BASH_INDEX = "nethive-bash-*"
 HTTPMON_INDEX = "nethive-httpmon-*"
@@ -20,11 +20,14 @@ AUDIT_INDEX = "nethive-audit-*"
 SQLI_INDEX = "nethive-sqli-*"
 XSS_INDEX = "nethive-xss-*"
 
-KAFKA_TOPIC = "LEXY"
+KAFKA_TOPIC = "TANOSY"
+BOOTSTRAP_SERVER = ["10.20.148.158:9092"]
+
 FETCH_SIZE = 10
 SORT = "desc"
 
 def initial_search(targetIndex):
+    global es
     return es.search(index=targetIndex, body={
         "query": {
             "match_all": {}
@@ -41,6 +44,7 @@ def initial_search(targetIndex):
 
 
 def next_search(targetIndex, lastTimestamp, prevIds):
+    global es
     return es.search(index=targetIndex, body={
         "query": {
             "bool": {
@@ -74,10 +78,13 @@ def display_hits(hits):
         print(hit, "\n") 
 
 def relay_to_kafka(parser_function, hits):
+    global producer
     for result in parser_function(hits):
         if result:
-            producer.send(KAFKA_TOPIC, {'foo': 'bar'})
+            foo = producer.send(KAFKA_TOPIC, result)
             print(result, "\n")
+            meta = foo.get(timeout=60)
+            print("Offset: %d" % meta.offset)
 
 def elastail(targetIndex, parser_function):
     first = initial_search(targetIndex)
@@ -109,7 +116,6 @@ def elastail(targetIndex, parser_function):
             next = next_search(targetIndex, lastHitTimestamp, prevIds)
             hits = next['hits']['hits']
 
-
             if next['hits']['total']['value'] > 0:
                 # print([hit['_source']['@timestamp'] for hit in hits])
 
@@ -131,12 +137,23 @@ def elastail(targetIndex, parser_function):
         delay = 0.5
     elif delay <= 2:
         delay = delay + 0.5
+    
+def booting():
+    global es, producer
+    es = Elasticsearch(hosts="http://elastic:changeme@localhost:9200/")
+    producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), compression_type='gzip', bootstrap_servers=BOOTSTRAP_SERVER)
+    print("[Threlk Engine] Waiting for Elasticsearch to start...")
+    while True:
+        if es.ping():
+            print("[Threlk Engine] Elasticsearch is online. Starting...")
+            return True
 
 def start():
-    print("[Threlk Engine] Starting Threlk...")
+    print("[Threlk Engine] Initiating Threlk Engine...")
+    booting()
     # threading.Thread(target=elastail, args=(BASH_INDEX, _bashmon.parse)).start() 
-    # threading.Thread(target=elastail, args=(AUDIT_INDEX, _auditmon.parse)).start()
-    threading.Thread(target=elastail, args=(HTTPMON_INDEX, _httpmon.parse)).start()
+    threading.Thread(target=elastail, args=(AUDIT_INDEX, _auditmon.parse)).start()
+    # threading.Thread(target=elastail, args=(HTTPMON_INDEX, _httpmon.parse)).start()
     print("[Threlk Engine] Started.")
 
 start()

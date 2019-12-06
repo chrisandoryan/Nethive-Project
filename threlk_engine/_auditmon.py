@@ -108,27 +108,29 @@ AUDIT_TRAIL_TAGS = {
 
 def parse(hits):
     for hit in hits:
-        print(hit)
-        print()
         package = {}
         try:
-            data = hit['_source']
-            major_tag, minor_tag = categorize_message(data['tags'][0])
-            package = {
+            data_source = hit['_source']
+            major_tag, minor_tag = categorize_message(data_source['tags'][0])
+            event_data = {
                 "elastic_id": hit['_id'],
-                "tag": data['tags'][0],
+                "tag": data_source['tags'][0],
                 "trail_tag": {
                     "major": major_tag,
                     "minor": minor_tag
                 },
-                "summary": data['auditd']['summary'],
-                "hostname": data['host']['name'],
+                "summary": data_source['auditd']['summary'],
+                "hostname": data_source['host']['name'],
                 "user": {
-                    "id": data['user']['id'],
-                    "name": data['user']['name'],
-                    "group": data['user']['group']
+                    "id": data_source['user']['id'],
+                    "name": data_source['user']['name'],
+                    "group": data_source['user']['group']
                 },
-                "process": data['process'],
+                "process": data_source['process'],
+            }
+            package = {
+                "EVENT_DATA": event_data,
+                "EVENT_TYPE": "AUDIT_MONITOR"
             }
         except Exception as e:
             pass
