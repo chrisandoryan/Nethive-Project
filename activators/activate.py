@@ -234,6 +234,7 @@ def configs():
     packetbeat()
     print("[*] Configuring bash \"historians\" module...")
     bash()
+    print("Done. Press [enter] to continue...")
     # print("[*] Updating docker-elk configuration...")
     # elk()
     # print("[*] Updating Logstash configuration...")
