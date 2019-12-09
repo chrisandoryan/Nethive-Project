@@ -7,7 +7,7 @@
   <br>
 </h1>
 
-<h4 align="center">Zero-to-Low Latency Monitoring System<a href="https://github.com/chrisandoryan/Nethive-Project" target="_blank"></a></h4>
+<h4 align="center">Zero to Low Latency Monitoring System<a href="https://github.com/chrisandoryan/Nethive-Project" target="_blank"></a></h4>
 
 <p align="center">
   <a href="#features">Features</a> •
@@ -45,10 +45,10 @@ You can install Nethive from PyPi package manager using the following command:
 
 You can install Nethive using the latest repository:
 ```
-git clone https://github.com/chrisandoryan/Nethive-Project.git
-cd Nethive-Project/
-sudo bash install.sh
-sudo pip3 install -r requirements.txt
+$ git clone https://github.com/chrisandoryan/Nethive-Project.git
+$ cd Nethive-Project/
+$ sudo bash install.sh
+$ sudo pip3 install -r requirements.txt
 ```
 Please make sure all dependencies are installed if anyone of the above fails.
 For more detailed information, refer to the [installation guide](https://github.com/chrisandoryan/Nethive-Project/doc/user_guide.md#installation).
@@ -57,17 +57,22 @@ For more detailed information, refer to the [installation guide](https://github.
 
  1. Fetch and start **nethive-cvss** docker container
 	```
-	git clone https://github.com/Falanteris/docker-nethive-cvss/
-	cd docker-nethive-cvss/
-	docker build -t nethive-cvss .
-	./cvss
+	$ git clone https://github.com/Falanteris/docker-nethive-cvss/
+	$ cd docker-nethive-cvss/
+	$ docker build -t nethive-cvss .
+	$ ./cvss
 	```
- 2. Start **Nethive** and activating all sensors
+ 2. Start **Nethive** and copy default configuration
 	```
-	cd Nethive-Project/
-	sudo python3 main.py
+	$ cd Nethive-Project/
+	$ cp .env.example .env
 	```
-	On the menu prompt, choose `[3] Just-Run-This-Thing` . Then wait for the engine to be initialized.
+	
+3. Activate all **Nethive** processing engines
+		`$ sudo python3 main.py `
+
+	On the menu prompt, choose **[3] Just-Run-This-Thing** . 
+Then wait for the engines to be initialized.
 	
  3. Start Nethive UI Server
 		
@@ -75,8 +80,4 @@ For more detailed information, refer to the [installation guide](https://github.
 
 ## Contributors
 
- -  Alex Ferdinand Gunawan
- - Chrisando Ryan Pardomuan Siahaan
- - Rayhan Raibul Tsani
- - Vandevlin Alfonso Wibawa
 

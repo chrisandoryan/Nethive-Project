@@ -70,10 +70,10 @@ https://www.python.org/
 
 Filebeat:
 
-    wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
-    sudo apt-get install apt-transport-https
-    echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main"  | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
-    sudo apt-get update && sudo apt-get install filebeat
+    $ wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+    $ sudo apt-get install apt-transport-https
+    $ echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main"  | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
+    $ sudo apt-get update && sudo apt-get install filebeat
 
 Alternatively, you can follow the instructions provided on the official website: https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html
 
@@ -88,16 +88,16 @@ https://www.docker.com/
 
 Installation example for **Ubuntu 18.04**:
 ```
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
-sudo apt update && sudo apt install docker-ce
+$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+$ sudo apt update && sudo apt install docker-ce
 ```
 Docker-Compose:
 https://docs.docker.com/compose/install/
 
 ```
-sudo curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
+$ sudo curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+$ sudo chmod +x /usr/local/bin/docker-compose
 ```
 
 #### Installation from Github
@@ -105,19 +105,19 @@ sudo chmod +x /usr/local/bin/docker-compose
 Installing from GitHub involves the following steps:
 
 1.  Clone the repository:  
-`git clone https://github.com/chrisandoryan/Nethive-Project.git`
+`$ git clone https://github.com/chrisandoryan/Nethive-Project.git`
 
 2.  Navigate into the project directory: 
-`cd Nethive-Project/`
+`$ cd Nethive-Project/`
 
 3.  Install library dependencies:
-`sudo bash install.sh`
+`$ sudo bash install.sh`
     
 3.  Install Python dependencies:
-`sudo python3 -m pip install -r requirements.txt`
+`$ sudo python3 -m pip install -r requirements.txt`
     
 4.  Install Nethive package: 
-`sudo python3 setup.py install`
+`$ sudo python3 setup.py install`
     
 If done, proceed to [After installation](https://github.com/chrisandoryan)
 
@@ -125,7 +125,15 @@ If done, proceed to [After installation](https://github.com/chrisandoryan)
 #### Configuring Nethive environment
 
 ##### Editing the configurations using a text-editor
-Nethive configuration is stored in a file named ``.env`` and can be found on the root directory of the project.
+Nethive configuration should be stored in a file named ``.env`` and located on the root directory of the project.
+
+1. Copy `.env.example` to `.env`
+	```
+	$ cd Nethive-Project/
+	$ cp .env.example .env
+	``` 
+2. Edit using gedit: `$ gedit .env`
+3. Save your changes and proceed to next section.
 
 Default configuration:
 ```
@@ -168,7 +176,7 @@ XSS_WATCHMAN_SOCKET = "/tmp/xss_auditor.sock"
 
 # Kafka configuration
 KAFKA_TOPIC = "NETHIVE"
-KAFKA_BOOTSTRAP_SERVER = ["10.20.148.158:9092"]
+KAFKA_BOOTSTRAP_SERVER = ["127.0.0.1:9092"]
 ```
 
 ##### Editing the configurations using interactive menu
@@ -179,21 +187,23 @@ KAFKA_BOOTSTRAP_SERVER = ["10.20.148.158:9092"]
 
 > Important! **Nethive** needs a sudo permission to work.
 
- 1. Start **Nethive** with superuser permission:  `sudo python3 main.py`
+ 1. Start **Nethive** with superuser permission:  `$ sudo python3 main.py`
 2. On the menu prompt, choose: 
-`[2] Refresh Configuration` menu
-to apply your modified  `.env` configuration into the **Nethive** itself and into the third party dependencies (beats, MySQL server, etc.).
+**[2] Refresh Configuration** 
+to apply your modified  `.env` configuration into the **Nethive** itself and to distribute Nethive-ready configuration for the third party dependencies (beats, etc.).
 
 [Command preview GIF]
 
 ### Usage
 #### Nethive-CVSS
-This module is required so that every detected attacks are measured automatically according to CVSS3.0 vulnerability measurement. **Nethive Engine** will automatically send every detected attacks data into this docker container and the measurement result will be stored back into Elasticsearch.
+This module is required so that every detected attacks are measured automatically according to CVSS3.0 vulnerability measurement. A **Nethive Engine** will automatically send every detected attacks data into this docker container and the measurement result will be stored back into Elasticsearch.
+
+To run nethive-cvss docker:
 ```
-git clone https://github.com/Falanteris/docker-nethive-cvss/
-cd docker-nethive-cvss/
-docker build -t nethive-cvss .
-./cvss
+$ git clone https://github.com/Falanteris/docker-nethive-cvss/
+$ cd docker-nethive-cvss/
+$ docker build -t nethive-cvss .
+$ ./cvss
 ```
 
 #### Nethive Engines
