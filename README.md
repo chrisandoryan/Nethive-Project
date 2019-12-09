@@ -7,7 +7,7 @@
   <br>
 </h1>
 
-<h4 align="center">Zero to Low Latency Monitoring System<a href="https://github.com/chrisandoryan/Nethive-Project" target="_blank"></a></h4>
+<h4 align="center">Zero-to-Low Latency Monitoring System<a href="https://github.com/chrisandoryan/Nethive-Project" target="_blank"></a></h4>
 
 <p align="center">
   <a href="#features">Features</a> •
