@@ -147,13 +147,21 @@ def elastail(targetIndex, parser_function):
     
 def booting():
     global es, producer
+    es_online = False
+    kafka_online = False
     es = Elasticsearch(hosts="http://elastic:changeme@localhost:9200/")
-    producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), compression_type='gzip', bootstrap_servers=KAFKA_BOOTSTRAP_SERVER)
     print("[Threlk Engine] Waiting for Elasticsearch to start...")
-    while True:
-        if es.ping():
-            print("[Threlk Engine] Elasticsearch is online. Starting...")
-            return True
+    while not es_online and not kafka_online:
+        try:
+            producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), compression_type='gzip', bootstrap_servers=KAFKA_BOOTSTRAP_SERVER)
+            if es.ping():
+                print("[Threlk Engine] Elasticsearch is online. Starting...")
+                es_online = True
+            if producer.bootstrap_connected():
+                print("[Threlk Engine] Kafka is online. Starting...")
+                kafka_online = True
+        except Exception as e:
+            pass
 
 def start():
     print("[Threlk Engine] Initiating Threlk Engine...")
@@ -163,6 +171,6 @@ def start():
     # threading.Thread(target=elastail, args=(HTTPMON_INDEX, _httpmon.parse)).start()
     print("[Threlk Engine] Started.")
 
-start()
+# start()
 
 # https://gist.github.com/hmldd/44d12d3a61a8d8077a3091c4ff7b9307
