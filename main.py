@@ -40,18 +40,15 @@ def menu():
     while True:
         os.system("clear")
         print("Nethive, a SIEMxCVSS Project\n")
-        print("[0] Check Dependencies")
-        print("[1] Fresh Installation")
+        print("[1] Check Dependencies")
         print("[2] Refresh Configuration")
         print("[3] Just-Start-This-Thing")
         print("[4] Exit")
         setup = input(">> ")
 
-        if setup == "0":
+        if setup == "1":
             # check if dependencies are already installed
             pass
-        elif setup == "1":
-            activate.fresh()
         elif setup == "2":
             activate.configs()
         elif setup == "3":
@@ -60,6 +57,7 @@ def menu():
             exit(0)
         else:
             print("Invalid input, please try again.")
+            input("Press [enter] to continue...")
 
 if __name__ == "__main__":
 

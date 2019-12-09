@@ -61,6 +61,7 @@ Nethive Project runs on Linux operating systems. It is compatible with Python 3.
 -  Auditbeat
 -  Packetbeat
 -  Docker
+-  Docker-Compose
 -  Scapy
 
 #### Installing pre-requisites
@@ -84,12 +85,20 @@ See [Filebeat](#filebeat)
 
 Docker:
 https://www.docker.com/
+
+Installation example for **Ubuntu 18.04**:
 ```
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
 sudo apt update && sudo apt install docker-ce
 ```
+Docker-Compose:
+https://docs.docker.com/compose/install/
 
+```
+sudo curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
 
 #### Installation from Github
 
@@ -113,16 +122,38 @@ Installing from GitHub involves the following steps:
 If done, proceed to [After installation](https://github.com/chrisandoryan)
 
 ### After installation
+#### Configuring Nethive environment
 
-#### Configuring Nethive Environment
 ##### Editing the configurations using a text-editor
 Nethive configuration is stored in a file named ``.env`` and can be found on the root directory of the project.
 
 Default configuration:
 
-    [Add default configuration]
+    enter code here
 
-##### Editing the configurations using interactive setup mode
+##### Editing the configurations using a text-editor
 [Coming soon!]
 
+#### Running Nethive for the first time
+**Nethive** depends on some third party binaries, such as: Filebeat, Auditbeat, etc., and requires special configuration for some services, such as MySQL server, etc. When running for the first time, you need to make sure that those binaries and services are configured to work with **Nethive**.
+
+> Important! **Nethive** needs a sudo permission to work.
+
+ 1. Start **Nethive** with superuser permission:  `sudo python3 main.py`
+2. On the menu prompt, choose: 
+`[2] Refresh Configuration` menu
+to apply your modified  `.env` configuration into the **Nethive** itself and into the third party dependencies (beats, MySQL server, etc.).
+
+[Command preview GIF]
+
 ### Usage
+#### [1] Check Dependencies
+[Coming soon!]
+#### [2] Refresh Configuration
+[Coming soon!]
+#### [3] Just-Start-This-Thing
+[Coming soon!]
+#### [4] Exit
+You know, just an ordinary exit menu. Meh.
+
+
