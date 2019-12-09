@@ -1,0 +1,197 @@
+//extends admin
+
+//block content
+.content-header
+    .container-fluid
+        .row.mb-2
+            .col-sm-6
+                h1.m-0.text-dark Configurations
+            .col-sm-6
+                ol.breadcrumb.float-sm-right
+                    li.breadcrumb-item Home
+                    li.breadcrumb-item.active Configurations
+section.content
+    .container-fluid
+        .row
+            section.col-md-6.connectedSortable.ui-sortable
+                .card
+                    .card-header.ui-sortable-handle
+                        h5.card-title Maintenance Mode
+                        .card-tools
+                            button.btn.btn-tool(type="button" data-card-widget="maintenance")
+                                .toggle-button-cover
+                                    .button.r#button-3
+                                        input.checkbox(type="checkbox")
+                                        .knobs
+                                        .layer
+            section.col-md-6.connectedSortable.ui-sortable
+                .card.bg-info
+                    .card-header.ui-sortable-handle
+                        h5.card-title Check for NVD Dataset updates
+                        .card-tools
+                            button.btn.btn-tool(type="button" data-card-widget="download")
+                                i.fas.fa-cloud
+        .row
+            section.col-12.connectedSortable.ui-sortable
+                .card.card-primary.card-outline.card-outline-tabs
+                    .card-header.ui-sortable-handle.p-0.border-bottom-0
+                        ul#custom-tabs-one-tab.nav.nav-tabs(role="tablist")
+                            li.nav-item
+                                a#custom-tabs-one-historian-tab.nav-link.active(data-toggle="pill" href="#custom-tabs-one-audit" role="tab" aria-controls="custom-tabs-one-audit" aria-selected="true") audit.rules
+                            li.nav-item
+                                a#custom-tabs-one-historian-tab.nav-link(data-toggle="pill" href="#custom-tabs-one-historian" role="tab" aria-controls="custom-tabs-one-historian" aria-selected="true") historians.rules
+                    .card-body
+                        #custom-tabs-one-tabContent.tab-content
+                            #custom-tabs-one-audit.tab-pane.fade.active.show(role="tabpanel" aria-labelledby="custom-tabs-one-audit-tab")
+                                form(role="form")
+                                    .form-group
+                                        label(for="Filesystem") Filesystem Rules
+                                        .row.input-group.mb-3
+                                            .col-12.col-sm-4
+                                                .input-group
+                                                    .input-group-prepend
+                                                        span.input-group-text
+                                                            i -w
+                                                    input.form-control(placeholder="path-to-file")
+                                            .col-12.col-sm-4
+                                                .input-group
+                                                    .input-group-prepend
+                                                        span.input-group-text
+                                                            i -p
+                                                    input.form-control(placeholder="permissions")
+                                            .col-12.col-sm-4
+                                                .input-group
+                                                    .input-group-prepend
+                                                        span.input-group-text
+                                                            i -k
+                                                    input.form-control(placeholder="key-name (trailtags)")            
+                                        .row
+                                            .col-12
+                                                button.btn.btn-primary(type="submit") Add Rule
+                                form(role="form")
+                                    .form-group
+                                        label(for="Filesystem") Systemcall Rules
+                                        .row.input-group.mb-3
+                                            .col-12.col-sm-3
+                                                .input-group
+                                                    .input-group-prepend
+                                                        span.input-group-text
+                                                            i -a
+                                                    input.form-control(placeholder="action")
+                                            .col-12.col-sm-3
+                                                .input-group
+                                                    .input-group-prepend
+                                                        span.input-group-text
+                                                            i -S
+                                                    input.form-control(placeholder="system_call")
+                                            .col-12.col-sm-3
+                                                .input-group
+                                                    .input-group-prepend
+                                                        span.input-group-text
+                                                            i -F
+                                                    input.form-control(placeholder="field=value")            
+                                            .col-12.col-sm-3
+                                                .input-group
+                                                    .input-group-prepend
+                                                        span.input-group-text
+                                                            i -k
+                                                    input.form-control(placeholder="key_name")                                            
+                                        .row
+                                            .col-12
+                                                button.btn.btn-primary(type="submit") Add Rule                                        
+                            #custom-tabs-one-historian.tab-pane.fade(role="tabpanel" aria-labelledby="custom-tabs-one-historian-tab")
+                                form(role="form")
+                                    .row.input-group.mb-3
+                                        .form-group.col-12.col-sm-4
+                                            label(for="Users") Users
+                                            .input-group
+                                                .input-group-prepend
+                                                    span.input-group-text
+                                                        i.fas.fa-user
+                                                input.form-control(placeholder="username")
+                                        .form-group.col-12.col-sm-8
+                                            label(for="Exclude") Exclude Commands
+                                            .input-group
+                                                .input-group-prepend
+                                                    span.input-group-text
+                                                        i.fas.fa-terminal
+                                                input.form-control(placeholder="separate with ';' for multiple commands")
+                                    .row
+                                        .col-12
+                                            button.btn.btn-primary(type="submit") Add Rule
+        .row
+            section.col-12.connectedSortable.ui-sortable
+                .card.card-primary.card-outline.card-outline-tabs
+                    .card-header.ui-sortable-handle.p-0.border-bottom-0
+                        ul#custom-tabs-two-tab.nav.nav-tabs(role="tablist")
+                            li.nav-item
+                                a#custom-tabs-two-historian-tab.nav-link.active(data-toggle="pill" href="#custom-tabs-two-audit" role="tab" aria-controls="custom-tabs-two-audit" aria-selected="true") audit.rules
+                            li.nav-item
+                                a#custom-tabs-two-historian-tab.nav-link(data-toggle="pill" href="#custom-tabs-two-historian" role="tab" aria-controls="custom-tabs-two-historian" aria-selected="true") historians.rules
+                    .card-body
+                        #custom-tabs-two-tabContent.tab-content
+                            #custom-tabs-two-audit.tab-pane.fade.active.show(role="tabpanel" aria-labelledby="custom-tabs-two-audit-tab")
+                                .row
+                                    .col-12
+                                        p.lead.mb-0 Audit Rules
+                                .row
+                                    .col-12
+                                        table#audit.table.table-bordered.table-striped
+                                            thead
+                                                tr
+                                                    th No
+                                                    th Rules
+                                                    th Remove
+                                            tbody
+                                                tr
+                                                    td 1
+                                                    td -w /etc/audit/ -p wa -k auditconfig
+                                                    td 
+                                                        input(type="checkbox")
+                                                tr
+                                                    td 2
+                                                    td -w /etc/audisp/ -p wa -k audispconfig
+                                                    td 
+                                                        input(type="checkbox")
+                                .row
+                                    .col-12
+                                        button.btn.btn-primary.float-right(type="submit") Delete
+                            #custom-tabs-two-historian.tab-pane.fade(role="tabpanel" aria-labelledby="custom-tabs-one-historian-tab")
+                                .row
+                                    .col-12
+                                        p.lead.mb-0 Historians Rules
+                                .row
+                                    .col-12
+                                        table#historian.table.table-bordered.table-striped
+                                            thead
+                                                tr
+                                                    th No
+                                                    th User
+                                                    th Excluded Command
+                                                    th Remove
+                                            tbody
+                                                tr
+                                                    td 1
+                                                    td user1
+                                                    td ls
+                                                    td 
+                                                        input(type="checkbox")
+                                                tr
+                                                    td 2
+                                                    td user1
+                                                    td pwd
+                                                    td 
+                                                        input(type="checkbox")                                                        
+                                                tr
+                                                    td 3
+                                                    td user1
+                                                    td apt-get
+                                                    td 
+                                                        input(type="checkbox")                                
+                                .row
+                                    .col-12
+                                        button.btn.btn-primary.float-right(type="submit") Delete
+// DataTables
+script(src="/plugins/datatables/jquery.dataTables.js")
+script(src="/plugins/datatables-bs4/js/dataTables.bootstrap4.js")                    
+script(src='/javascripts/admin.config.js')

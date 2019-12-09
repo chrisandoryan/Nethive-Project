@@ -1,0 +1,52 @@
+extends layout
+
+block content
+  canvas#myCanvas
+  div#main-container
+    div.section#first-section
+      div.logo
+        include ../public/images/logo.svg
+    section
+      .section#second-section
+        form#form(action="#")
+          fieldset.form-fieldset.ui-input.__first
+            input#email(type="email")
+            label(for="email")
+              span(data-text="E-mail Address") E-mail Address
+          fieldset.form-fieldset.ui-input.__second
+            input#email(type="password")
+            label(for="password")
+              span(data-text="Password") Password
+          div.form-footer
+            label#remember(for="remember") Remember Me
+              input(type="checkbox" name="remember")
+              span.checkmark
+            button.btn Login
+    div.section#third-section
+      div.details-wrapper
+        div.details-container
+          div.details-title
+            label(for="contributor") Contributors
+          div.details-content
+            span Alex Ferdinand Gunawan
+            span Chrisando Ryan Padomuan Siahaan
+            span Rayhan Rabiul Tsani
+            span Vandevlin Alfonso Wibawa
+        div.details-container
+          div.details-title
+            label(for="social") Social
+          div.details-content
+            a.fa.fa-facebook(href="#")
+            a.fa.fa-github(href="#")
+            a.fa.fa-instagram(href="#")
+        div.details-container
+          div.details-title
+            label(for="thanks") Special Thanks To
+          div.details-content
+            span God Almighty
+            span Aditya Kurniawan, S.Kom., MMSI.
+            span Yohan Muliono, S.Kom., MTI.
+  script(src='/javascripts/vector.js')
+  script(src='/javascripts/particle.js')
+  script(src='/javascripts/particle-canvas.js')
+  script(src='/javascripts/login.js')     

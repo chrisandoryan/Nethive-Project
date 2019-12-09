@@ -1,0 +1,421 @@
+*{
+  margin: 0;
+  padding: 0;
+  scrollbar-width: thin;
+}
+
+body {
+  /* padding: 50px; */
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  display:flex;
+}
+
+canvas {
+  display: block;
+  background-color: #131313;
+  height:100%;
+  width:100%;
+  position: fixed;
+  z-index: -10;
+}
+
+#main-container{
+	width:100%;
+}
+
+.section{
+  width:100%;
+}
+
+#first-section{
+  /* background:rgba(0,0,0,.5); */
+  display:flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#first-section .logo{
+	width: 50%;
+	height:auto;
+
+}
+
+#second-section{
+  background:rgb(30, 33, 37);
+  display:flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Starts of Login Form */
+
+#form {
+	width: 320px;
+	margin: 0 auto;
+	padding: 20px 16px 40px 16px;
+	transform: translateZ(0);
+	text-align: center;
+}
+ .form-footer {
+   margin-top: 2em;
+   display:flex;
+   align-items: center;
+}
+ .ui-input {
+	 position: relative;
+	 padding: 0;
+	 border: 0;
+}
+ .ui-input input {
+	 font-family: "Avenir Next", "Avenir", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	 border: 0;
+	 background: none;
+	 padding: 16px 0 16px 0;
+	 font-size: 16px;
+	 outline: 0;
+	 width: 100%;
+}
+ .ui-input input + label {
+	 position: relative;
+	 display: block;
+	 padding: 8px 0 8px 0;
+	 text-transform: uppercase;
+	 font-size: 12px;
+	 letter-spacing: 0.0875em;
+	 font-weight: 500;
+	 text-align: left;
+}
+ .ui-input input + label::before, .ui-input input + label::after {
+	 position: absolute;
+	 top: 0;
+	 left: 0;
+	 content: "";
+	 width: 100%;
+	 height: 1px;
+}
+ .ui-input input + label::before {
+	 background-color: rgba(255, 255, 255, .2);
+}
+ .ui-input input + label::after {
+	 transform: scaleX(0);
+	 transform-origin: left;
+	 transition: transform 300ms cubic-bezier(0.215, 0.61, 0.355, 1);
+	 background-color: rgb(154, 204, 20);
+	 height: 1px;
+}
+ .ui-input input + label span {
+	 position: relative;
+	 color: rgba(255, 255, 255, .2);
+	 transition: color 300ms cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+ .ui-input input + label span::after {
+	 content: attr(data-text);
+	 position: absolute;
+	 overflow: hidden;
+	 left: 0;
+	 transform: scaleX(1);
+	 white-space: nowrap;
+	 color: #fff;
+	 background-image: linear-gradient(to right, rgb(154, 204, 20) 50%, rgba(255, 255, 255, 0) 0%);
+	 background-position: 100% 50%;
+	 background-size: 200%;
+	 -webkit-background-clip: text;
+	 -webkit-text-fill-color: transparent;
+	 backface-visibility: hidden;
+	 perspective: 1000;
+	 transform: translateZ(0);
+	 transition: background-position 300ms cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+ .ui-input input:focus + label::after, .ui-input input.error + label::after, .ui-input input:invalid + label::after, .ui-input input.filled + label::after {
+	 transform: scaleX(1);
+	 transform-origin: left;
+}
+ .ui-input input:focus + label span::after, .ui-input input.error + label span::after, .ui-input input:invalid + label span::after, .ui-input input.filled + label span::after {
+	 background-image: linear-gradient(to right, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 0%);
+	 background-position: 0% 50%;
+}
+ .ui-input input.filled {
+	 color: #fff;
+}
+ .ui-input input.filled + label::after {
+	 background-color: #fff;
+}
+ .ui-input input.filled + label span::after {
+	 background-image: linear-gradient(to right, #fff 50%, rgba(255, 255, 255, 0) 0%);
+	 background-position: 0% 50%;
+}
+ .ui-input input:focus {
+	 color: rgb(154, 204, 20);
+}
+ .ui-input input:focus + label::after {
+	 background-color: rgb(154, 204, 20);;
+}
+ .ui-input input:focus + label span::after {
+	 background-image: linear-gradient(to right, rgb(154, 204, 20) 50%, rgba(255, 255, 255, 0) 0%);
+	 background-position: 0% 50%;
+}
+ .ui-input input.error, .ui-input input:invalid {
+   color: #e66161;
+}
+ .ui-input input.error + label::after, .ui-input input:invalid + label::after {
+	 background-color: #e66161;
+}
+ .ui-input input.error + label span::after, .ui-input input:invalid + label span::after {
+	 background-image: linear-gradient(to right, #e66161 50%, rgba(255, 255, 255, 0) 0%);
+	 background-position: 0% 50%;
+}
+
+#remember{
+	position: relative;
+	margin-right: auto;
+	color:rgba(255, 255, 255, .2);
+	padding: 0 10px;
+	font-family: "Avenir Next", "Avenir", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	line-height:22px;
+	display: block;
+	position: relative;
+	padding-left: 35px;
+	cursor: pointer;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	transition: color 300ms cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+#remember:hover{
+	color:#ccc;
+}
+
+#remember input[type=checkbox]{
+	position: absolute;
+	opacity: 0;
+	cursor: pointer;
+	height: 0;
+	width: 0;
+	top: 0;
+	left: 0;
+	height: 25px;
+	width: 100%;
+	z-index:10;
+}
+
+#remember .checkmark{
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 25px;
+	width: 25px;
+	border-radius : 2px;
+	border : 1px solid rgba(154, 204, 20,0.2);
+}
+
+#remember:hover input ~ .checkmark {
+	background-color: rgba(154, 204, 20,0.2);
+	border : 1px solid rgb(154, 204, 20);
+}
+
+.checkmark:after {
+	content: "";
+	position: absolute;
+	display: none;
+}
+
+#remember input:checked ~ .checkmark:after {
+	display: block;
+}
+
+#remember .checkmark:after {
+	left: 9px;
+	top: 5px;
+	width: 5px;
+	height: 10px;
+	border: solid rgb(154, 204, 20);
+	border-width: 0 3px 3px 0;
+	-webkit-transform: rotate(45deg);
+	-ms-transform: rotate(45deg);
+	transform: rotate(45deg);
+}
+
+#remember:hover .checkmark:after {
+	left: 9px;
+	top: 5px;
+	width: 5px;
+	height: 10px;
+	border: solid #bbb;
+	border-width: 0 3px 3px 0;
+	-webkit-transform: rotate(45deg);
+	-ms-transform: rotate(45deg);
+	transform: rotate(45deg);
+}
+
+ .btn {
+	border: 1px solid rgb(154, 204, 20);
+	background-color: rgba(0, 0, 0, 0);
+	padding: 10px 30px;
+	font-size: 12px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	letter-spacing: 0.0875em;
+	font-weight: 500;
+	color: #fff;
+	font-family: "Avenir Next", "Avenir", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	border-radius: 5px;
+	outline: 0;
+	transition: background-color 300ms cubic-bezier(0.215, 0.61, 0.355, 1), color 300ms cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+ .btn:focus, .btn:active, .btn:hover {
+	background-color: rgba(154, 204, 20,0.2);
+   	color: white;
+  	cursor:pointer;
+}
+ .__first, .__second, .__third, .__fourth {
+	animation-name: fadeIn;
+	animation-duration: 180ms;
+	animation-fill-mode: both;
+	animation-iteration-count: 1;
+}
+ .__first {
+	animation-delay: 0;
+}
+ .__second {
+	animation-delay: 80ms;
+}
+ .__third {
+	animation-delay: 180ms;
+}
+ @keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translate3d(0, -25%, 0);
+	}
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+}
+/* Ends of Login Form*/
+
+
+#third-section .details-wrapper{
+	margin:100px 70px;
+	display: flex;
+	flex-direction: row;
+	font-family: "Avenir Next", "Avenir", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	color: #fff;
+	text-align: center;
+}
+
+#third-section .details-wrapper .details-container{
+	width:33%;
+}
+
+.details-wrapper .details-container:first-child .details-content{
+	color: rgb(154, 204, 20);
+}
+
+.details-wrapper .details-container:nth-child(2) .details-content{
+	flex-direction: row ;
+	justify-content: center;
+	align-items: center;
+}
+
+.details-title{
+	font-size: 16px;
+	font-weight:700;
+	margin-bottom:50px;
+	letter-spacing: 0.1em;
+}
+
+.details-content{
+	display:flex;
+	flex-direction: column;
+}
+
+.fa{
+	padding: 5px;
+	font-size: 25px !important;
+	width:40px;
+	text-decoration: none;
+	color:#fff;
+}
+
+.fa:hover{
+	opacity: .7;
+}
+
+.details-content span{
+	margin:4px;
+}
+
+@media only screen and (min-width: 300px) {
+	#first-section {
+	  min-height:77%;
+	}
+  
+	#second-section{
+	  min-height:17%;
+	}
+
+	#second-section #form{
+	  max-width:280px;
+	}
+  
+	#third-section{
+	  min-height:20vh;
+	}
+
+	#third-section .details-wrapper{
+		margin:100px 30px;
+	}
+
+	.details-title{
+		font-size: 12px;
+		margin-bottom: 30px;
+	}
+
+	.details-content span{
+		font-size: 10px;
+	}
+  }
+
+@media only screen and (min-width: 600px) {
+  #first-section {
+    min-height:77%;
+  }
+
+  #second-section{
+    min-height:40%;
+  }
+
+  .details-title{
+	font-size: 14px;
+	margin-bottom: 35px;
+	}
+
+  #third-section{
+    min-height:10vh;
+  }
+
+  .details-content span{
+	font-size: 12px;
+}
+}
+
+@media only screen and (min-width: 1400px) {
+  #first-section {
+    min-height:70%;
+  }
+
+  #second-section{
+    min-height:25%;
+  }
+
+  #second-section #form{
+	  max-width: 400px;
+  }
+
+  #third-section{
+    min-height:30vh;
+  }
+}
