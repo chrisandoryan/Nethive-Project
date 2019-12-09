@@ -7,10 +7,10 @@
   <a href="#installation">Installation</a> •
   <a href="#quick-start">Quick Start</a> •
   <a href="#contributors">Contributors</a> •
-  <a href="/doc/en-US/user_guide.md">User Guide</a>
+  <a href="/doc/user_guide.md">User Guide</a>
 </p>
 
-**The Nethive SIEM Project** provides a Security Information and Event Management (SIEM) insfrastructure empowered by **CVSS** measurements.
+**The Nethive Project** provides a Security Information and Event Management (SIEM) insfrastructure empowered by **CVSS** measurements.
 
 [Gambar Dashboard]
 
@@ -26,7 +26,7 @@
  - [x] Resourceful Dashboard UI
  - [ ] Notify Suspicious Activity via Email 
 
-## Setup
+## Installation
 
 Before installing, please make sure to install the **[pre-requisites](/doc/en-US/user_guide.md#pre-requisites)**.
 
@@ -40,11 +40,12 @@ You can install SecureTea using the latest repository:
 ```
 git clone https://github.com/chrisandoryan/Nethive-Project.git
 cd Nethive-Project/
+sudo bash install.sh
 sudo pip3 install -r requirements.txt
 ```
 Please make sure all dependencies are installed if anyone of the above fails.
-For more detailed information, refer to the [installation guide](https://github.com/OWASP/SecureTea-Project/blob/master/doc/en-US/user_guide.md#installation).
+For more detailed information, refer to the [installation guide](https://github.com/chrisandoryan/Nethive-Project/doc/user_guide.md#installation).
 
 ## Quick Start
 
-
+[Coming soon!]
