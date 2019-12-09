@@ -35,39 +35,31 @@ def keyboardInterruptHandler(signal, frame):
     else:
         print("[Main] Already exiting... Please wait.")
 
-    
-# def logQueMan():
-#     """
-#     Manage and display log output from every sensors
-#     """
-#     global panel, outHand
-#     outHand.sendLog("[*] Waiting for output from sensory...")
-#     while True:
-#         out = outHand.loggerQueue.get()
-#         print(out)
-#         if panel is not None:
-#             panel.out2logger(out)
-#             panel.refresh()
-#     return
+def menu():
+    setup = -1
+    while True:
+        os.system("clear")
+        print("Nethive, a SIEMxCVSS Project\n")
+        print("[0] Check Dependencies")
+        print("[1] Fresh Installation")
+        print("[2] Refresh Configuration")
+        print("[3] Just-Start-This-Thing")
+        print("[4] Exit")
+        setup = input(">> ")
 
-# def outQueMan():
-#     """
-#     Manage and display stdout/stderr output from engines
-#     """
-#     global panel, outHand
-#     while True:
-#         out = outHand.outerrQueue.get()
-#         print(out)
-#         if panel is not None:
-#             panel.out2outerr(out)
-#             panel.refresh()
-#     return
-
-# def panMan(stdscr):
-#     global panel
-#     # panel = ledger.MainPanel(stdscr)
-
-#     # p_thread = threading.Thread(target=panel.run, args=()).start()
+        if setup == "0":
+            # check if dependencies are already installed
+            pass
+        elif setup == "1":
+            activate.fresh()
+        elif setup == "2":
+            activate.configs()
+        elif setup == "3":
+            return
+        elif setup == "4":
+            exit(0)
+        else:
+            print("Invalid input, please try again.")
 
 if __name__ == "__main__":
 
@@ -76,32 +68,9 @@ if __name__ == "__main__":
 
     # --- Dependency and configuration management
 
-    print("Nethive, a SIEMxCVSS Project\n")
-    print("[1] Fresh Installation")
-    print("[2] Refresh Configuration")
-    print("[3] Just-Start-This-Thing")
-    print("[4] Exit")
-    setup = input(">> ")
-
-    if setup == "1":
-        activate.fresh()
-    elif setup == "2":
-        activate.configs()
-    elif setup == "3":
-        pass
-    elif setup == "4":
-        exit(0)
-    else:
-        print("Invalid input, please try again.")
-
-    # --- UI Management
-    # curses.wrapper(panMan)
-
-    # --- Output Synchronization Management
-    # lq_thread = threading.Thread(target=logQueMan, args=()).start()
-    # oq_thread = threading.Thread(target=outQueMan, args=()).start()
-
-    # --- Activating SIEM Engines
+    menu()
+    
+    # --- Activating Nethive Engines
 
     serviceguards.elkstack.run()
     serviceguards.redistimeseries.run()
@@ -111,7 +80,7 @@ if __name__ == "__main__":
     serviceguards.httpsniffer.run()
     serviceguards.xssauditor.run()
     serviceguards.slogparser.run()
-    # serviceguards.threlkengine.run()
+    serviceguards.threlkengine.run()
 
     serviceguards.beatsforwarder.run()
     

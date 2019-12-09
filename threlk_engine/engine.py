@@ -1,10 +1,17 @@
 from elasticsearch import Elasticsearch
 from kafka import KafkaProducer
-import _auditmon, _bashmon, _httpmon
+from threlk_engine import _auditmon, _bashmon, _httpmon
 
 import threading
 import time
 import json
+import logging
+import os
+import settings
+
+tracer = logging.getLogger('elasticsearch')
+tracer.setLevel(logging.DEBUG) # or desired level
+tracer.addHandler(logging.FileHandler('threlk.log'))
 
 """
 Threlk Engine is the engine that specifically constructed to process raw data from the ELK infrasctructure into something more useful for the client.
@@ -20,8 +27,8 @@ AUDIT_INDEX = "nethive-audit-*"
 SQLI_INDEX = "nethive-sqli-*"
 XSS_INDEX = "nethive-xss-*"
 
-KAFKA_TOPIC = "TANOSY"
-BOOTSTRAP_SERVER = ["10.20.148.158:9092"]
+KAFKA_TOPIC = os.getenv("KAFKA_TOPIC")
+KAFKA_BOOTSTRAP_SERVER = os.getenv("KAFKA_BOOTSTRAP_SERVER")
 
 FETCH_SIZE = 10
 SORT = "desc"
@@ -141,7 +148,7 @@ def elastail(targetIndex, parser_function):
 def booting():
     global es, producer
     es = Elasticsearch(hosts="http://elastic:changeme@localhost:9200/")
-    producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), compression_type='gzip', bootstrap_servers=BOOTSTRAP_SERVER)
+    producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), compression_type='gzip', bootstrap_servers=KAFKA_BOOTSTRAP_SERVER)
     print("[Threlk Engine] Waiting for Elasticsearch to start...")
     while True:
         if es.ping():

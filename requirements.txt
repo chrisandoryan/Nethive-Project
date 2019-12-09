@@ -8,7 +8,7 @@ pandas
 dpkt
 sqlparse
 python-dateutil
-sh
+# sh
 sqlparse
 mysqlclient
 python-dotenv
