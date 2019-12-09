@@ -9,9 +9,9 @@ import logging
 import os
 import settings
 
-tracer = logging.getLogger('elasticsearch')
-tracer.setLevel(logging.DEBUG) # or desired level
-tracer.addHandler(logging.FileHandler('threlk.log'))
+logger = logging.getLogger('elasticsearch')
+logger.setLevel(logging.CRITICAL)
+logger.addHandler(logging.FileHandler('threlk.log'))
 
 """
 Threlk Engine is the engine that specifically constructed to process raw data from the ELK infrasctructure into something more useful for the client.

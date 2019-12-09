@@ -8,7 +8,7 @@ import pandas as pd
 
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.CRITICAL)
 logger = logging.getLogger(__name__)
 
 LOGSTASH_HOST = os.getenv('LOGSTASH_HOST')

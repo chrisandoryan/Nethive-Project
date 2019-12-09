@@ -16,7 +16,7 @@ from processors import sql_inspector
 
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.CRITICAL)
 logger = logging.getLogger(__name__)
 
 SQL_METHOD_LESS_INTEREST = ["USE"]
