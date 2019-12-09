@@ -234,10 +234,10 @@ def configs():
     packetbeat()
     print("[*] Configuring bash \"historians\" module...")
     bash()
-    print("[*] Updating docker-elk configuration...")
-    elk()
-    print("[*] Updating Logstash configuration...")
-    logstash()
+    # print("[*] Updating docker-elk configuration...")
+    # elk()
+    # print("[*] Updating Logstash configuration...")
+    # logstash()
 
 if __name__ == "__main__":
     pass
