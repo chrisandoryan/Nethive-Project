@@ -3,9 +3,7 @@
 <h1 align="center">
   <br>
   <a href="https://github.com/chrisandoryan/Nethive-Project">
-  <img src="graphics/logo.png" align="center" alt="nethive-logo" width="100"></a>
-  <br>
-  Nethive Project
+  <img src="graphics/logo.png" align="center" alt="nethive-logo"></a>
   <br>
 </h1>
 
@@ -19,7 +17,7 @@
   <a href="/doc/user_guide.md">User Guide</a>
 </p>
 
-**The Nethive Project** provides a Security Information and Event Management (SIEM) insfrastructure empowered by **CVSS** measurements.
+**The Nethive Project** provides a Security Information and Event Management (SIEM) insfrastructure empowered by **CVSS** automatic measurements.
 
 [Gambar Dashboard]
 
