@@ -1,10 +1,10 @@
 scapy>=2.4.3
 networkx
-scikit-learn
+# scikit-learn
 numpy
 pandas
-matplotlib
-mlxtend
+# matplotlib
+# mlxtend
 dpkt
 sqlparse
 python-dateutil
@@ -15,9 +15,9 @@ python-dotenv
 requests
 pyyaml
 pylibmc==1.6.1
-python-logstash-async
+# python-logstash-async
 redistimeseries
-uuid
+# uuid
 joblib
 kafka-python
 elasticsearch

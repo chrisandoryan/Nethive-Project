@@ -4,7 +4,7 @@ import time
 import os
 import settings
 import json
-import uuid
+# import uuid
 import random
 import socket
 import base64
