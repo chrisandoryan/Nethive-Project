@@ -43,7 +43,7 @@ You can install Nethive from PyPi package manager using the following command:
 
 **or**
 
-You can install SecureTea using the latest repository:
+You can install Nethive using the latest repository:
 ```
 git clone https://github.com/chrisandoryan/Nethive-Project.git
 cd Nethive-Project/
@@ -55,4 +55,28 @@ For more detailed information, refer to the [installation guide](https://github.
 
 ## Quick Start
 
-[Coming soon!]
+ 1. Fetch and start **nethive-cvss** docker container
+	```
+	git clone https://github.com/Falanteris/docker-nethive-cvss/
+	cd docker-nethive-cvss/
+	docker build -t nethive-cvss .
+	./cvss
+	```
+ 2. Start **Nethive** and activating all sensors
+	```
+	cd Nethive-Project/
+	sudo python3 main.py
+	```
+	On the menu prompt, choose `[3] Just-Run-This-Thing` . Then wait for the engine to be initialized.
+	
+ 3. Start Nethive UI Server
+		
+ 5. Go to http://localhost:3000/
+
+## Contributors
+
+ -  Alex Ferdinand Gunawan
+ - Chrisando Ryan Pardomuan Siahaan
+ - Rayhan Raibul Tsani
+ - Vandevlin Alfonso Wibawa
+

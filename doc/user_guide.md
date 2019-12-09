@@ -128,13 +128,53 @@ If done, proceed to [After installation](https://github.com/chrisandoryan)
 Nethive configuration is stored in a file named ``.env`` and can be found on the root directory of the project.
 
 Default configuration:
+```
+# Nethive configuration
+LISTEN_IFACE = "lo"
 
-    enter code here
+# MySQL Information
+MYSQL_USER = "root"
+MYSQL_PASS = ""
+MYSQL_HOSTNAME = "127.0.0.1"
+MYSQL_DB = ""
 
-##### Editing the configurations using a text-editor
+# Log File paths to be monitored
+AUDIT_LOG_PATH = "/var/log/audit/audit.log"
+MYSQL_SLOW_QUERY_LOG_PATH = "/var/log/mysql/slow-query.log"
+PARSED_SLOW_QUERY_LOG_PATH = "/var/log/mysql/slog.log"
+SQL_RESPONSE_LOG_PATH = "/var/log/mysql/responses.log"
+HTTP_LOG_PATH = "/var/log/http/inbound.log"
+CENTRALIZED_BASH_HISTORY_PATH = "/var/log/bash/history.log"
+
+# Auditbeat configuration
+AUDITBEAT_PATH = "/etc/auditbeat"
+AUDITBEAT_CONFIG_PATH = "${AUDITBEAT_PATH}/auditbeat.yml"
+AUDITBEAT_RULES_PATH = "${AUDITBEAT_PATH}/audit.rules.d/auditbeat.rules"
+
+# Filebeat configuration
+FILEBEAT_PATH = "/etc/filebeat"
+FILEBEAT_CONFIG_PATH = "${FILEBEAT_PATH}/filebeat.yml"
+
+# Packetbeat configuration
+PACKETBEAT_PATH = "/etc/packetbeat"
+PACKETBEAT_CONFIG_PATH = "${PACKETBEAT_PATH}/packetbeat.yml"
+
+# Connection
+LOGSTASH_HOST = "127.0.0.1"
+LOGSTASH_PORT = 5000
+AUDIT_CONTROL_HOST = "127.0.0.1"
+AUDIT_CONTROL_PORT = "5129"
+XSS_WATCHMAN_SOCKET = "/tmp/xss_auditor.sock"
+
+# Kafka configuration
+KAFKA_TOPIC = "NETHIVE"
+KAFKA_BOOTSTRAP_SERVER = ["10.20.148.158:9092"]
+```
+
+##### Editing the configurations using interactive menu
 [Coming soon!]
 
-#### Running Nethive for the first time
+#### Running Nethive after configuration change
 **Nethive** depends on some third party binaries, such as: Filebeat, Auditbeat, etc., and requires special configuration for some services, such as MySQL server, etc. When running for the first time, you need to make sure that those binaries and services are configured to work with **Nethive**.
 
 > Important! **Nethive** needs a sudo permission to work.
@@ -147,13 +187,26 @@ to apply your modified  `.env` configuration into the **Nethive** itself and int
 [Command preview GIF]
 
 ### Usage
-#### [1] Check Dependencies
+#### Nethive-CVSS
+This module is required so that every detected attacks are measured automatically according to CVSS3.0 vulnerability measurement. **Nethive Engine** will automatically send every detected attacks data into this docker container and the measurement result will be stored back into Elasticsearch.
+```
+git clone https://github.com/Falanteris/docker-nethive-cvss/
+cd docker-nethive-cvss/
+docker build -t nethive-cvss .
+./cvss
+```
+
+#### Nethive Engines
+##### [1] Check Dependencies
 [Coming soon!]
-#### [2] Refresh Configuration
+##### [2] Refresh Configuration
 [Coming soon!]
-#### [3] Just-Start-This-Thing
+##### [3] Just-Start-This-Thing
 [Coming soon!]
-#### [4] Exit
+##### [4] Exit
 You know, just an ordinary exit menu. Meh.
+#### Nethive Admin
+
+
 
 
