@@ -1,1 +1,0 @@
-1. add namespace blackhead on dvwaPage.inc.php, every vulnerability's index.php, and (maybe not neccesary) every vulnerability's source code
