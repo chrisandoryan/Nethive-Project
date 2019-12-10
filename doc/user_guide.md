@@ -198,14 +198,15 @@ to apply your modified  `.env` configuration into the **Nethive** itself and to 
 
 ### Introduction
 Nethive-cvss is a low-latency, CVSS Summarizer that allows for quick estimation of risk from an event that is classified as a threat by the SIEM engine. The output of this summarizer is shaped in the following format
-`
-{
-	severity: < The severity of the vulnerability based on CVSS:3.0 severity range>,
-	score : < The actual risk score >,
-	vector: < The vector string representation of the vulnerability's risk >
+
+
+	{
+		severity: < The severity of the vulnerability based on CVSS:3.0 severity range>,
+		score : < The actual risk score >,
+		vector: < The vector string representation of the vulnerability's risk >
 	
-}
-`
+	}
+
 Nethive-CVSS requires a Kafka server to run. YOu can get a quick instance from here : 
 
 ### Required Env Variables
