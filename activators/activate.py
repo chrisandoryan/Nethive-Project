@@ -168,15 +168,15 @@ def bash():
 
 def dirs():
     if not os.path.exists(AUDIT_LOG_PATH):
-        os.makedirs(os.path.dirname(AUDIT_LOG_PATH), exist_ok=True)
+        os.makedirs(os.path.dirname(AUDIT_LOG_PATH), mode=0o773, exist_ok=True)
     if not os.path.exists(MSQL_SLOW_QUERY_LOG_PATH):    
-        os.makedirs(os.path.dirname(MSQL_SLOW_QUERY_LOG_PATH), exist_ok=True)
+        os.makedirs(os.path.dirname(MSQL_SLOW_QUERY_LOG_PATH), mode=0o773, exist_ok=True)
     if not os.path.exists(SQL_RESPONSE_LOG_PATH):    
-        os.makedirs(os.path.dirname(SQL_RESPONSE_LOG_PATH), exist_ok=True)
+        os.makedirs(os.path.dirname(SQL_RESPONSE_LOG_PATH), mode=0o773, exist_ok=True)
     if not os.path.exists(HTTP_LOG_PATH):
-        os.makedirs(os.path.dirname(HTTP_LOG_PATH), exist_ok=True)
+        os.makedirs(os.path.dirname(HTTP_LOG_PATH), mode=0o773, exist_ok=True)
     if not os.path.exists(CENTRALIZED_BASH_HISTORY_PATH):
-        os.makedirs(os.path.dirname(CENTRALIZED_BASH_HISTORY_PATH), exist_ok=True)
+        os.makedirs(os.path.dirname(CENTRALIZED_BASH_HISTORY_PATH), mode=0o773 ,exist_ok=True)
 
 def memcache():
     # TODO: setup memcache configuration WILL BE REMOVED - NOT USED ANYMORE
