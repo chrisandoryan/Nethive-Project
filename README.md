@@ -35,7 +35,7 @@
 
 ## Installation
 
-Before installing, please make sure to install the **[pre-requisites](/doc/en-US/user_guide.md#pre-requisites)**.
+Before installing, please make sure to install the **[pre-requisites](/doc/user_guide.md#pre-requisites)**.
 
 You can install Nethive from PyPi package manager using the following command:
 
@@ -51,7 +51,7 @@ $ sudo bash install.sh
 $ sudo pip3 install -r requirements.txt
 ```
 Please make sure all dependencies are installed if anyone of the above fails.
-For more detailed information, refer to the [installation guide](https://github.com/chrisandoryan/Nethive-Project/doc/user_guide.md#installation).
+For more detailed information, refer to the [installation guide](/doc/user_guide.md).
 
 ## Quick Start
 
@@ -68,9 +68,7 @@ For more detailed information, refer to the [installation guide](https://github.
 	$ cp .env.example .env
 	```
 	
-3. Activate all **Nethive** processing engines
-		`$ sudo python3 main.py `
-
+3. Activate all **Nethive** processing engines: `$ sudo python3 main.py `
 	On the menu prompt, choose **[3] Just-Run-This-Thing** . 
 Then wait for the engines to be initialized.
 	
