@@ -29,9 +29,11 @@ XSS_INDEX = "nethive-xss-*"
 
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC")
 KAFKA_BOOTSTRAP_SERVER = os.getenv("KAFKA_BOOTSTRAP_SERVER")
+print(KAFKA_BOOTSTRAP_SERVER)
 
 FETCH_SIZE = 10
 SORT = "desc"
+
 
 def initial_search(targetIndex):
     global es
@@ -80,9 +82,11 @@ def next_search(targetIndex, lastTimestamp, prevIds):
         ]
     })
 
+
 def display_hits(hits):
     for hit in hits:
-        print(hit, "\n") 
+        print(hit, "\n")
+
 
 def relay_to_kafka(parser_function, hits):
     global producer
@@ -92,6 +96,7 @@ def relay_to_kafka(parser_function, hits):
             print(result, "\n")
             meta = foo.get(timeout=60)
             print("Offset: %d" % meta.offset)
+
 
 def elastail(targetIndex, parser_function):
     first = initial_search(targetIndex)
@@ -139,12 +144,13 @@ def elastail(targetIndex, parser_function):
         else:
             # print("Here")
             pass
-    
+
     if next['hits']['total']['value'] > 0 and delay > 0.5:
         delay = 0.5
     elif delay <= 2:
         delay = delay + 0.5
-    
+
+
 def booting():
     global es, producer
     es_online = False
@@ -152,28 +158,34 @@ def booting():
     es = Elasticsearch(hosts="http://elastic:changeme@localhost:9200/")
     print("[Threlk Engine] Waiting for Elasticsearch and Kafka to start...")
     while not es_online or not kafka_online:
-        try:
-            producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), compression_type='gzip', bootstrap_servers=KAFKA_BOOTSTRAP_SERVER)
+        if not es_online:
             if es.ping():
                 print("[Threlk Engine] Elasticsearch is online. Starting...")
                 es_online = True
             else:
                 print("[Threlk Engine] Waiting for Elasticsearch to start...")
-            if producer.bootstrap_connected():
+        if not kafka_online:
+            try:
+                producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode(
+                    'utf-8'), compression_type='gzip', bootstrap_servers=KAFKA_BOOTSTRAP_SERVER)
                 print("[Threlk Engine] Kafka is online. Starting...")
                 kafka_online = True
-            else:
-                print("[Threlk Engine] Waiting for Kafka to start...")
-            time.sleep(2)
-        except Exception as e:
-            pass
+            except Exception as e:
+                print(
+                    "[Threlk Engine] Got response: %s. Waiting for Kafka to start..." % e)
+                pass
+        time.sleep(5)
+
 
 def start():
     print("[Threlk Engine] Initiating Threlk Engine...")
     booting()
-    # threading.Thread(target=elastail, args=(BASH_INDEX, _bashmon.parse)).start() 
-    threading.Thread(target=elastail, args=(AUDIT_INDEX, _auditmon.parse)).start()
-    # threading.Thread(target=elastail, args=(HTTPMON_INDEX, _httpmon.parse)).start()
+    threading.Thread(target=elastail, args=(
+        BASH_INDEX, _bashmon.parse)).start()
+    threading.Thread(target=elastail, args=(
+        AUDIT_INDEX, _auditmon.parse)).start()
+    threading.Thread(target=elastail, args=(
+        HTTPMON_INDEX, _httpmon.parse)).start()
     print("[Threlk Engine] Started.")
 
 # start()
