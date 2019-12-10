@@ -68,9 +68,8 @@ For more detailed information, refer to the [installation guide](/doc/user_guide
 	$ cp .env.example .env
 	```
 	
-3. Activate all **Nethive** processing engines: `$ sudo python3 main.py `
-	On the menu prompt, choose **[3] Just-Run-This-Thing** . 
-Then wait for the engines to be initialized.
+3. Activate all **Nethive** processing engines: `$ sudo python3 main.py `.  
+On the menu prompt, choose **[3] Just-Run-This-Thing**, then wait for the engines to be initialized.
 	
  3. Start Nethive UI Server
 		
