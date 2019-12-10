@@ -235,6 +235,7 @@ def configs():
     print("[*] Configuring bash \"historians\" module...")
     bash()
     print("Done. Press [enter] to continue...")
+    input()
     # print("[*] Updating docker-elk configuration...")
     # elk()
     # print("[*] Updating Logstash configuration...")
