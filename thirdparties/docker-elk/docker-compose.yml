@@ -6,7 +6,7 @@ services:
       context: elasticsearch/
       args:
         ELK_VERSION: $ELK_VERSION
-    image: siahaan/docker-nethive-elasticsearch:latest
+    # image: siahaan/docker-nethive-elasticsearch:latest
     volumes:
       - type: bind
         source: ./elasticsearch/config/elasticsearch.yml
@@ -29,7 +29,7 @@ services:
       context: logstash/
       args:
         ELK_VERSION: $ELK_VERSION
-    image: siahaan/docker-nethive-logstash:latest
+    # image: siahaan/docker-nethive-logstash:latest
     volumes:
       - type: bind
         source: ./logstash/config/logstash.yml
@@ -55,7 +55,7 @@ services:
       context: kibana/
       args:
         ELK_VERSION: $ELK_VERSION
-    image: siahaan/docker-nethive-kibana:latest
+    # image: siahaan/docker-nethive-kibana:latest
     volumes:
       - type: bind
         source: ./kibana/config/kibana.yml

@@ -150,16 +150,21 @@ def booting():
     es_online = False
     kafka_online = False
     es = Elasticsearch(hosts="http://elastic:changeme@localhost:9200/")
-    print("[Threlk Engine] Waiting for Elasticsearch to start...")
+    print("[Threlk Engine] Waiting for Elasticsearch and Kafka to start...")
     while not es_online and not kafka_online:
         try:
             producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), compression_type='gzip', bootstrap_servers=KAFKA_BOOTSTRAP_SERVER)
             if es.ping():
                 print("[Threlk Engine] Elasticsearch is online. Starting...")
                 es_online = True
+            else:
+                print("[Threlk Engine] Waiting for Elasticsearch to start...")
             if producer.bootstrap_connected():
                 print("[Threlk Engine] Kafka is online. Starting...")
                 kafka_online = True
+            else:
+                print("[Threlk Engine] Waiting for Kafka to start...")
+            time.sleep(3)
         except Exception as e:
             pass
 
