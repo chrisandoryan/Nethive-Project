@@ -72,6 +72,10 @@ For more detailed information, refer to the [installation guide](/doc/user_guide
 On the menu prompt, choose **[3] Just-Run-This-Thing**, then wait for the engines to be initialized.
 	
  3. Start Nethive UI Server
+ 	```
+	$ cd Nethive-Project/dashboard/
+	$ npm install && npm start
+	```
 		
  5. Go to http://localhost:3000/
 

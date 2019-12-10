@@ -10,30 +10,12 @@
     - [Software](#software)
     - [Installing pre-requisites](#installing-pre-requisites)
   - [Procedure for installing](#procedure-for-installing)
-    * [Setting up a virtual environment(optional)](#setting-up-a-virtual-environment)
     * [GitHub](#github)
-    * [Zip](#zip)
   - [After installation](#after-installation)
-    *  [Configuring SecureTea](#configuring-securetea)
-      -  [Editing the configurations using a text editor](#editing-the-configurations-using-a-text-editor)
-          -  [Using Vim](#using-vim)
-	     -  [Using gedit](#using-gedit)
-      -  [Configuring using interactive setup mode](#configuring-using-interactive-setup-mode)
-          - [Setup all the features](#setup-all-the-features)
-	     - [Setup a particular feature](#setup-a-particular-feature)
-      -  [Configuring using Web UI](#configuring-using-web-ui)
-          - [Using local web server over HTTPS](/doc/en-US/web_https.md)
-      -  [Configuring using CLI arguments](#configuring-using-cli-arguments)
-    *  [Getting tokens](#getting-tokens)
-        -  [Getting Twitter tokens](#getting-twitter-tokens)
-	   -  [Getting Slack tokens](#getting-slack-tokens)
-	   -  [Getting Telegram tokens](#getting-telegram-tokens)
-        -  [Get Twilio SMS tokens](#getting-twilio-sms-tokens)
-	   - [Get Gmail tokens](#getting-gmail-tokens)
 
 ## Introduction
 
-**The Nethive Project** provides a Security Information and Event Management (SIEM) insfrastructure empowered by **CVSS** measurements. 
+**The Nethive Project** provides a Security Information and Event Management (SIEM) insfrastructure empowered by **CVSS** measurements. This infrastructure offers zero to no latency vulnerability monitoring, and has been empowered by ELK Infrastructure as well. The infrastructure prioritzes flexibility, as we construct the infrastructure with plug-and-play engines through Docker. We also use Kafka server to relay event messages between engines, making it lightning fast in terms of event data relaying. The infrastructure has 4 different components backboning it.
 
 **Nethive Engine** monitors every request coming through HTTP protocol to detect and identify any attempt of SQL Injection attacks. It also anonymously monitors every SQL query response to provide a wide range of XSS protection for your server, with both Stored and Reflected XSS attacks fully covered.
 
@@ -195,8 +177,57 @@ to apply your modified  `.env` configuration into the **Nethive** itself and to 
 [Command preview GIF]
 
 ### Usage
+
+### Introduction
+Nethive-cvss is a low-latency, CVSS Summarizer that allows for quick estimation of risk from an event that is classified as a threat by the SIEM engine. The output of this summarizer is shaped in the following format
+
+
+	{
+		severity: < The severity of the vulnerability based on CVSS:3.0 severity range>,
+		score : < The actual risk score >,
+		vector: < The vector string representation of the vulnerability's risk >
+	
+	}
+
+Nethive-CVSS requires a Kafka server to run. YOu can get a quick instance from here : 
+
+### Required Env Variables
+
+You would need to configure a MYSQL server, a table called `paths` must be inserted in your specified database with the following columns 
+	
+	  `superuser` tinyint(1) NOT NULL DEFAULT '0',
+	  `authentication` tinyint(1) NOT NULL DEFAULT '0',
+	  `paths` varchar(255) DEFAULT NULL,
+	  `id` int(11) NOT NULL AUTO_INCREMENT,
+	  PRIMARY KEY (`id`)
+	
+
+The Nethive-CVSS microservice requires you to specify several environment variables in order to work. The following is the list of envionment variables
+
+
+	PRODUCER  		the topic name, which would connect
+	BOOTSTRAP_SERVER 	the location of your Kafka server
+	INTERFACE		IP/CIDR combination of the machine you wish to check
+	ESLOC			Location of Elasticsearch
+	STOREINDEX		The Elasticsearch index where you'd store new summarizing outputs
+	MYSQL			The dsn to connect to a mysql server
+				Format : [username[:password]@][protocol[(address)]]/dbname[?
+				param1=value1&...&paramN=valueN]
+				Example : test_user:test@/test
+	
+
+Where 
+
+        - test_user is the user is the user of the database
+        - test (before the @) is the password
+        - you can simply just write @ to specify that the database is located in localhost
+        - and the final *test* is the database name.
+ 
+
+And the rest, is taken care for y
+
 #### Nethive-CVSS
-This module is required so that every detected attacks are measured automatically according to CVSS3.0 vulnerability measurement. A **Nethive Engine** will automatically send every detected attacks data into this docker container and the measurement result will be stored back into Elasticsearch.
+This microservice is required so that every detected attacks are measured automatically according to CVSS3.0 vulnerability measurement. A **Nethive Engine** will automatically send every detected attacks data into this docker container and the measurement result will be stored back into Elasticsearch to a specified index.
 
 To run nethive-cvss docker:
 ```
