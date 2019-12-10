@@ -221,7 +221,7 @@ You would need to configure a MYSQL server, a table called `paths` must be inser
 
 The Nethive-CVSS microservice requires you to specify several environment variables in order to work. The following is the list of envionment variables
 
-`
+
 	PRODUCER  		the topic name, which would connect
 	BOOTSTRAP_SERVER 	the location of your Kafka server
 	INTERFACE		IP/CIDR combination of the machine you wish to check
@@ -231,7 +231,7 @@ The Nethive-CVSS microservice requires you to specify several environment variab
 				Format : [username[:password]@][protocol[(address)]]/dbname[?
 				param1=value1&...&paramN=valueN]
 				Example : test_user:test@/test
-`	
+	
 
 Where 
 
