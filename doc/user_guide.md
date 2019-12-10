@@ -15,7 +15,7 @@
 
 ## Introduction
 
-**The Nethive Project** provides a Security Information and Event Management (SIEM) insfrastructure empowered by **CVSS** measurements. 
+**The Nethive Project** provides a Security Information and Event Management (SIEM) insfrastructure empowered by **CVSS** measurements. This infrastructure offers zero to no latency vulnerability monitoring, and has been empowered by ELK Infrastructure as well. The infrastructure prioritzes flexibility, as we construct the infrastructure with plug-and-play engines through Docker. We also use Kafka server to relay event messages between engines, making it lightning fast in terms of event data relaying. The infrastructure has 4 different components backboning it.
 
 **Nethive Engine** monitors every request coming through HTTP protocol to detect and identify any attempt of SQL Injection attacks. It also anonymously monitors every SQL query response to provide a wide range of XSS protection for your server, with both Stored and Reflected XSS attacks fully covered.
 
