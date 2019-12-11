@@ -106,55 +106,59 @@ def relay_to_kafka(parser_function, hits):
 
 def elastail(targetIndex, parser_function):
     first = initial_search(targetIndex)
+    delay = 0.5
 
     hits = first['hits']['hits']
     # display_hits(hits)
-    relay_to_kafka(parser_function, hits)
+    if first['hits']['total']['value'] > 0:
+        relay_to_kafka(parser_function, hits)
 
-    lastHitTimestamp = hits[0]['_source']['@timestamp']
-    # print(lastHitTimestamp)
-    # print(len(hits))
+        lastHitTimestamp = hits[0]['_source']['@timestamp']
+        # print(lastHitTimestamp)
+        # print(len(hits))
 
-    prevIds = [hit['_id'] for hit in hits]
-    # print(prevIds)
+        prevIds = [hit['_id'] for hit in hits]
+        # print(prevIds)
 
-    delay = 0.5
-    currentHitTimestamp = ""
+        currentHitTimestamp = ""
 
-    while True:
-        # print("Fetching...")
-        # print("Current: ", currentHitTimestamp)
-        # print("Last: ", lastHitTimestamp)
-        time.sleep(delay)
-        if currentHitTimestamp != lastHitTimestamp:
+        while True:
+                # print("Fetching...")
+                # print("Current: ", currentHitTimestamp)
+                # print("Last: ", lastHitTimestamp)
+            time.sleep(delay)
+            if currentHitTimestamp != lastHitTimestamp:
 
-            if currentHitTimestamp != "":
-                lastHitTimestamp = currentHitTimestamp
+                if currentHitTimestamp != "":
+                    lastHitTimestamp = currentHitTimestamp
 
-            next = next_search(targetIndex, lastHitTimestamp, prevIds)
-            hits = next['hits']['hits']
+                next = next_search(targetIndex, lastHitTimestamp, prevIds)
+                hits = next['hits']['hits']
 
-            if next['hits']['total']['value'] > 0:
-                # print([hit['_source']['@timestamp'] for hit in hits])
+                if next['hits']['total']['value'] > 0:
+                    # print([hit['_source']['@timestamp'] for hit in hits])
 
-                currentHitTimestamp = hits[0]['_source']['@timestamp']
-                # print(currentHitTimestamp)
+                    currentHitTimestamp = hits[0]['_source']['@timestamp']
+                    # print(currentHitTimestamp)
 
-                prevIds = [hit['_id'] for hit in hits]
+                    prevIds = [hit['_id'] for hit in hits]
 
-                relay_to_kafka(parser_function, hits)
+                    relay_to_kafka(parser_function, hits)
 
+                else:
+                    currentHitTimestamp = ""
+                    # print("Already up to date.")
             else:
-                currentHitTimestamp = ""
-                # print("Already up to date.")
-        else:
-            # print("Here")
-            pass
+                # print("Here")
+                pass
 
-    if next['hits']['total']['value'] > 0 and delay > 0.5:
-        delay = 0.5
-    elif delay <= 2:
-        delay = delay + 0.5
+        if next['hits']['total']['value'] > 0 and delay > 0.5:
+            delay = 0.5
+        elif delay <= 2:
+            delay = delay + 0.5
+    else:
+        time.sleep(delay)
+        elastail(targetIndex, parser_function)
 
 
 def booting():
@@ -180,7 +184,7 @@ def booting():
                 print(
                     "[Threlk Engine] Got response: %s. Waiting for Kafka to start..." % e)
                 pass
-        time.sleep(4)
+        time.sleep(6)
 
 
 def create_indices():
