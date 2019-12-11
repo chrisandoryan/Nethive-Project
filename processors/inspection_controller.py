@@ -186,7 +186,7 @@ def audit_the_package(sqli_package, xss_package, bundle_package):
             sqli_result = sqli_inspect.get(timeout=20)
             xss_result = xss_audit.get(timeout=20)
         except Exception as e:
-            print("[Inspection Controller] %s" % e)
+            print("[Inspection Controller] Got error: %s" % e)
 
         # print("BUNDLE PACKAGE", bundle_package)
         # print("SQLI RESULT", sqli_result)
@@ -278,10 +278,15 @@ def handle_client_connection(client_socket):
                 elif raw_inspection_data['type'] == 'http':
                     print("[Inspection Controller] Initiating Light-Inspection procedure...")
 
-                    light_package = restructure_for_auditor(raw_inspection_data['package'])
+                    decoded_package = decode_deeply(raw_inspection_data['package'])
+                    light_xss_package = restructure_for_auditor(raw_inspection_data['package'])
 
-                    xss_audit = threading.Thread(target=xss_watcher.domparse, args=(light_package, False,)) # inspect request data WITHOUT sql response
-                    xss_audit.start()
+                    vuln_check = threading.Thread(target=audit_the_package, args=(None, light_xss_package, decoded_package))
+
+                    vuln_check.start()
+
+                    # xss_audit = threading.Thread(target=xss_watcher.domparse, args=(light_package, False,)) # inspect request data WITHOUT sql response
+                    # xss_audit.start()
                     
         except Exception as e:
             print("[Inspection Controller] %s" % e)

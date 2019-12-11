@@ -82,6 +82,7 @@ def domparse(the_package, is_flagged_xss):
     """
         Send HTTP Response to DOM Parser to detect XSS
     """
+    if not the_package: return
 
     the_package['res_body'] = the_package['res_body'].decode('ISO-8859-1')
     the_package = package_transform(the_package)

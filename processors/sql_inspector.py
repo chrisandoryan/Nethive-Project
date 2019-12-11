@@ -91,6 +91,7 @@ def transform_for_sqli_model(package):
         print(e)
     
 def inspect(inspection_package):
+    if not inspection_package: return
     print("[SQL Inspection] Restructuring inspection package...")
     transformed = transform_for_sqli_model(inspection_package)
     if transformed:
