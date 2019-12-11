@@ -55,6 +55,8 @@ For more detailed information, refer to the [installation guide](/doc/user_guide
 
 ## Quick Start
 
+![Start Nethive](graphics/start-nethive.gif)
+
  1. Fetch and start **nethive-cvss** docker container
 	```
 	$ git clone https://github.com/Falanteris/docker-nethive-cvss/
