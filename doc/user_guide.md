@@ -39,6 +39,8 @@ Nethive Project runs on Linux operating systems. It is compatible with Python 3.
 
 #### Software
 -  Python 2.x or 3.x
+-  Node.js
+-  NPM
 -  Filebeat
 -  Auditbeat
 -  Packetbeat
@@ -49,6 +51,11 @@ Nethive Project runs on Linux operating systems. It is compatible with Python 3.
 #### Installing pre-requisites
 Python:
 https://www.python.org/
+
+Node.js and NPM:
+```
+$ sudo apt install nodejs npm
+```
 
 Filebeat:
 
