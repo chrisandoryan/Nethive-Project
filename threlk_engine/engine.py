@@ -29,10 +29,12 @@ XSS_INDEX = "nethive-xss-*"
 
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC")
 KAFKA_BOOTSTRAP_SERVER = os.getenv("KAFKA_BOOTSTRAP_SERVER")
-print(KAFKA_BOOTSTRAP_SERVER)
+# print(KAFKA_BOOTSTRAP_SERVER)
 
 FETCH_SIZE = 10
 SORT = "desc"
+
+BOOT_TIMEOUT = 20
 
 
 def initial_search(targetIndex):
@@ -90,12 +92,16 @@ def display_hits(hits):
 
 def relay_to_kafka(parser_function, hits):
     global producer
-    for result in parser_function(hits):
-        if result:
-            foo = producer.send(KAFKA_TOPIC, result)
-            print(result, "\n")
-            meta = foo.get(timeout=60)
-            print("Offset: %d" % meta.offset)
+    try:
+        for result in parser_function(hits):
+            if result:
+                foo = producer.send(KAFKA_TOPIC, result)
+                print(result, "\n")
+                meta = foo.get(timeout=60)
+                print("Offset: %d" % meta.offset)
+    except Exception as e:
+        print("[Threlk Engine] Got error: %s" % e)
+        pass
 
 
 def elastail(targetIndex, parser_function):
@@ -174,12 +180,26 @@ def booting():
                 print(
                     "[Threlk Engine] Got response: %s. Waiting for Kafka to start..." % e)
                 pass
-        time.sleep(5)
+        time.sleep(4)
+
+
+def create_indices():
+    global es
+    if not es.indices.exists(HTTPMON_INDEX):
+        res = es.indices.create(index=HTTPMON_INDEX)
+        print(res)
+    if not es.indices.exists(BASH_INDEX):
+        res = es.indices.create(index=BASH_INDEX)
+        print(res)
+    if not es.indices.exists(AUDIT_INDEX):
+        res = es.indices.create(index=AUDIT_INDEX)
+        print(res)
 
 
 def start():
     print("[Threlk Engine] Initiating Threlk Engine...")
     booting()
+    create_indices()
     threading.Thread(target=elastail, args=(
         BASH_INDEX, _bashmon.parse)).start()
     threading.Thread(target=elastail, args=(

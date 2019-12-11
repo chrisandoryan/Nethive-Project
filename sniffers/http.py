@@ -52,7 +52,7 @@ def write_http_log(data):
         with open(HTTP_LOG_PATH, 'a+') as f:
             f.writelines(json.dumps(data) + "\n")
     except Exception as e:
-        print("[HTTP Sniffer] %s" % e)
+        print("[HTTP Sniffer] Got error: %s" % e)
     return
 
 def sql_tokenize_request(packet, buffer):
@@ -70,7 +70,7 @@ def sql_tokenize_request(packet, buffer):
     try:
         ip = packet[IP].src
     except Exception as e:
-        print("[HTTP Sniffer] %s" % e)
+        # print("[HTTP Sniffer] Got error: %s" % e)
         ip = ""
 
     result = []
@@ -222,6 +222,8 @@ def process_packets():
                     # --1. Deep Inspection
                     insert_status = redis.ts_insert_http_bundle(redis_store_key, package_id, current_timestamp, package_id, deep_bundle)
 
+                    print("[HTTP Sniffer] Storing bundle %s with result: %s" % (redis_store_key, insert_status))
+
                     # redis.ts_get_http_bundles(current_timestamp - 10, current_timestamp + 10)
 
                     # --2. Deep Inspection
@@ -251,14 +253,14 @@ def get_cookie_unidecoded(packet):
     try:
         return packet[HTTPRequest].Cookie.decode('utf-8')
     except Exception as e:
-        print("[HTTP Sniffer] %s" % e)
+        # print("[HTTP Sniffer] %s" % e)
         return bytearray()
 
 def get_ua(packet):
     try:
         return getattr(packet[HTTPRequest], 'User_Agent').decode("utf-8")
     except Exception as e:
-        print("[HTTP Sniffer] %s" % e)
+        # print("[HTTP Sniffer] %s" % e)
         return ""
 
 def get_ip_port(packet):
@@ -275,7 +277,7 @@ def get_content_type(packet, state):
     try:
         return getattr(packet[state], 'Content_Type').decode("utf-8")
     except Exception as e:
-        print("[HTTP Sniffer] %s" % e)
+        # print("[HTTP Sniffer] Got error: %s" % e)
         pass
 
 def get_longurl(packet):
@@ -297,6 +299,6 @@ def run(sniffMode, iface):
     try:
         sniff_packet(iface)
     except Exception as e:
-        print("[HTTP Sniffer] %s" % e)
+        # print("[HTTP Sniffer] Got error: %s" % e)
         pass
 

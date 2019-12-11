@@ -71,6 +71,7 @@ if __name__ == "__main__":
     # --- Activating Nethive Engines
 
     serviceguards.elkstack.run()
+    serviceguards.kafkaserver.run()
     serviceguards.redistimeseries.run()
 
     serviceguards.inspectioncontroller.run()

@@ -207,7 +207,7 @@ def audit_the_package(sqli_package, xss_package, bundle_package):
         }
 
         message = {'result': result, 'log_type': 'TYPE_HTTP_MONITOR'}
-        print ("MESSAGE", message, "\n")
+        # print ("MESSAGE", message, "\n")
 
         threading.Thread(target=send_to_logstash, args=(message,)).start()
         return True

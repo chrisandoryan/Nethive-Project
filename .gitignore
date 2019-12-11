@@ -7,3 +7,5 @@ activators/config/auditbeat.reference.yml
 **/threlk_engine/target/debug/.fingerprint
 **/threlk_engine/target/debug/.cargo-lock
 **/__pycache__/*
+*.pyc
+.env

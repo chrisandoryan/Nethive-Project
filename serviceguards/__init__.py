@@ -6,3 +6,4 @@ from . import redistimeseries
 from . import slogparser
 from . import threlkengine
 from . import xssauditor
+from . import kafkaserver
