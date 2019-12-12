@@ -19,7 +19,7 @@
 
 **The Nethive Project** provides a Security Information and Event Management (SIEM) insfrastructure empowered by **CVSS** automatic measurements.
 
-[Gambar Dashboard]
+![Dashboard Preview](graphics/dashboard.png)
 
 ## Features
 
