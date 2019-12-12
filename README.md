@@ -30,7 +30,7 @@
  - [x] CVSS Measurement on Detected Attacks
  - [x] Realtime Log Storing powered by Elasticsearch and Logstash
  - [x] Basic System Monitoring
- - [x] Resourceful Dashboard UI
+ - [ ] Resourceful Dashboard UI
  - [ ] Notify Suspicious Activity via Email 
 
 ## Installation
