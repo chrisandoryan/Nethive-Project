@@ -206,6 +206,7 @@ You would need to configure a MYSQL server, a table called `paths` must be inser
 	  `authentication` tinyint(1) NOT NULL DEFAULT '0',
 	  `paths` varchar(255) DEFAULT NULL,
 	  `id` int(11) NOT NULL AUTO_INCREMENT,
+	  CONSTRAINT AK_UniquePaths UNIQUE(paths)
 	  PRIMARY KEY (`id`)
 	
 
