@@ -4,6 +4,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+var cvssLogRoute = require('./routes/cvssLogs');
+
 var usersRoute = require('./routes/users');
 var adminRoute = require('./routes/admin');
 var scriptsRoute = require('./routes/scripts');
@@ -19,6 +21,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/logs',cvssLogRoute);
 
 app.use('/', usersRoute);
 app.use('/admin', adminRoute);

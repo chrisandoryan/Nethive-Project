@@ -1,32 +1,32 @@
 doctype html
 html
   head
-    title= title
-    meta(name="viewport", content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi")
-    // Title Icon
-    link(rel="icon" type="image/png" href="/images/just-logo.svg")
-    link(rel="stylesheet", href="/plugins/fontawesome-free/css/all.min.css")
-    link(rel='stylesheet' href='https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css')
-    // Tempusdominus Bbootstrap 4
-    link(rel='stylesheet' href='/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css')
-    // iCheck
-    link(rel='stylesheet' href='/plugins/icheck-bootstrap/icheck-bootstrap.min.css')
-    // JQVMap
-    link(rel='stylesheet' href='/plugins/jqvmap/jqvmap.min.css')
-    // Theme style
-    link(rel='stylesheet' href='/dist/css/adminlte.min.css')
-    // overlayScrollbars
-    link(rel='stylesheet' href='/plugins/overlayScrollbars/css/OverlayScrollbars.min.css')
-    // Daterange picker
-    link(rel='stylesheet' href='/plugins/daterangepicker/daterangepicker.css')
-    // summernote
-    link(rel='stylesheet' href='/plugins/summernote/summernote-bs4.css')
-    // DataTables
-    link(rel="stylesheet", href="/plugins/datatables-bs4/css/dataTables.bootstrap4.css")
-    // Google Font: Source Sans Pro
-    link(href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700' rel='stylesheet')
-    //custom css
-    link(rel="stylesheet", href="/stylesheets/admin.css")
+    block head
+        meta(name="viewport", content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi")
+        // Title Icon
+        link(rel="icon" type="image/png" href="/images/just-logo.svg")
+        link(rel="stylesheet", href="/plugins/fontawesome-free/css/all.min.css")
+        link(rel='stylesheet' href='https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css')
+        // Tempusdominus Bbootstrap 4
+        link(rel='stylesheet' href='/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css')
+        // iCheck
+        link(rel='stylesheet' href='/plugins/icheck-bootstrap/icheck-bootstrap.min.css')
+        // JQVMap
+        link(rel='stylesheet' href='/plugins/jqvmap/jqvmap.min.css')
+        // Theme style
+        link(rel='stylesheet' href='/dist/css/adminlte.min.css')
+        // overlayScrollbars
+        link(rel='stylesheet' href='/plugins/overlayScrollbars/css/OverlayScrollbars.min.css')
+        // Daterange picker
+        link(rel='stylesheet' href='/plugins/daterangepicker/daterangepicker.css')
+        // summernote
+        link(rel='stylesheet' href='/plugins/summernote/summernote-bs4.css')
+        // DataTables
+        link(rel="stylesheet", href="/plugins/datatables-bs4/css/dataTables.bootstrap4.css")
+        // Google Font: Source Sans Pro
+        link(href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700' rel='stylesheet')
+        //custom css
+        link(rel="stylesheet", href="/stylesheets/admin.css")
 
     body.hold-transition.sidebar-mini.layout-fixed
         .wrapper
@@ -142,7 +142,7 @@ html
                             //Add icons to the links using the .nav-icon class
                             //with font-awesome or any other icon font library
                             li.nav-item.has-treeview
-                                a.nav-link.active(href='/admin/dashboard')
+                                a.nav-link.active(href='/admin/')
                                     i.nav-icon.fas.fa-tachometer-alt
                                     p
                                         | Dashboard
@@ -178,40 +178,41 @@ html
                                             i.nav-icon.fas.fa-file
                                             p Documentation
             .content-wrapper
+                block content
                 //- include pages/logs/logsBashPage
-                include pages/dashboardPage
+                //- include pages/dashboardPage
 
             aside.control-sidebar.control-sidebar-dark
                 
-    //AJAX
-    script(scr='https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js')
-    script(src='/plugins/jquery/jquery.min.js')
-    // jQuery UI 1.11.4
-    script(src='/plugins/jquery-ui/jquery-ui.min.js')
-    // Resolve conflict in jQuery UI tooltip with Bootstrap tooltip
-    script.
-        $.widget.bridge('uibutton', $.ui.button)
-    // Bootstrap 4
-    script(src='/plugins/bootstrap/js/bootstrap.bundle.min.js')
-    // ChartJS
-    script(src='/plugins/chart.js/Chart.min.js')
-    // Sparkline
-    script(src='/plugins/sparklines/sparkline.js')
-    // JQVMap
-    script(src='/plugins/jqvmap/jquery.vmap.min.js')
-    script(src='/plugins/jqvmap/maps/jquery.vmap.usa.js')
-    // jQuery Knob Chart
-    script(src='/plugins/jquery-knob/jquery.knob.min.js')
-    // daterangepicker
-    script(src='/plugins/moment/moment.min.js')
-    script(src='/plugins/daterangepicker/daterangepicker.js')
-    // Tempusdominus Bootstrap 4
-    script(src='/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js')
-    // Summernote
-    script(src='/plugins/summernote/summernote-bs4.min.js')
-    // overlayScrollbars
-    script(src='/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js')
-    // AdminLTE App
-    script(src='/dist/js/adminlte.js')
-    script(src='/javascripts/admin.js')
-    script(src='/javascripts/websocket.integration.js')
+    block script
+        //AJAX
+        script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js')
+        script(src='/plugins/jquery/jquery.min.js')
+        // jQuery UI 1.11.4
+        script(src='/plugins/jquery-ui/jquery-ui.min.js')
+        // Resolve conflict in jQuery UI tooltip with Bootstrap tooltip
+        script.
+            $.widget.bridge('uibutton', $.ui.button)
+        // Bootstrap 4
+        script(src='/plugins/bootstrap/js/bootstrap.bundle.min.js')
+        // ChartJS
+        script(src='/plugins/chart.js/Chart.min.js')
+        // Sparkline
+        script(src='/plugins/sparklines/sparkline.js')
+        // JQVMap
+        script(src='/plugins/jqvmap/jquery.vmap.min.js')
+        script(src='/plugins/jqvmap/maps/jquery.vmap.usa.js')
+        // jQuery Knob Chart
+        script(src='/plugins/jquery-knob/jquery.knob.min.js')
+        // daterangepicker
+        script(src='/plugins/moment/moment.min.js')
+        script(src='/plugins/daterangepicker/daterangepicker.js')
+        // Tempusdominus Bootstrap 4
+        script(src='/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js')
+        // Summernote
+        script(src='/plugins/summernote/summernote-bs4.min.js')
+        // overlayScrollbars
+        script(src='/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js')
+        // AdminLTE App
+        script(src='/dist/js/adminlte.js')
+        //- script(src='/javascripts/admin.js')
