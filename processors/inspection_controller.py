@@ -47,6 +47,7 @@ def send_to_logstash(message):
         tcp_socket.connect((LOGSTASH_HOST, LOGSTASH_PORT))
         tcp_socket.sendall((json.dumps(message) + "\n").encode())
         tcp_socket.close()
+        print("[Inspection Controller] Result sent to Logstash.")
         return True
     except Exception as e:
         print("[Inspection Controller] %s" % e)
@@ -212,6 +213,8 @@ def audit_the_package(sqli_package, xss_package, bundle_package):
 
         message = {'result': result, 'log_type': 'TYPE_HTTP_MONITOR'}
         # print ("MESSAGE", message, "\n")
+        with open("/tmp/inspection.log", "a+") as f:
+            f.write(json.dumps(message) + "\n")
 
         threading.Thread(target=send_to_logstash, args=(message,)).start()
         threading.Thread(target=write_log_to_file, args=('/tmp/nethive_result.log', message)).start()
