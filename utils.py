@@ -1,8 +1,12 @@
+from bs4 import BeautifulSoup
+import csv
 import time
 import requests
 import sys
 import queue
 from collections import defaultdict
+import urllib
+import re
 
 # class QueueHashmap(queue.Queue):
 #     def __init__(self, maxsize=65535):
@@ -39,7 +43,7 @@ from collections import defaultdict
 #     # --- Helper function to create multiple output types
 #     def success(self, buffer):
 #         self.outerrQueue.put(buffer.strip())
-#         return        
+#         return
 #     def info(self, buffer):
 #         self.outerrQueue.put(buffer.strip())
 #         return
@@ -50,6 +54,7 @@ from collections import defaultdict
 #         self.loggerQueue.put(buffer.strip())
 #         return
 
+
 def tail(logfile):
     logfile.seek(0, 2)
     while True:
@@ -59,10 +64,36 @@ def tail(logfile):
             continue
         yield line
 
-def send_request(url, payload, method):
+
+def login_dvwa():
+    url = "http://localhost/DVWA/login.php"
+    req = requests.get(url)
+    session_id = re.match("PHPSESSID=(.*?);", req.headers["set-cookie"])
+    session_id = session_id.group(1)
+    print("[X] Session_id: " + session_id)
+    cookie = {"PHPSESSID": session_id}
+    soup = BeautifulSoup(req.text, "html.parser")
+    user_token = soup.find("input", {"name": "user_token"})["value"]
+    print("[X] User_token: " + user_token + "\n")
+    payload = {"username": "admin",
+               "password": "password",
+               "Login": "Login",
+               "user_token": user_token}
+    req_login = requests.post(url, payload, cookies=cookie, allow_redirects=False)
+    result = req_login.headers["Location"]
+    if "index.php" in result:
+        return session_id
+    else:
+        print("Failed.")
+        return
+
+def send_request(url, payload, method, sessid):
+    if sessid == '':
+        sessid = login_dvwa()
+
     s = requests.Session()
     cookie = {
-        "PHPSESSID": "6i865obsioa6a1q609q1fb543h",
+        "PHPSESSID": sessid,
         "security": "low"
     }
     if method == "GET":
@@ -71,32 +102,77 @@ def send_request(url, payload, method):
         res = s.post(url, data=payload, cookies=cookie, allow_redirects=False)
     print(res.status_code)
 
+
 def expand(x):
     yield x
     while x.payload:
         x = x.payload
         yield x
 
+
 def decode_deeply(data):
-    if isinstance(data, bytes):  return data.decode()
-    if isinstance(data, dict):   return dict(map(decode_deeply, data.items()))
-    if isinstance(data, tuple):  return tuple(map(decode_deeply, data))
-    if isinstance(data, list):   return list(map(decode_deeply, data))
+    if isinstance(data, bytes):
+        return data.decode()
+    if isinstance(data, dict):
+        return dict(map(decode_deeply, data.items()))
+    if isinstance(data, tuple):
+        return tuple(map(decode_deeply, data))
+    if isinstance(data, list):
+        return list(map(decode_deeply, data))
     return data
+
 
 def bufferOutput(process, max_line=0):
     line_count = 0
     while True:
         out = process.stdout.readline()
-        if not out: break
+        if not out:
+            break
         else:
             sys.stdout.write(out.rstrip() + "\r\n")
             line_count += 1
-        if max_line == 0: pass
-        elif line_count >= max_line: break
+        if max_line == 0:
+            pass
+        elif line_count >= max_line:
+            break
+
 
 def checkProcess(process):
     while True:
-        if process.poll() != None: # process is dead
+        if process.poll() != None:  # process is dead
             return False
         return True
+
+
+def replay_csic_dataset(mode):  # mode is either GET or POST
+    print("Replaying %s packets from CSIC2010 Dataset\n" % mode)
+    target = 'http://localhost/DVWA/vulnerabilities/xss_r/'
+    param_name = 'name'
+    
+    dataset = open(
+        "/home/sh/Documents/Research/Testing/httpcsic2010dataset.csv", "r")
+    csv_reader = csv.reader(dataset, delimiter=',')
+
+    sessid = login_dvwa()
+
+    line_count = 0
+    send_count = 0
+    for row in csv_reader:
+        if line_count == 0:
+            # print(' '.join(row)) # Uncomment to print headers
+            line_count += 1
+        else:
+            if row[17].strip() == mode:
+                raw_payload = urllib.parse.unquote_plus(row[16].strip())
+                payload = dict(re.findall(
+                    r'(\S+)=(".*?"|\S+)', str(raw_payload)))
+                if payload:
+                    print(payload[list(payload.keys())[0]])
+                    send_request(target, {param_name: payload[list(payload.keys())[0]], 'Submit': 'Submit'}, row[1], sessid)
+                    send_count += 1
+                    time.sleep(1)
+            line_count += 1
+            if send_count >= 17000:
+                return
+
+    print("Finished sending %d requests" % send_count)
