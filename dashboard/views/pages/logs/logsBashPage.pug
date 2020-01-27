@@ -1,31 +1,34 @@
-//extends admin
+extends ../../admin
 
-//block content
-.content-header
-    .container-fluid
-        .row.mb-2
-            .col-sm-6
-                h1.m-0.text-dark Bash Logs
-            .col-sm-6
-                ol.breadcrumb.float-sm-right
-                    li.breadcrumb-item Home
-                    li.breadcrumb-item Logs
-                    li.breadcrumb-item.active Bash
-section.content
-    .cotainer-fluid
-        .row
-            .col-12
-                .card
-                    .card-header
-                        h3.card-title Latest Command Executed
-                    .card-body.table-responsive.p-0(style='height: 300px;')
-                        table#table-bash.table.table-head-fixed.table-striped
-                            thead
-                                tr
-                                    th exectime
-                                    th hostname
-                                    th executor
-                                    th command
-                                    th workdir
-                                    th source
-                            tbody
+block prepend head
+    title=title
+
+block content
+    .content-header
+        .container-fluid
+            .row.mb-2
+                .col-sm-6
+                    h1.m-0.text-dark Bash Logs
+                .col-sm-6
+                    ol.breadcrumb.float-sm-right
+                        li.breadcrumb-item Home
+                        li.breadcrumb-item Logs
+                        li.breadcrumb-item.active Bash
+    section.content
+        .cotainer-fluid
+            .row
+                .col-12
+                    .card
+                        .card-header
+                            h3.card-title Latest Command Executed
+                        .card-body.table-responsive.p-0(style='height: 300px;')
+                            table#table-bash.table.table-head-fixed.table-striped
+                                thead
+                                    tr
+                                        th exectime
+                                        th hostname
+                                        th executor
+                                        th command
+                                        th workdir
+                                        th source
+                                tbody

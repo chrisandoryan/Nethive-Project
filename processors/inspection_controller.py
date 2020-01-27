@@ -37,6 +37,10 @@ redis = RedisClient.getInstance()
 def keyboardInterruptHandler(signal, frame):
     server.close()
 
+def write_log_to_file(filename, data):
+    with open(filename, 'a+') as f:
+        f.write(json.dumps(data) + '\n')
+
 def send_to_logstash(message):
     try:
         tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -213,6 +217,8 @@ def audit_the_package(sqli_package, xss_package, bundle_package):
             f.write(json.dumps(message) + "\n")
 
         threading.Thread(target=send_to_logstash, args=(message,)).start()
+        threading.Thread(target=write_log_to_file, args=('/tmp/nethive_result.log', message)).start()
+
         return True
 
     print ("[Inspection Controller] Audit has been completed.")

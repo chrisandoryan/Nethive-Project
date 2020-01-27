@@ -1,171 +1,175 @@
-//extends admin
+extends ../admin
 
-//block content
-.content-header
-    .container-fluid
-        .row.mb-2
-            .col-sm-6
-                h1.m-0.text-dark Dashboard
-            .col-sm-6
-                ol.breadcrumb.float-sm-right
-                    li.breadcrumb-item 
-                        a(href="/admin/") Home
-                    li.breadcrumb-item.active Dashboard
+block prepend head
+    title=title
 
-section.content
-    .container-fluid
-        .row
-            .col-12.col-sm-6.col-md-3
-                .info-box
-                    span.info-box-icon.bg-info.elevation-1
-                        i.fas.fa-industry
-                    .info-box-content
-                        span.info-box-text Request Count
-                        span.info-box-number 18,9/s
-            .col-12.col-sm-6.col-md-3
-                .info-box
-                    span.info-box-icon.bg-danger.elevation-1
-                        i.fas.fa-bolt
-                    .info-box-content
-                        span.info-box-text CPU Traffic
-                        span.info-box-number 24,3%
-            .col-12.col-sm-6.col-md-3
-                .info-box
-                    span.info-box-icon.bg-warning.elevation-1
-                        i.fas.fa-clock
-                    .info-box-content
-                        span.info-box-text Last Attack
-                        span.info-box-number 12/3/19 11:05:59
-            .col-12.col-sm-6.col-md-3
-                .info-box
-                    span.info-box-icon.bg-success.elevation-1
-                        i.fas.fa-cogs
-                    .info-box-content
-                        span.info-box-text Engine Status
-                        span.info-box-number Online
-                                    
-        .row
-            .col-12
-                .card
-                    .card-header
-                        h3.card-title CVSS Summarizing
-                    .card-body.table-responsive.p-0(style='height: 300px;')
-                        table.table.table-head-fixed.table-striped
-                            thead
-                                tr
-                                    th Timestamp
-                                    th Vulnerability Type(s)
-                                    th Vector String
-                                    th Base Score
-                            tbody
-                                tr
-                                    td Nov 2, 2019 11:08:05 
-                                    td Sql
-                                    td AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N
-                                    td 
-                                        span.badge.badge-warning 6.5 Medium
-                                tr
-                                    td Dec 2, 2019 11:08:05 
-                                    td Sql
-                                    td AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N
-                                    td 
-                                        span.badge.badge-danger 8.9 High
-                                tr
-                                    td Dec 2, 2019 11:08:05 
-                                    td XSS
-                                    td AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N
-                                    td 
-                                        span.badge.badge-success 2.3 Low
-                                tr
-                                    td Dec 2, 2019 11:08:05 
-                                    td XSS
-                                    td AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N
-                                    td 
-                                        span.badge.badge-warning 6.5 Medium
-                                tr
-                                    td Dec 2, 2019 11:08:05 
-                                    td Sql
-                                    td AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N
-                                    td 
-                                        span.badge.badge-danger 8.9 High
-                                tr
-                                    td Dec 2, 2019 11:08:05 
-                                    td XSS
-                                    td AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N
-                                    td 
-                                        span.badge.badge-success 2.3 Low
-                                tr
-                                    td Dec 2, 2019 11:08:05 
-                                    td XSS
-                                    td AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N
-                                    td 
-                                        span.badge.badge-warning 6.5 Medium
-                                tr
-                                    td Dec 2, 2019 11:08:05 
-                                    td Sql
-                                    td AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N
-                                    td 
-                                        span.badge.badge-danger 8.9 High
-                                tr
-                                    td Dec 2, 2019 11:08:05 
-                                    td Sql
-                                    td AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N
-                                    td 
-                                        span.badge.badge-success 2.3 Low                                        
-        .row
-            .col-7
-                .card
-                    .card-header
-                        h3.card-title Latest Command Executed
-                    .card-body.table-responsive.p-0(style='height: 300px;')
-                        table.table.table-head-fixed.table-striped
-                            thead
-                                tr
-                                    th Timestamp
-                                    th User
-                                    th Command
-                            tbody
-                                tr
-                                    td Dec 2, 2019 11:08:05 
-                                    td root
-                                    td echo "uyee" > uyee.txt
-            .col-5
-                .card
-                    .card-header
-                        h3.card-title Latest R/W
-                    .card-body.table-responsive.p-0(style='height: 300px;')
-                        table.table.table-head-fixed.table-striped
-                            thead
-                                tr
-                                    th User
-                                    th Filename
-                                    th Date Modified
-                            tbody
-                                tr
-                                    td root
-                                    td uyee.txt
-                                    td Dec 2, 2019 11:08:05        
-        .row
-            .col-md-5
-                .card
-                    .card-header
-                        h3.card-title Active Sessions
-                    .card-body.p-0
-                        ul.users-list.clearfix
-                            li
-                                img(src="/images/face-placeholder.png", alt="")(style='height:64px; width:64px')
-                                a.users-list-name(href="#") Alex Ferdinand
-                                span.users-list-date Today
-                            li
-                                img(src="/images/face-placeholder.png", alt="")(style='height:64px; width:64px')
-                                a.users-list-name(href="#") Chrisando Ryan
-                                span.users-list-date Today
-                            li
-                                img(src="/images/face-placeholder.png", alt="")(style='height:64px; width:64px')
-                                a.users-list-name(href="#") Rayhan Tsani
-                                span.users-list-date Today                                                                
-                            li
-                                img(src="/images/face-placeholder.png", alt="")(style='height:64px; width:64px')
-                                a.users-list-name(href="#") Vandevlin Alfonso
-                                span.users-list-date Today
-                                                                
+block content
+    .content-header
+        .container-fluid
+            .row.mb-2
+                .col-sm-6
+                    h1.m-0.text-dark Dashboard
+                .col-sm-6
+                    ol.breadcrumb.float-sm-right
+                        li.breadcrumb-item 
+                            a(href="/admin/") Home
+                        li.breadcrumb-item.active Dashboard
+
+    section.content
+        .container-fluid
+            .row
+                .col-12.col-sm-6.col-md-3
+                    .info-box
+                        span.info-box-icon.bg-primary.elevation-1
+                            i.fas.fa-industry
+                        .info-box-content
+                            span.info-box-text Request Count
+                            span.info-box-number 18,9/s
+                .col-12.col-sm-6.col-md-3
+                    .info-box
+                        span.info-box-icon.bg-danger.elevation-1
+                            i.fas.fa-bolt
+                        .info-box-content
+                            span.info-box-text CPU Traffic
+                            span.info-box-number 24,3%
+                .col-12.col-sm-6.col-md-3
+                    .info-box
+                        span.info-box-icon.bg-warning.elevation-1
+                            i.fas.fa-clock
+                        .info-box-content
+                            span.info-box-text Last Attack
+                            span.info-box-number 12/3/19 11:05:59
+                .col-12.col-sm-6.col-md-3
+                    .info-box
+                        span.info-box-icon.bg-success.elevation-1
+                            i.fas.fa-cogs
+                        .info-box-content
+                            span.info-box-text Engine Status
+                            span.info-box-number Online
+                                        
+            .row
+                .col-12
+                    .card
+                        .card-header
+                            h3.card-title CVSS Summarizing
+                        .card-body.table-responsive.p-0(style='height: 300px;')
+                            table#table-cvss.table.table-head-fixed.table-striped
+                                thead
+                                    tr
+                                        th Timestamp
+                                        th Vulnerability Type(s)
+                                        th Vector String
+                                        th Base Score
+                                tbody
+                                    tr
+                                        td Nov 2, 2019 11:08:05 
+                                        td Sql
+                                        td AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N
+                                        td 
+                                            span.badge.badge-warning 6.5 Medium
+                                    tr
+                                        td Dec 2, 2019 11:08:05 
+                                        td Sql
+                                        td AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N
+                                        td 
+                                            span.badge.badge-danger 8.9 High
+                                    tr
+                                        td Dec 2, 2019 11:08:05 
+                                        td XSS
+                                        td AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N
+                                        td 
+                                            span.badge.badge-success 2.3 Low
+                                    tr
+                                        td Dec 2, 2019 11:08:05 
+                                        td XSS
+                                        td AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N
+                                        td 
+                                            span.badge.badge-warning 6.5 Medium
+                                    tr
+                                        td Dec 2, 2019 11:08:05 
+                                        td Sql
+                                        td AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N
+                                        td 
+                                            span.badge.badge-danger 8.9 High
+                                    tr
+                                        td Dec 2, 2019 11:08:05 
+                                        td XSS
+                                        td AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N
+                                        td 
+                                            span.badge.badge-success 2.3 Low
+                                    tr
+                                        td Dec 2, 2019 11:08:05 
+                                        td XSS
+                                        td AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N
+                                        td 
+                                            span.badge.badge-warning 6.5 Medium
+                                    tr
+                                        td Dec 2, 2019 11:08:05 
+                                        td Sql
+                                        td AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N
+                                        td 
+                                            span.badge.badge-danger 8.9 High
+                                    tr
+                                        td Dec 2, 2019 11:08:05 
+                                        td Sql
+                                        td AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N
+                                        td 
+                                            span.badge.badge-success 2.3 Low                                        
+            .row
+                .col-7
+                    .card
+                        .card-header
+                            h3.card-title Latest Command Executed
+                        .card-body.table-responsive.p-0(style='height: 300px;')
+                            table.table.table-head-fixed.table-striped
+                                thead
+                                    tr
+                                        th Timestamp
+                                        th User
+                                        th Command
+                                tbody
+                                    tr
+                                        td Dec 2, 2019 11:08:05 
+                                        td root
+                                        td echo "uyee" > uyee.txt
+                .col-5
+                    .card
+                        .card-header
+                            h3.card-title Latest R/W
+                        .card-body.table-responsive.p-0(style='height: 300px;')
+                            table.table.table-head-fixed.table-striped
+                                thead
+                                    tr
+                                        th User
+                                        th Filename
+                                        th Date Modified
+                                tbody
+                                    tr
+                                        td root
+                                        td uyee.txt
+                                        td Dec 2, 2019 11:08:05        
+            .row
+                .col-md-5
+                    .card
+                        .card-header
+                            h3.card-title Active Sessions
+                        .card-body.p-0
+                            ul.users-list.clearfix
+                                li
+                                    img(src="/images/face-placeholder.png", alt="")(style='height:64px; width:64px')
+                                    a.users-list-name(href="#") Alex Ferdinand
+                                    span.users-list-date Today
+                                li
+                                    img(src="/images/face-placeholder.png", alt="")(style='height:64px; width:64px')
+                                    a.users-list-name(href="#") Chrisando Ryan
+                                    span.users-list-date Today
+                                li
+                                    img(src="/images/face-placeholder.png", alt="")(style='height:64px; width:64px')
+                                    a.users-list-name(href="#") Rayhan Tsani
+                                    span.users-list-date Today                                                                
+                                li
+                                    img(src="/images/face-placeholder.png", alt="")(style='height:64px; width:64px')
+                                    a.users-list-name(href="#") Vandevlin Alfonso
+                                    span.users-list-date Today
+block append script     
+    script(src="/javascripts/handler/fetch-cvss-logs.js")                                                              
