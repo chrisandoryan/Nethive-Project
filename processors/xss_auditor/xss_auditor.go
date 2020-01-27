@@ -89,7 +89,7 @@ var extContentAttrList = []string{"src", "code", "data", "content", "href"}
 
 func main() {
 	// Logging
-	logfile, err := os.OpenFile("xss_auditor.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	logfile, err := os.OpenFile("/tmp/XssAuditor.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -200,6 +200,26 @@ func constructAuditResultRecapitulation(checkCalledFrom string, inspectedElement
 	}
 }
 
+func writeInspectionLog(payload String, afterParse String) {
+	f, err := os.OpenFile("/tmp/XssAuditorInspections.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+	l, err := f.WriteString("\n\n============================================\n" + payload + "\n============================================\n" + afterParse + "\n============================================\n\n")
+    if err != nil {
+        fmt.Println(err)
+        f.Close()
+        return
+    }
+    fmt.Println(l, "bytes written successfully into /tmp/XssAuditorInspections.log")
+    err = f.Close()
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+}
+
 func compareWithRequest(afterParse string, originalRequest RequestPacket) []int {
 	// FIXME: perform data transformation here (to prevent obfuscation)
 	// fmt.Println(afterParse, originalRequest.URL)
@@ -213,6 +233,8 @@ func compareWithRequest(afterParse string, originalRequest RequestPacket) []int 
 			if containsIgnoreCase(payload, afterParse) {
 				fromSQLResponse = constInjectionFromSQLResponse
 				break
+			} else { // write log if auditor found no threat
+				writeInspectionLog(payload, afterParse)
 			}
 		}
 		if fromSQLResponse > 0 {
@@ -222,10 +244,14 @@ func compareWithRequest(afterParse string, originalRequest RequestPacket) []int 
 
 	if containsIgnoreCase(originalRequest.URL, afterParse) {
 		fromQueryParam = constInjectionFromQueryParam
+	} else { // write log if auditor found no threat
+		writeInspectionLog(originalRequest.URL, afterParse)
 	}
 
 	if containsIgnoreCase(originalRequest.Body, afterParse) {
 		fromRequestBody = constInjectionFromRequestBody
+	} else { // write log if auditor found no threat
+		writeInspectionLog(originalRequest.Body, afterParse)
 	}
 
 	return []int{fromQueryParam, fromRequestBody, fromSQLResponse}
