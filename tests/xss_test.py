@@ -9,3 +9,5 @@ if __name__ == '__main__' and __package__ is None:
     utils.replay_csic_dataset("norm")
 
     # Send malicious requests
+    # Manual invoke via XSStrike
+    

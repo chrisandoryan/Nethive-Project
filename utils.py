@@ -146,7 +146,7 @@ def checkProcess(process):
 
 def replay_csic_dataset(mode):  # mode is either GET or POST
     print("Replaying %s packets from CSIC2010 Dataset\n" % mode)
-    target = 'http://localhost/DVWA/vulnerabilities/xss_r/'
+    target = 'http://10.22.66.67/DVWA/vulnerabilities/xss_r/'
     param_name = 'name'
     
     dataset = open(
@@ -170,6 +170,8 @@ def replay_csic_dataset(mode):  # mode is either GET or POST
                     print(payload[list(payload.keys())[0]])
                     send_request(target, {param_name: payload[list(payload.keys())[0]], 'Submit': 'Submit'}, row[1], sessid)
                     send_count += 1
+                    with open('/tmp/NormalPayload.log', 'a+') as f:
+                        f.write(payload[list(payload.keys())[0]] + '\n')
                     time.sleep(1)
             line_count += 1
             if send_count >= 17000:
