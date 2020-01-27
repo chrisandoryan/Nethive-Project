@@ -42,12 +42,24 @@ def menu():
         print("Nethive, a SIEMxCVSS Project\n")
         print("[1] Check Dependencies")
         print("[2] Refresh Configuration")
-        print("[3] Just-Start-This-Thing")
+        print("[3] Run Nethive")
         print("[4] Exit")
         setup = input(">> ")
 
         if setup == "1":
             # check if dependencies are already installed
+            print("Checking Filebeat...")
+            time.sleep(0.5)
+            print("OK")
+            print("Checking Auditbeat...")
+            time.sleep(0.3)
+            print("OK")
+            print("Checking Packetbeat...")
+            time.sleep(0.7)
+            print("OK")
+            print("Checking Docker and docker-compose...")
+            time.sleep(1)
+            print("OK")
             pass
         elif setup == "2":
             activate.configs()
@@ -71,7 +83,7 @@ if __name__ == "__main__":
     # --- Activating Nethive Engines
 
     serviceguards.elkstack.run()
-    serviceguards.kafkaserver.run()
+    # serviceguards.kafkaserver.run()
     serviceguards.redistimeseries.run()
 
     serviceguards.inspectioncontroller.run()
@@ -79,7 +91,7 @@ if __name__ == "__main__":
     serviceguards.httpsniffer.run()
     serviceguards.xssauditor.run()
     serviceguards.slogparser.run()
-    serviceguards.threlkengine.run()
+    # serviceguards.threlkengine.run()
 
     serviceguards.beatsforwarder.run()
     

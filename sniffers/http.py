@@ -8,6 +8,7 @@ import json
 import random
 import socket
 import base64
+import traceback
 
 from processors import sql_tokenizer
 # from parsers import slog_parser
@@ -44,6 +45,7 @@ outHand = None # OutputHandler().getInstance()
 redis = RedisClient.getInstance()
 
 def sniff_packet(interface):
+    print("[HTTP Sniffer] Capturing {} requests from {}".format(sniff_mode, interface))
     sniff(iface=interface, store=False, prn=process_packets(), session=TCPSession)
 
 def write_http_log(data):
@@ -146,6 +148,7 @@ def process_packets():
 
     def processor(packet):
         global sniff_mode
+        # print("Haleluya")
 
         src, dst = get_ip_port(packet)
         ip_src, tcp_sport = src
@@ -157,7 +160,7 @@ def process_packets():
         #     sql_processes = foo if len(foo) > 0 else sql_processes
 
         if packet.haslayer(HTTPRequest):
-            # print("sql_processes2: ", sql_processes)
+            # print("[HTTP Sniffer] Got HTTP Request.")
             # print(packet[HTTPRequest].show())
             # sql_conn_observer.start()
 
@@ -181,12 +184,22 @@ def process_packets():
 
             # xss_watcher.inspect([url, payload])
             # memcache.set(ip_src, tcp_sport, pack_request_for_inspection(packet))
-            redis.store_http_request("{}:{}".format(ip_src, tcp_sport), pack_request_for_inspection(decode_deeply(packet), tokenized))
-            
+            # print(type(tokenized))
+            inspection_pack = pack_request_for_inspection(decode_deeply(packet), tokenized)
+            # print(inspection_pack)
+            if inspection_pack:
+                try:
+                    redis.store_http_request("{}:{}".format(ip_src, tcp_sport), inspection_pack)
+                except Exception as e:
+                    print("[HTTP Sniffer] Error: %s", e)
+                    pass
+            else:
+                pass
+
             # print(req_data)
 
         if packet.haslayer(HTTPResponse):
-            # print(packet[HTTPResponse].show())
+            # print("[HTTP Sniffer] Got HTTP Response.")
             content_type = get_content_type(packet, HTTPResponse)
             if get_mime_type(content_type)[0] in unsafe_content_types:
                 # req_data = memcache.pop(ip_dst, tcp_dport)
@@ -244,7 +257,7 @@ def get_url_unidecoded(packet):
     return get_url(packet).decode('utf-8')
 
 def get_referer(packet):
-    return packet[HTTPRequest].Referer
+    return packet[HTTPRequest].Referer if packet[HTTPRequest].Referer else ''
 
 def get_method(packet):
     return packet[HTTPRequest].Method
@@ -254,7 +267,7 @@ def get_cookie_unidecoded(packet):
         return packet[HTTPRequest].Cookie.decode('utf-8')
     except Exception as e:
         # print("[HTTP Sniffer] %s" % e)
-        return bytearray()
+        return '' #bytearray()
 
 def get_ua(packet):
     try:
@@ -299,6 +312,7 @@ def run(sniffMode, iface):
     try:
         sniff_packet(iface)
     except Exception as e:
-        # print("[HTTP Sniffer] Got error: %s" % e)
+        print("[HTTP Sniffer] Got error: %s" % e)
+        traceback.print_exc()
         pass
 
