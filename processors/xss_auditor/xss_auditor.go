@@ -200,7 +200,7 @@ func constructAuditResultRecapitulation(checkCalledFrom string, inspectedElement
 	}
 }
 
-func writeInspectionLog(payload String, afterParse String) {
+func writeInspectionLog(payload string, afterParse string) {
 	f, err := os.OpenFile("/tmp/XssAuditorInspections.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
     if err != nil {
         fmt.Println(err)
