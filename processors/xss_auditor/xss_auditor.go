@@ -1,5 +1,7 @@
 package main
 
+// lakukan pengecekan jika spasi diganti dengan /+/
+
 import (
 	"encoding/json"
 	"fmt"
@@ -84,7 +86,7 @@ var safeJavaScriptURL = []string{"javascript:void(0)"}
 // Might not use this anymore since there are so many on* attributes
 var eventHandlerAttrList = []string{"onload", "onerror", "onclick", "oncut", "onunload", "onfocus", "onblur", "onpointerover", "onpointerdown"}
 
-var extContentTagList = []string{"script", "object", "param", "embed", "applet", "iframe", "meta", "base", "form", "input", "button"}
+var extContentTagList = []string{"a", "script", "object", "param", "embed", "applet", "iframe", "meta", "base", "form", "input", "button"}
 var extContentAttrList = []string{"src", "code", "data", "content", "href"}
 
 func main() {
