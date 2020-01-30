@@ -66,7 +66,7 @@ def tail(logfile):
 
 
 def login_dvwa():
-    url = "http://10.22.66.67/DVWA/login.php"
+    url = "http://192.168.137.220/DVWA/login.php"
     req = requests.get(url)
     print(req.headers)
     session_id = re.match("PHPSESSID=(.*?);", req.headers["set-cookie"])
@@ -147,7 +147,7 @@ def checkProcess(process):
 def replay_xss_payload_dataset():
     print("Replaying XSS Payload dataset from https://github.com/pgaijin66/XSS-Payloads/blob/master/payload.txt")
 
-    target = 'http://10.22.66.67/DVWA/vulnerabilities/xss_r/'
+    target = 'http://192.168.137.220/DVWA/vulnerabilities/xss_r/'
     param_name = 'name'
 
     payloads = open('/home/sh/Documents/Research/Testing/MaliciousFormattedPayload.log', 'r', encoding="ISO-8859-1").readlines()
@@ -166,10 +166,30 @@ def replay_xss_payload_dataset():
     
     print("Sent %d MALICIOUS requests." % send_count)
 
+def replay_sqli_normal_dataset():
+    print("Replaying SQLi Payload dataset from https://github.com/Scott-Park/MachineLearning/blob/master/Sql-Injection/source/trainingdata/plain.txt")
+
+    target = 'http://192.168.137.220/DVWA/vulnerabilities/sqli/'
+    param_name = 'id'
+
+    payloads = open('/home/sh/Documents/Research/Testing/NormalSQLiPayload.txt', 'r').readlines()
+
+    send_count = 0
+    
+    sessid = login_dvwa()
+
+    for data in payloads:
+        print(data)
+        send_request(target, {param_name: data, 'Submit': 'Submit'}, "GET", sessid)
+        send_count += 1
+        time.sleep(1.5)
+    
+    print("Sent %d MALICIOUS requests." % send_count)
+
 
 def replay_csic_dataset(mode):  # mode is either GET or POST
     print("Replaying %s packets from CSIC2010 Dataset\n" % mode)
-    target = 'http://10.22.66.67/DVWA/vulnerabilities/xss_r/'
+    target = 'http://192.168.137.220/DVWA/vulnerabilities/xss_r/'
     param_name = 'name'
     
     dataset = open(

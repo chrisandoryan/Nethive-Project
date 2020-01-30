@@ -16,7 +16,7 @@ LOGSTASH_PORT = int(os.getenv('LOGSTASH_PORT'))
 
 """ Constants """
 
-MODEL_LEARNING = False
+MODEL_LEARNING = True
 ACTIVE_LABEL = "normal"
 
 """ End of Constants """
