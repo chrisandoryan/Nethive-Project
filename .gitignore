@@ -9,3 +9,4 @@ activators/config/auditbeat.reference.yml
 **/__pycache__/*
 *.pyc
 .env
+Dockerfile

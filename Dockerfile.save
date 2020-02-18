@@ -1,0 +1,23 @@
+FROM ubuntu:18.04
+
+WORKDIR /usr/src/app
+
+COPY . /usr/src/app
+
+RUN apt-get update
+RUN apt-get upgrade
+
+RUN apt-get install nodejs npm
+
+RUN wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+RUN apt-get install apt-transport-https
+RUN echo deb https://artifacts.elastic.co/packages/7.x/apt stable main"  | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
+RUN apt-get update && sudo apt-get install filebeat
+
+RUN bash install.sh
+RUN python3 -m pip install -r requirements.txt
+RUN python3 setup.py install
+
+RUN cp .env.example .env
+CMD [""]
+
