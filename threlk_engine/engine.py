@@ -1,7 +1,6 @@
 from elasticsearch import Elasticsearch
 from kafka import KafkaProducer
-from threlk_engine import _auditmon, _bashmon, _httpmon
-
+from threlk_engine import _auditmon, _bashmon, _httpmon, _cvssapi
 import threading
 import time
 import json
@@ -95,10 +94,12 @@ def relay_to_kafka(parser_function, hits):
     try:
         for result in parser_function(hits):
             if result:
-                foo = producer.send(KAFKA_TOPIC, result)
                 print(result, "\n")
-                meta = foo.get(timeout=60)
-                print("Offset: %d" % meta.offset)
+                to_send = _cvssapi.convert(result)
+                for items in to_send:
+                    foo = producer.send(KAFKA_TOPIC, items);
+                    meta = foo.get(timeout=60)
+                    print("Offset: %d" % meta.offset)
     except Exception as e:
         print("[Threlk Engine] Got error: %s" % e)
         pass
