@@ -189,7 +189,7 @@ def print_detection_output(sqli_result, xss_result):
                 print(Fore.RED + '[Inspection Controller] Please check Kibana for information.')
                 print(Style.RESET_ALL)
         # print(xss_result)
-    if sqli_result is not None:
+    if sqli_result is not None and "inspection_result" in sqli_result:
         if any(x for x in sqli_result["inspection_result"] if x["classification"] == "malicious"):
             print(Fore.RED + '[Inspection Controller] SQL Injection has been detected! (From {})'.format(sqli_result['client_ip']))
             print(Fore.RED + '[Inspection Controller] Please check Kibana for information.')
