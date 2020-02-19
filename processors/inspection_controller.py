@@ -182,13 +182,17 @@ def unwrap_http_bundle(bundle_package):
 
 def print_detection_output(sqli_result, xss_result):
     if xss_result is not None:
-        if xss_result["SQLResponseAuditResult"] is not None or xss_result["QueryParamAuditResult"] or xss_result["RequestBodyAuditResult"] is not None:
-            print(Fore.RED + '[Inspection Controller] XSS Attack has been detected!')
-            print(Style.RESET_ALL)
+        if "SQLResponseAuditResult" in xss_result or "QueryParamAuditResult" in xss_result or "RequestBodyAuditResult" in xss_result:
+            if xss_result["SQLResponseAuditResult"] is not None or xss_result["QueryParamAuditResult"] is not None or xss_result["RequestBodyAuditResult"] is not None:
+                # print(xss_result)
+                print(Fore.RED + '[Inspection Controller] XSS Attack has been detected! (From {})'.format(xss_result['NonMaliciousAuditResult'][0]['ClientIP']))
+                print(Fore.RED + '[Inspection Controller] Please check Kibana for information.')
+                print(Style.RESET_ALL)
         # print(xss_result)
     if sqli_result is not None:
         if any(x for x in sqli_result["inspection_result"] if x["classification"] == "malicious"):
-            print(Fore.RED + '[Inspection Controller] SQL Injection has been detected!')
+            print(Fore.RED + '[Inspection Controller] SQL Injection has been detected! (From {})'.format(sqli_result['client_ip']))
+            print(Fore.RED + '[Inspection Controller] Please check Kibana for information.')
             print(Style.RESET_ALL)
         # print(sqli_result)
 
