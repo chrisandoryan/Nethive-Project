@@ -1,5 +1,7 @@
 import socket
 import threading
+from colorama import init
+from colorama import Fore, Back, Style
 
 from multiprocessing import Process, Pool
 
@@ -15,6 +17,8 @@ from processors import xss_watcher
 from processors import sql_inspector
 
 import logging
+
+init()
 
 logging.basicConfig(level=logging.CRITICAL)
 logger = logging.getLogger(__name__)
@@ -176,6 +180,18 @@ def unwrap_http_bundle(bundle_package):
         bundle_packed = json.loads(base64.decodestring(bundle_package[k][0]['package'].encode("utf-8")))
         return (redis_key, bundle_packed)
 
+def print_detection_output(sqli_result, xss_result):
+    if xss_result is not None:
+        if xss_result["SQLResponseAuditResult"] is not None or xss_result["QueryParamAuditResult"] or xss_result["RequestBodyAuditResult"] is not None:
+            print(Fore.RED + '[Inspection Controller] XSS Attack has been detected!')
+            print(Style.RESET_ALL)
+        # print(xss_result)
+    if sqli_result is not None:
+        if any(x for x in sqli_result["inspection_result"] if x["classification"] == "malicious"):
+            print(Fore.RED + '[Inspection Controller] SQL Injection has been detected!')
+            print(Style.RESET_ALL)
+        # print(sqli_result)
+
 def audit_the_package(sqli_package, xss_package, bundle_package):
 
     print ("[Inspection Controller] Auditing...")
@@ -196,6 +212,7 @@ def audit_the_package(sqli_package, xss_package, bundle_package):
         # print("BUNDLE PACKAGE", bundle_package)
         # print("SQLI RESULT", sqli_result)
         # print("XSS RESULT", xss_result)
+        print_detection_output(sqli_result, xss_result)
 
         result = {
             "url": bundle_package['req_packet']['url'],
