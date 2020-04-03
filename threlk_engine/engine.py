@@ -94,14 +94,14 @@ def relay_to_kafka(parser_function, hits):
     try:
         for result in parser_function(hits):
             if result:
-                print(result, "\n")
                 to_send = _cvssapi.convert(result)
+                print(to_send)
                 for items in to_send:
                     foo = producer.send(KAFKA_TOPIC, items);
-
-                meta = foo.get(timeout=60)
-                print("Offset: %d" % meta.offset)
+                    meta = foo.get(timeout=60)
+                    print("Offset: {}".format(meta.offset))
     except Exception as e:
+        print(e)
         print("[Threlk Engine] Got error: %s" % e)
         pass
 

@@ -16,7 +16,7 @@ LOGSTASH_PORT = int(os.getenv('LOGSTASH_PORT'))
 
 """ Constants """
 
-MODEL_LEARNING = True
+MODEL_LEARNING = False
 ACTIVE_LABEL = "normal"
 
 """ End of Constants """
@@ -66,7 +66,7 @@ def transform_for_sqli_model(package):
                 'sql_token': t['sql_token'],
                 'dangerous_token': t['dangerous_token'],
                 'hex_char': t['hex_char'],
-                'whitespace': t['whitespace'],
+                # 'whitespace': t['whitespace'],
                 "error_code": 0,
             }
 

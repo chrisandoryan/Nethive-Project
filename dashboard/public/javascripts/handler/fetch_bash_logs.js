@@ -1,15 +1,15 @@
-var URI = 'http://localhost:3000/logs/cvss/timestamp/desc';
+var URI_Bash = 'http://localhost:3000/logs/bash/timestamp/desc';
 
 function fetchConversation(){
-    var score = severity(e.SUMMARIZE_RESULT.score);
+    // var score = severity(e.SUMMARIZE_RESULT.score);
     let img = "<img src='/images/face-placeholder.png' alt='' style='height:64px; width:64px'>"
     var tr  = "<tr></tr>";
-    var td1 = $("<td></td>").text(e.timestamp);   // Create with jQuery
-    var td2 = $("<td></td>").text("test");   // Create with jQuery
-    var td3 = $("<td></td>").text(e.SUMMARIZE_RESULT.vector);   // Create with jQuery
-    var td4 = $("<td></td>").append(score);   // Create with jQuery
+    var td1 = $("<td></td>").text(e['@timestamp']);   // Create with jQuery
+    // var td2 = $("<td></td>").text("test");   // Create with jQuery
+    var td3 = $("<td></td>").text(e['user']);   // Create with jQuery
+    var td4 = $("<td></td>").append(e['command']);   // Create with jQuery
     $("#notifs").append(tr);      // Append the new elements 
-    $("#table-cvss tbody tr:last-child").append(td1,td2,td3,td4);
+    $("#table-bash tbody tr:last-child").append(td1,td3,td4);
 }
 function severity(score){
 
@@ -43,20 +43,22 @@ function severity(score){
     return span
 }
 
-function appendData(e) {
-    var score = severity(e.SUMMARIZE_RESULT.score);
-
+function appendBashData(e) {
+    // var score = severity(e.SUMMARIZE_RESULT.score);
+    let img = "<img src='/images/face-placeholder.png' alt='' style='height:64px; width:64px'>"
     var tr  = "<tr></tr>";
-    var td1 = $("<td></td>").text(e.timestamp);   // Create with jQuery
-    var td2 = $("<td></td>").text("test");   // Create with jQuery
-    var td3 = $("<td></td>").text(e.SUMMARIZE_RESULT.vector);   // Create with jQuery
-    var td4 = $("<td></td>").append(score);   // Create with jQuery
-    $("#table-cvss tbody").append(tr);      // Append the new elements 
-    $("#table-cvss tbody tr:last-child").append(td1,td2,td3,td4);
+    var td1 = $("<td></td>").text(e['@timestamp']);   // Create with jQuery
+    // var td2 = $("<td></td>").text("test");   // Create with jQuery
+    var td3 = $("<td></td>").text(e['user']);   // Create with jQuery
+    var td4 = $("<td></td>").text(e['command']);   // Create with jQuery
+    $("#table-bash tbody").append(tr);     // Append the new elements 
+    $("#table-bash tbody tr:last-child").append(td1,td3,td4);
+    console.log("added new data")
+    console.log($("#table-bash"))
 }
 
-function emptyData(){
-    $("#table-cvss tbody").empty();
+function emptyBashData(){
+    $("#table-bash tbody").empty();
 }
 function getRecent(data){
     let recent
@@ -88,7 +90,7 @@ function setRecentDate(recent){
         return final_recent
 }
 setInterval(() => {
-fetch(URI)
+fetch(URI_Bash)
   .then(
     function(response) {
       if (response.status !== 200) {
@@ -101,11 +103,11 @@ fetch(URI)
       response.json().then(function(data) {
         let recent  = getRecent(data)
         let final_recent = setRecentDate(recent)
-        $("#last_attack").html(final_recent)
-        emptyData();
+        // $("#last_attack").html(final_recent)
+        emptyBashData();
         data.forEach(element => {
             // console.log(element.vector)
-            appendData(element);
+            appendBashData(element);
         });
       });
     }

@@ -21,3 +21,5 @@ redistimeseries
 joblib
 kafka-python
 elasticsearch
+bs4
+colorama

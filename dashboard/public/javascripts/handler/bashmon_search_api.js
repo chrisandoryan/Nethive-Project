@@ -1,16 +1,14 @@
 var client = require('./elasticsearch-client.js');
 
 
-function startCvssLog (callback,method, sortby){
+function startBashLog (callback,method, sortby){
     let query = {};
-    if(method=="priority"){
-      query = {"SUMMARIZE_RESULT.score":sortby};
-    }
+    
     if(method=="timestamp"){
-      query = {"timestamp":sortby};
+      query = {"@timestamp":sortby};
     }
     client.search({  
-      index: 'nethive-cvss',
+      index: 'nethive-bash-*',
       type: '_doc',
       body: {
         sort: [query],
@@ -19,6 +17,7 @@ function startCvssLog (callback,method, sortby){
     },function (error, response,status) {
         if (error){
           console.log("search error: "+error)
+          callback({"error":"searching failed.."})
         }
         else {
           // console.log("--- Response ---");
@@ -29,4 +28,4 @@ function startCvssLog (callback,method, sortby){
     });
 }
 
-module.exports = startCvssLog;
+module.exports = startBashLog;

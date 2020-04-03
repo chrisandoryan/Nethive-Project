@@ -9,7 +9,7 @@ var cvssLogRoute = require('./routes/cvssLogs');
 var usersRoute = require('./routes/users');
 var adminRoute = require('./routes/admin');
 var scriptsRoute = require('./routes/scripts');
-
+var utilsRoute = require('./routes/utils');
 var app = express();
 
 // view engine setup
@@ -27,7 +27,7 @@ app.use('/logs',cvssLogRoute);
 app.use('/', usersRoute);
 app.use('/admin', adminRoute);
 app.use('/scripts',scriptsRoute);
-
+app.use('/utils',utilsRoute)
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
