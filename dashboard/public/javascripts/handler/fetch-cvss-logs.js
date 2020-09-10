@@ -48,7 +48,7 @@ function appendData(e) {
 
     var tr  = "<tr></tr>";
     var td1 = $("<td></td>").text(e.timestamp);   // Create with jQuery
-    var td2 = $("<td></td>").text("test");   // Create with jQuery
+    var td2 = $("<td></td>").text(e.vul_tag);   // Create with jQuery
     var td3 = $("<td></td>").text(e.SUMMARIZE_RESULT.vector);   // Create with jQuery
     var td4 = $("<td></td>").append(score);   // Create with jQuery
     $("#table-cvss tbody").append(tr);      // Append the new elements 
