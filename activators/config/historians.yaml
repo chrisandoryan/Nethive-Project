@@ -1,10 +1,6 @@
 users:
   -
-<<<<<<< HEAD
     username: siahaan
-=======
-    username: jasperzec
->>>>>>> origin/kafka-relay
     exclude_commands: 
       - ls
       - whoami
