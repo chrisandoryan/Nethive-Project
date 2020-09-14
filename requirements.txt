@@ -1,3 +1,4 @@
+python-dotenv
 scapy>=2.4.3
 networkx
 # scikit-learn

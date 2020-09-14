@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import settings
+import traceback
 
 logger = logging.getLogger('elasticsearch')
 logger.setLevel(logging.CRITICAL)
@@ -103,6 +104,7 @@ def relay_to_kafka(parser_function, hits):
     except Exception as e:
         print(e)
         print("[Threlk Engine] Got error: %s" % e)
+        traceback.print_exc()
         pass
 
 
@@ -160,7 +162,9 @@ def elastail(targetIndex, parser_function):
             delay = delay + 0.5
     else:
         time.sleep(delay)
-        elastail(targetIndex, parser_function)
+        return False
+        # elastail(targetIndex, parser_function)
+    return True
 
 
 def booting():
@@ -200,6 +204,16 @@ def create_indices():
     if not es.indices.exists(AUDIT_INDEX):
         res = es.indices.create(index=AUDIT_INDEX)
         print(res)
+
+def start_tailing(targetIndex, parser_function):
+    status = elastail(targetIndex, parser_function)
+    while True:
+        if not status:
+            status = elastail(targetIndex, parser_function)
+
+
+
+
 
 
 def start():

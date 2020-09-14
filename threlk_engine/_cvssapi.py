@@ -2,6 +2,9 @@
 
 import datetime
 def convert(result):
+		if not result["EVENT_TYPE"] is "HTTP_MONITOR":
+			return []
+
 		id = result["EVENT_DATA"]["arrived_at"]
 		xss_data = result["EVENT_DATA"]["audit_xss"]
 		sqli_data = result["EVENT_DATA"]["inspect_sqli"]
@@ -25,4 +28,4 @@ def convert(result):
 		if len(sqli_malicious) > 0:
 			converted = [{"_id":id,"url":sqli_data["url"],"ip":checkIfNone(sqli_data["client_ip"]), "vul": "SQLi","timestamp":str(datetime.datetime.now())}]
 
-		return converted;
+		return converted
