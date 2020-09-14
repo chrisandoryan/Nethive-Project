@@ -31,14 +31,14 @@ block content
                             i.fas.fa-bolt
                         .info-box-content
                             span.info-box-text CPU Traffic
-                            span.info-box-number 24,3%
+                            span.info-box-number#cpu 24,3%
                 .col-12.col-sm-6.col-md-3
                     .info-box
                         span.info-box-icon.bg-warning.elevation-1
                             i.fas.fa-clock
                         .info-box-content
                             span.info-box-text Last Attack
-                            span.info-box-number 12/3/19 11:05:59
+                            span.info-box-number#last_attack 12/3/19 11:05:59
                 .col-12.col-sm-6.col-md-3
                     .info-box
                         span.info-box-icon.bg-success.elevation-1
@@ -121,7 +121,7 @@ block content
                         .card-header
                             h3.card-title Latest Command Executed
                         .card-body.table-responsive.p-0(style='height: 300px;')
-                            table.table.table-head-fixed.table-striped
+                            table.table.table-head-fixed.table-striped#table-bash
                                 thead
                                     tr
                                         th Timestamp
@@ -173,3 +173,7 @@ block content
                                     span.users-list-date Today
 block append script     
     script(src="/javascripts/handler/fetch-cvss-logs.js")                                                              
+block append script     
+    script(src="/javascripts/handler/viewstat.js")                                                              
+block append script     
+    script(src="/javascripts/handler/fetch_bash_logs.js")                                                              

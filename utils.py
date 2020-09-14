@@ -54,6 +54,9 @@ import re
 #         self.loggerQueue.put(buffer.strip())
 #         return
 
+# change location variable
+
+location = "localhost"
 
 def tail(logfile):
     logfile.seek(0, 2)
@@ -63,10 +66,8 @@ def tail(logfile):
             time.sleep(0.01)
             continue
         yield line
-
-
 def login_dvwa():
-    url = "http://192.168.137.220/DVWA/login.php"
+    url = "http://{}/login.php".format(location)
     req = requests.get(url)
     print(req.headers)
     session_id = re.match("PHPSESSID=(.*?);", req.headers["set-cookie"])
@@ -80,7 +81,8 @@ def login_dvwa():
                "password": "password",
                "Login": "Login",
                "user_token": user_token}
-    req_login = requests.post(url, payload, cookies=cookie, allow_redirects=False)
+    req_login = requests.post(url, payload, cookies=cookie,allow_redirects=False)
+    print(req_login)
     result = req_login.headers["Location"]
     if "index.php" in result:
         return session_id
