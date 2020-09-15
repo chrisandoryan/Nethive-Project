@@ -3,7 +3,6 @@
 import datetime
 
 def convert(result):
-		# print("RESULT", result)
 		if not result["EVENT_TYPE"] is "HTTP_MONITOR":
 			return []
 
