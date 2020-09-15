@@ -15,7 +15,7 @@ from utils import decode_deeply
 import base64
 from processors import xss_watcher
 from processors import sql_inspector
-
+import traceback
 import logging
 
 init()
@@ -55,6 +55,7 @@ def send_to_logstash(message):
         return True
     except Exception as e:
         print("[Inspection Controller] %s" % e)
+        traceback.print_exc()
         logger.exception(e)
     return False
 
@@ -146,7 +147,7 @@ def create_sqli_inspection_package(package, parsed_sql_data):
 
 def get_flow_time_average():
     # TODO: write an algorithm to calculate time between http and sql dynamically
-    return 1.0
+    return 10.0
 
 def normalize_json_quote_problem(the_data):
     """
@@ -175,10 +176,13 @@ def normalize_json_quote_problem(the_data):
 #         yield package
 
 def unwrap_http_bundle(bundle_package):
+    # print("BPS", bundle_package, len(bundle_package))
     for k in bundle_package:
         redis_key = k
-        bundle_packed = json.loads(base64.decodestring(bundle_package[k][0]['package'].encode("utf-8")))
-        return (redis_key, bundle_packed)
+        # print("BP", bundle_package[k][0])
+        if "package" in bundle_package[k][0]:
+            bundle_packed = json.loads(base64.decodestring(bundle_package[k][0]['package'].encode("utf-8")))
+            return (redis_key, bundle_packed)
 
 def print_detection_output(sqli_result, xss_result):
     if xss_result is not None:
@@ -199,6 +203,7 @@ def print_detection_output(sqli_result, xss_result):
 def audit_the_package(sqli_package, xss_package, bundle_package):
 
     print ("[Inspection Controller] Auditing...")
+    # print("SQLI Package", sqli_package)
 
     with Pool(processes=2) as pool:
         sqli_inspect = pool.apply_async(sql_inspector.inspect, (sqli_package,))
@@ -213,9 +218,9 @@ def audit_the_package(sqli_package, xss_package, bundle_package):
         except Exception as e:
             print("[Inspection Controller] Got error: %s" % e)
 
-        # print("BUNDLE PACKAGE", bundle_package)
-        # print("SQLI RESULT", sqli_result)
-        # print("XSS RESULT", xss_result)
+        #print("BUNDLE PACKAGE", bundle_package)
+        #print("SQLI RESULT", sqli_result)
+        #print("XSS RESULT", xss_result)
         print_detection_output(sqli_result, xss_result)
 
         result = {
@@ -262,12 +267,12 @@ def handle_client_connection(client_socket):
             len_bundles = len(http_bundles)
 
             print("[Inspection Controller] Got %d bundle(s) from Redis" % len_bundles)
-
+            # print("HTTPBUNDLES", http_bundles)
             for pack in request.decode("utf-8").split("\n"):
-
+                if len(pack) == 0: continue
+                # print("[LenPack]", len(pack))
                 raw_inspection_data = json.loads(pack)
                 # print("RAW INSPECTION DATA", raw_inspection_data)
-
                 if raw_inspection_data['type'] == 'mysql':
                     # print("BEFORE", raw_inspection_data)
                     parsed_sql_data = parse_mysql_beat_packet(raw_inspection_data)
@@ -275,7 +280,11 @@ def handle_client_connection(client_socket):
                     if parsed_sql_data:
                         print("[Inspection Controller] Initiating Deep-Inspection procedure with %d bundle(s)" % len_bundles)
                         for bundle in http_bundles:
+                            # print("BUNDLE", bundle)
                             redis_key, bundle_packed = unwrap_http_bundle(bundle)
+                            # print(bundle_packed)
+                            if not bundle_packed:
+                                continue
 
                             # delete the data to prevent rechecking
                             delete_status = redis.ts_expire_http_bundle(redis_key)
@@ -318,6 +327,7 @@ def handle_client_connection(client_socket):
                     
         except Exception as e:
             print("[Inspection Controller] %s" % e)
+            traceback.print_exc()
             logger.exception(e)
             # print("ERROR", request.decode("utf-8"))
 

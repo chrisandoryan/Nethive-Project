@@ -31,11 +31,11 @@ class RedisClient:
     # Timeseries Query
 
     def ts_insert_http_bundle(self, store_key, package_id, timestamp, value, label):
-        self.__ts_client.create(store_key)
+        self.__ts_client.create(store_key, labels={'type': 'http'})
         return self.__ts_client.add(package_id, timestamp, value, labels=label)
 
     def ts_get_http_bundles(self, start_time, end_time):
-        return self.__ts_client.mrange(start_time, end_time, filters=['type=http'])
+        return self.__ts_client.mrange(start_time, end_time, filters=['type=http'], with_labels=True)
         # return self.__ts_client.info(key)
         # return self.__ts_client.mrange(start_time, end_time)
         # id = self.__ts_client.range(key, start_time, end_time)

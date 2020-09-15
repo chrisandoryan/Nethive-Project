@@ -186,7 +186,7 @@ def process_packets():
             # memcache.set(ip_src, tcp_sport, pack_request_for_inspection(packet))
             # print(type(tokenized))
             inspection_pack = pack_request_for_inspection(decode_deeply(packet), tokenized)
-            # print(inspection_pack)
+            # print("PROCESS_PACKET", inspection_pack)
             if inspection_pack:
                 try:
                     redis.store_http_request("{}:{}".format(ip_src, tcp_sport), inspection_pack)
