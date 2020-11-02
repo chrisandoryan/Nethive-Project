@@ -82,5 +82,7 @@ On the menu prompt, choose **[3] Just-Run-This-Thing**, then wait for the engine
  5. Go to http://localhost:3000/
 
 ## Contributors
-
+Chrisando Ryan [LinkedIn](https://www.linkedin.com/in/chrisandoryan/) 
+Rayhan Rabiul Tsani [LinkedIn](https://id.linkedin.com/in/rayhan-rabiul-tsani-137234172)
+Vandevlin Alfonso Wibawa [LinkedIn](https://id.linkedin.com/in/vandevlin-alfonso-wibawa-0970b2172)
 
